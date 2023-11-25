@@ -17,8 +17,6 @@ function App() {
 
 	const [startTime, setStartTime] = useState<number>(0.0)
 	const [currentTime, setCurrentTime] = useState<number>(0.0)
-	const [userResponse, setUserResponse] = useState<string>('')
-	const [randNum, setRandNum] = useState<number>(0) // do i need this??
 	const [displayLyric, setDisplayLyric] = useState<string>('')
 	const [song, setSong] = useState<string>('')
 	const [album, setAlbum] = useState<string>('')
@@ -134,7 +132,7 @@ function App() {
 		setGameStarted(true)
 
 		const randInd = Math.floor(Math.random() * lyricsDB.length)
-		setRandNum(randInd) 
+		
 		clearInterval(intervalRef.current as NodeJS.Timeout)
 		// start timer and display a lyric 
 		setAnsChoices(pickRandomAns(lyricsDB[randInd].song))
@@ -162,13 +160,12 @@ function App() {
 		// console.log({'time': secondsElapsed, song: song, userResponse: clicked.trim(), correct: 0, album: album, lyric: displayLyric},gameStats)
 		let rand = Math.floor(Math.random() * lyricsDB.length)
 		// change song, clear input, reset timer
-		setRandNum(rand)
-
+		
 		setDisplayLyric(lyricsDB[rand].lyric)
 		setSong(lyricsDB[rand].song.trim())
 		setAlbum(lyricsDB[rand].album.trim())
 		setAnsChoices(pickRandomAns(lyricsDB[rand].song))
-		setUserResponse('')
+		// setUserResponse('')
 		
 		setStartTime(Date.now())
 		setCurrentTime(Date.now())
@@ -196,7 +193,7 @@ function App() {
 				</div>
 				
 				{!gameStarted && !displayStats && <div className='grid grid-cols-1'>
-					<h2>So you think you're the #1 Swift fan?</h2>
+					<h2>So you think you're the 1? The Swiftest fan?</h2>
 					<h2>How quickly can you ID the song?</h2>
 					<h6>It's time to go</h6>
 					<button className='m-6 bg-eras_grey p-4' onClick={() => startGame()}>...Ready For It?</button>
