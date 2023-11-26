@@ -4,17 +4,22 @@ import { useState, useRef, useEffect } from 'react'
 import title from '/title.svg'
 import axios from 'axios';
 
+let lyricsFullDB: Lyrics[] = [] // all lyrics 
+let songsFullDB: SongList[] = [] // all songs 
+
 function App() {
 	
 	const ltErasColors = ['eras_green', 'eras_gold', 'eras_purple', 'eras_lblue', 'eras_pink', 'eras_maroon', 'eras_indigo', 'eras_tan', 'eras_grey', 'eras_black'];
 
 	// const albumColorKey = [{'Taylor Swift': 'eras_green'}, {'Fearless': 'eras_gold'}, {'Speak Now': 'eras_purple'}, {'Red': 'eras_maroon'}, {'1989': 'eras_lblue'}, {'reputation': 'eras_black'}, {'Lover': 'eras_pink'}, {'folklore': 'eras_grey'}, {'evermore': 'eras_tan'}, {'Midnights': 'eras_indigo'}]
-	const albumColorKey: albumColorKey = {'Taylor_Swift': 'era-taylor-swift', 'Fearless': 'era-fearless', 'Speak_Now': 'era-speak-now', 'Red': 'era-red', '1989': 'era-1989', 'reputation': 'era-reputation', 'Lover': 'era-lover', 'folklore': 'era-folklore', 'evermore': 'era-evermore', 'Midnights': 'era-midnights'}
+	const albumColorKey = {'Taylor_Swift': 'era-taylor-swift', 'Fearless': 'era-fearless', 'Speak_Now': 'era-speak-now', 'Red': 'era-red', '1989': 'era-1989', 'reputation': 'era-reputation', 'Lover': 'era-lover', 'folklore': 'era-folklore', 'evermore': 'era-evermore', 'Midnights': 'era-midnights'} as const
 
-	const albumList = ['Taylor Swift', 'Fearless', 'Speak Now', 'Red', '1989', 'reputation', 'Lover', 'folklore', 'evermore', 'Midnights']
+	// const gameModes = {'easy': 'this is me trying', 'normal': 'The Classics', 'hard': "Taylor's Version", 'expert': 'my tears richochet' } 
+	const gameModes = [{'key' : 'easy', 'value' : 'this is me trying (easy)'}, {'key' : 'normal', 'value' : "The Classics (rec'd)"}, {'key' : 'hard', 'value' : "Taylor's Version (hard)"}, {'key' : 'expert', 'value' : 'my tears richochet (expert)'}] as const
+
+	// const albumList = ['Taylor Swift', 'Fearless', 'Speak Now', 'Red', '1989', 'reputation', 'Lover', 'folklore', 'evermore', 'Midnights']
 
 	// let songList: SongList[] = []
-	// let lyricsDB: Lyrics[] = []
 
 	const intervalRef: {current: NodeJS.Timeout | null } = useRef(null);
 	// const intervalRef = useRef<ReturnType<typeof setInterval> | null>()  // ref for stopwatch interval
@@ -24,11 +29,13 @@ function App() {
 	const [displayLyric, setDisplayLyric] = useState<string>('')
 	const [song, setSong] = useState<string>('')
 	const [album, setAlbum] = useState<string>('')
-	const [albumKey, setAlbumKey] = useState<string>('')
-	
+	const [albumKey, setAlbumKey] = useState<AlbumKey | ''>('')
+	const [gameMode, setGameMode] = useState<string>('normal')
+	const [showGameModeQ, setShowGameModeQ] = useState<boolean>(false)
 	const [songList, setSongList] = useState<SongList[]>([])
 	const [lyricsDB, setLyricsDB] = useState<Lyrics[]>([])
-	const [answerChoices, setAnsChoices] = useState<string[]>([])
+
+ 	const [answerChoices, setAnsChoices] = useState<string[]>([])
 	const [result, setResult] = useState<string>() // true, false, null? 
 	const [gameStats, setGameStats] = useState<GameStats[]>([])  // make this an array of objects with lyric/song/album they got right and the time
 	const [gameStarted, setGameStarted] = useState<boolean>(false)
@@ -48,6 +55,8 @@ function App() {
 		axios.get(`http://localhost:3000/getSongs`)
 			.then(function (response) {	
 				setSongList(response.data.songList)
+				songsFullDB = response.data.songList
+				console.log(songsFullDB)
 			})
 			.catch(function (error) {				
 				console.log(error);
@@ -57,7 +66,7 @@ function App() {
 			axios.get(`http://localhost:3000/getLyrics`)
 			.then(function (response) {	
 				setLyricsDB(response.data.lyrics)
-				// setPlayerList(response.data.playerList)
+				lyricsFullDB = response.data.lyrics
 			})
 			.catch(function (error) {				
 				console.log(error);
@@ -125,6 +134,27 @@ function App() {
 
 	// }
 
+	function updateLyricsDB(level: string){
+		// filter/set the lyrics 
+		setGameMode(level)
+		console.log('lyricsFullDB', lyricsFullDB)
+		if (level == 'easy'){
+			setLyricsDB(lyricsFullDB.filter(x=> x.filler == 0 && x.vault == 0))
+			setSongList(songsFullDB.filter(x=> x.vault == 0))
+		} else if (level == 'normal') {
+			setLyricsDB(lyricsFullDB.filter(x=> x.filler == 0 && x.vault == 0 && x.title_in_lyric_match < 70))
+			setSongList(songsFullDB.filter(x=> x.vault == 0))
+		} else if (level == 'hard') {
+			// hard is all + more recent vault songs but no filler
+			setLyricsDB(lyricsFullDB.filter(x=> x.filler == 0 && x.title_in_lyric_match < 70))
+			setSongList(songsFullDB)
+		} else {
+			// expert level has vault songs, filler words, and 
+			setLyricsDB(lyricsFullDB.filter(x=> x.title_in_lyric_match < 70))
+			setSongList(songsFullDB)
+		}
+		
+	}
 
 	// start timer for beg of game 
 	function startGame() {
@@ -146,7 +176,7 @@ function App() {
 		setDisplayLyric(lyricsDB[randInd].lyric)
 		setSong(lyricsDB[randInd].song.trim())
 		setAlbum(lyricsDB[randInd].album.trim())
-		setAlbumKey(lyricsDB[randInd].album_key.trim())
+		setAlbumKey(lyricsDB[randInd].album_key)
 		intervalRef.current = setInterval(() => setCurrentTime(Date.now()), 10)		
 		// console.log(randInd, lyricsDB[randInd])
 
@@ -155,12 +185,16 @@ function App() {
 	function checkAnswer(clicked: string) {
 		// console.log('wtf2', lyricsDB, songList)
 		// console.log(clicked == song, song, clicked)
+		if (albumKey === '') {
+			return
+		}
+
 		if (song.trim() == clicked.trim()){ 
 			setResult('Correct!')
-			setGameStats([{'time': secondsElapsed, song: song, userResponse: clicked.trim(), correct: 1, album: album, lyric: displayLyric, album_key: albumKey}, ...gameStats])
+			setGameStats([{'time': secondsElapsed, song: song, userResponse: clicked.trim(), correct: 1, album: album, lyric: displayLyric, album_key: albumKey, level: gameMode}, ...gameStats])
 		} else {
 			setResult(wrongAnswersOnly[Math.floor(Math.random() * wrongAnswersOnly.length)])
-			setGameStats([{'time': secondsElapsed, song: song, userResponse: clicked.trim(), correct: 0, album: album, lyric: displayLyric, album_key: albumKey}, ...gameStats])
+			setGameStats([{'time': secondsElapsed, song: song, userResponse: clicked.trim(), correct: 0, album: album, lyric: displayLyric, album_key: albumKey, level: gameMode}, ...gameStats])
 		}
 
 		// log results 
@@ -172,13 +206,18 @@ function App() {
 		setDisplayLyric(lyricsDB[rand].lyric)
 		setSong(lyricsDB[rand].song.trim())
 		setAlbum(lyricsDB[rand].album.trim())
-		setAlbumKey(lyricsDB[rand].album_key.trim())
+		setAlbumKey(lyricsDB[rand].album_key)
 		setAnsChoices(pickRandomAns(lyricsDB[rand].song))
 		// setUserResponse('')
 		
 		setStartTime(Date.now())
 		setCurrentTime(Date.now())
 
+	}
+
+	function restartGame(){
+		setDisplayStats(false)
+		setGameStarted(false)
 	}
 
 	function endGame(){
@@ -188,12 +227,6 @@ function App() {
 		// end game and show game stats
 		setGameStarted(false)
 		setDisplayStats(true)
-	}
-
-	function calcStatsByAlbum() {
-
-		
-
 	}
 	
 	let secondsElapsed = 0;
@@ -211,7 +244,23 @@ function App() {
 				{!gameStarted && !displayStats && <div className='grid grid-cols-1'>
 					<h2>So you think you're the 1? The Swiftest fan?</h2>
 					<h2>How quickly can you ID the song?</h2>
-					<h6>It's time to go</h6>
+					<h6>Pick a level.  It's time to go</h6>
+					<div className="text-center m-4 p-2 text-md">
+					{gameModes.map((x,i)=> <div className={`cursor-pointer rounded-t-xl rounded-b-xl text-center text-md font-bold ${ltErasColors[i]} ${gameMode == x.key ? '' : 'faded'}`} id={x.key} onClick={() => updateLyricsDB(x.key)}>{x.value}</div>)}
+					
+					<div onClick={() => setShowGameModeQ(!showGameModeQ)}
+					className="cursor-pointer rounded-t-xl rounded-b-xl text-center text-md font-bold m-4" 
+					>Question...?</div>
+					{showGameModeQ && <div>
+						<div>Easy mode: song title might be in the lyric</div>
+						<div>Normal mode: lyrics with song title removed</div>
+						<div>Hard mode: vault songs included</div>
+						<div>Expert mode: vault songs + a surprise ooohhh</div>
+						</div>
+						}
+
+					</div>
+					
 					<button className='m-6 bg-eras_grey p-4' onClick={() => startGame()}>...Ready For It?</button>
 				</div>}
 
@@ -233,7 +282,7 @@ function App() {
 					</div>
 
 					<div className='md:flex justify-center'>
-						<button className='m-6 bg-eras_grey p-4' onClick={() => setGameStarted(false)}>Begin Again</button>
+						<button className='m-6 bg-eras_grey p-4' onClick={() => restartGame()}>Begin Again</button>
 						<button className='m-6 bg-eras_grey p-4' onClick={() => endGame()}>End Game</button>
 					</div>				
 
@@ -260,7 +309,7 @@ function App() {
 							</tr>
 						</thead>
 						<tbody>
-							{gameStats.filter(x=> x.correct == 1).map(x =><tr className={`text-center ${albumColorKey[x.album_key]}`}>
+							{gameStats.filter(x=> x.correct == 1).map(x =><tr className={`text-center text-[#68416d] ${albumColorKey[x.album_key as keyof typeof albumColorKey]}`}>
 								<td className="border p-1">{x.lyric}</td>
 								<td className="border p-1">{x.song}</td>
 								<td className="border p-1">{x.time.toFixed(1)}s</td>
@@ -282,16 +331,16 @@ function App() {
 							</thead>
 							<tbody>
 							{/* ${albumColorKey[x.album_key: keyof albumColorKey]} */}
-								{gameStats.filter(x=> x.correct == 0).map((x) =><tr  className={`text-center ${albumColorKey[x.album_key]}`}>
+								{gameStats.filter(x=> x.correct == 0).map((x) =><tr  className={`text-center text-[#513355] ${albumColorKey[x.album_key]}`}>
 									<td className="border p-1">{x.lyric}</td>
-									<td className="border p-1">{x.album}</td>
+									<td className="border p-1">{x.song}</td>
 									<td className="border p-1">{x.userResponse}</td>
 								</tr>)}		
 							</tbody>
 						</table>
 					</div>}
 
-				<button className='m-6 bg-eras_grey p-4' onClick={() => startGame()}>Begin Again</button>					
+				<button className='m-6 bg-eras_grey p-4' onClick={() => restartGame()}>Begin Again</button>					
 				</div>}
 
 				<p>What's my End Game?</p>

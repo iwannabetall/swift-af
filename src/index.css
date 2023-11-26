@@ -30,15 +30,24 @@
 	--eras-indigo: rgb(67,73,97);
 	--eras-black:rgb(132,126,128);
 	--era-taylor-swift: #A5C9A5;
+	--era-taylor-swift-text: #315231;
 	--era-fearless: #EFC180;
+	--era-fearless-text: black;
 	--era-speak-now: #C7A8CB;
+	--era-speak-now-text:#513355;
 	--era-red: #7A2E39;
+	--era-red-text: #e7c0c6;
 	--era-1989:#B5E5F8;
-	--era-reputation:#746F70;
+	--era-1989-text:#0c5c7b;
+	--era-reputation:#222222;
+	--era-reputation-text: #dedddd;
 	--era-lover:#F7B0CC;
+	--era-lover-text:#750c35;
 	--era-folklore:#CDC9C1;
 	--era-evermore:#C5AC90;
+	--era-evermore-text:#382c1e;
 	--era-midnights:#242E47;
+	--era-midnights-text:#c4cce1;
 
 }
 
@@ -141,32 +150,46 @@ button:focus-visible {
 
 .era-taylor-swift {
 	background-color: var(--era-taylor-swift);
+	color: var(--era-taylor-swift-text);
 }
 
 .era-fearless {
 	background-color: var(--era-fearless);
+	color: var(--era-fearless-text);
 }
 .era-speak-now {
 	background-color: var(--era-speak-now);
+	color: var(--era-speak-now-text);
 }
 .era-red {
 	background-color: var(--era-red);
+	color: var(--era-red-text);
 }
 .era-1989 {
 	background-color: var(--era-1989);
+	color: var(--era-1989-text);
 }
 .era-reputation {
 	background-color: var(--era-reputation);
+	color: var(--era-reputation-text);
 }
 .era-lover {
 	background-color: var(--era-lover);
+	color: var(--era-lover-text);
 }
 .era-folklore {
 	background-color: var(--era-folklore);
+	color: var(--era-folklore-text);
 }
 .era-evermore {
 	background-color: var(--era-evermore);
+	color: var(--era-evermore-text);
 }
 .era-midnights {
 	background-color: var(--era-midnights);
+	color: var(--era-midnights-text);
+}
+
+.faded{
+	opacity: 0.3;
 }

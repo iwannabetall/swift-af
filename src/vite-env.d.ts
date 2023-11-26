@@ -3,7 +3,7 @@
 interface Lyrics {
 	"song_full_name": string;
 	"album":  string;
-	"album_key":  string;
+	"album_key": AlbumKey;
 	"line_num": number;
 	"lyric":  string;
 	"track_n": number;
@@ -12,39 +12,43 @@ interface Lyrics {
 	"unique_lyric": number;
 	"song": string;
 	"filler": number;
+	"vault": number;
 }
 
-interface albumColorKey {
-	'Taylor_Swift': string;
-	'Fearless': string;
-	'Speak_Now': string;
-	'Red': string;
-	'1989': string;
-	'reputation': string;
-	'Lover': string;
-	'folklore': string;
-	'evermore': string;
-	'Midnights': string;
+// interface albumColorKey {
+// 	'Taylor_Swift': string;
+// 	'Fearless': string;
+// 	'Speak_Now': string;
+// 	'Red': string;
+// 	'1989': string;
+// 	'reputation': string;
+// 	'Lover': string;
+// 	'folklore': string;
+// 	'evermore': string;
+// 	'Midnights': string;
 		
-}
+// }
+type AlbumKey = "Taylor_Swift" | "Fearless" | "Speak_Now" | 'Red' | '1989' | 'reputation' | 'Lover' | 'folklore' | 'evermore' | 'Midnights' 
 
 interface SongList {
 	"song": string;
 	"album": string;
+	"vault": number;
 }
 
 declare global {
-	let lyricsDB: Lyrics[] = [];
-	let songList: SongList[] = [];
+	var lyricsFullDB: Lyrics[];
+	var songList: SongList[];
 }
 
 interface GameStats {
 	time: number; 
 	song: string;
-	album_key:  string;
+	album_key: AlbumKey;
 	album: string;
 	userResponse: string;	
 	correct: number;
 	lyric: string;
+	level: string;
 }
  
