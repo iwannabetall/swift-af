@@ -51,8 +51,8 @@ function App() {
 
 		console.log('get data')
 		// get song list 
-		// axios.get(`https://swift-api.fly.dev/getSongs`)
-		axios.get(`http://localhost:3000/getSongs`)
+		axios.get(`https://swift-api.fly.dev/getSongs`)
+		// axios.get(`http://localhost:3000/getSongs`)
 			.then(function (response) {	
 				setSongList(response.data.songList)
 				songsFullDB = response.data.songList
@@ -62,8 +62,8 @@ function App() {
 				console.log(error);
 			});	
 
-			// axios.get(`https://swift-api.fly.dev/getLyrics`)
-			axios.get(`http://localhost:3000/getLyrics`)
+			axios.get(`https://swift-api.fly.dev/getLyrics`)
+			// axios.get(`http://localhost:3000/getLyrics`)
 			.then(function (response) {	
 				setLyricsDB(response.data.lyrics)
 				lyricsFullDB = response.data.lyrics
