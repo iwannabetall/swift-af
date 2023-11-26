@@ -2,12 +2,16 @@
 import { useState, useRef, useEffect } from 'react'
 // import ReactDOM from 'react-dom';
 import title from '/title.svg'
-
 import axios from 'axios';
 
 function App() {
 	
-	const ltErasColors = ['eras_green', 'eras_gold', 'eras_purple', 'eras_lblue', 'eras_pink', 'eras_maroon', 'eras_indigo', 'eras_tan', 'eras_grey'];
+	const ltErasColors = ['eras_green', 'eras_gold', 'eras_purple', 'eras_lblue', 'eras_pink', 'eras_maroon', 'eras_indigo', 'eras_tan', 'eras_grey', 'eras_black'];
+
+	// const albumColorKey = [{'Taylor Swift': 'eras_green'}, {'Fearless': 'eras_gold'}, {'Speak Now': 'eras_purple'}, {'Red': 'eras_maroon'}, {'1989': 'eras_lblue'}, {'reputation': 'eras_black'}, {'Lover': 'eras_pink'}, {'folklore': 'eras_grey'}, {'evermore': 'eras_tan'}, {'Midnights': 'eras_indigo'}]
+	const albumColorKey: albumColorKey = {'Taylor_Swift': 'era-taylor-swift', 'Fearless': 'era-fearless', 'Speak_Now': 'era-speak-now', 'Red': 'era-red', '1989': 'era-1989', 'reputation': 'era-reputation', 'Lover': 'era-lover', 'folklore': 'era-folklore', 'evermore': 'era-evermore', 'Midnights': 'era-midnights'}
+
+	const albumList = ['Taylor Swift', 'Fearless', 'Speak Now', 'Red', '1989', 'reputation', 'Lover', 'folklore', 'evermore', 'Midnights']
 
 	// let songList: SongList[] = []
 	// let lyricsDB: Lyrics[] = []
@@ -20,6 +24,7 @@ function App() {
 	const [displayLyric, setDisplayLyric] = useState<string>('')
 	const [song, setSong] = useState<string>('')
 	const [album, setAlbum] = useState<string>('')
+	const [albumKey, setAlbumKey] = useState<string>('')
 	
 	const [songList, setSongList] = useState<SongList[]>([])
 	const [lyricsDB, setLyricsDB] = useState<Lyrics[]>([])
@@ -122,7 +127,7 @@ function App() {
 	// start timer for beg of game 
 	function startGame() {
 		
-		console.log('start game')
+		console.log('start game', lyricsDB)
 		
 		setDisplayStats(false) // in case you're starting another game
 
@@ -139,31 +144,33 @@ function App() {
 		setDisplayLyric(lyricsDB[randInd].lyric)
 		setSong(lyricsDB[randInd].song.trim())
 		setAlbum(lyricsDB[randInd].album.trim())
+		setAlbumKey(lyricsDB[randInd].album_key.trim())
 		intervalRef.current = setInterval(() => setCurrentTime(Date.now()), 10)		
 		// console.log(randInd, lyricsDB[randInd])
 
 	}
 
 	function checkAnswer(clicked: string) {
-		console.log('wtf2', lyricsDB, songList)
+		// console.log('wtf2', lyricsDB, songList)
 		// console.log(clicked == song, song, clicked)
 		if (song.trim() == clicked.trim()){ 
 			setResult('Correct!')
-			setGameStats([{'time': secondsElapsed, song: song, userResponse: clicked.trim(), correct: 1, album: album, lyric: displayLyric}, ...gameStats])
+			setGameStats([{'time': secondsElapsed, song: song, userResponse: clicked.trim(), correct: 1, album: album, lyric: displayLyric, album_key: albumKey}, ...gameStats])
 		} else {
 			setResult(wrongAnswersOnly[Math.floor(Math.random() * wrongAnswersOnly.length)])
-			setGameStats([{'time': secondsElapsed, song: song, userResponse: clicked.trim(), correct: 0, album: album, lyric: displayLyric}, ...gameStats])
+			setGameStats([{'time': secondsElapsed, song: song, userResponse: clicked.trim(), correct: 0, album: album, lyric: displayLyric, album_key: albumKey}, ...gameStats])
 		}
 
 		// log results 
 		
-		// console.log({'time': secondsElapsed, song: song, userResponse: clicked.trim(), correct: 0, album: album, lyric: displayLyric},gameStats)
+		console.log({'time': secondsElapsed, song: song, userResponse: clicked.trim(), correct: 0, album: album, lyric: displayLyric},gameStats)
 		let rand = Math.floor(Math.random() * lyricsDB.length)
 		// change song, clear input, reset timer
 		
 		setDisplayLyric(lyricsDB[rand].lyric)
 		setSong(lyricsDB[rand].song.trim())
 		setAlbum(lyricsDB[rand].album.trim())
+		setAlbumKey(lyricsDB[rand].album_key.trim())
 		setAnsChoices(pickRandomAns(lyricsDB[rand].song))
 		// setUserResponse('')
 		
@@ -174,10 +181,17 @@ function App() {
 
 	function endGame(){
 		console.log('end game')
+		console.log(gameStats)
 
 		// end game and show game stats
 		setGameStarted(false)
 		setDisplayStats(true)
+	}
+
+	function calcStatsByAlbum() {
+
+		
+
 	}
 	
 	let secondsElapsed = 0;
@@ -231,11 +245,48 @@ function App() {
 					<div>long story short</div>
 					<div>{gameStats.map(x=> x.correct).reduce((total, current) => total + current, 0)}/{gameStats.length} Correct 
 					</div>
-					<div>
-					{(gameStats.map(x=> x.time).reduce((total, current) => total + current, 0)/gameStats.length).toFixed(2)} seconds per lyric</div>
-					<button className='m-6 bg-eras_grey p-4' onClick={() => startGame()}>Begin Again</button>
+
+					
+					<div>{(gameStats.map(x=> x.time).reduce((total, current) => total + current, 0)/gameStats.length).toFixed(2)} seconds per lyric</div>					
+					
+					{gameStats.filter(x=> x.correct == 1).length > 0 && <table>
+						<thead>
+							<th>Lyric</th>
+							<th>Song</th>
+							<th>Time</th>
+						</thead>
+						<tbody>
+							{gameStats.filter(x=> x.correct == 1).map(x =><tr className={`text-center ${albumColorKey[x.album_key]}`}>
+								<td className="border p-1">{x.lyric}</td>
+								<td className="border p-1">{x.song}</td>
+								<td className="border p-1">{x.time.toFixed(1)}s</td>
+							</tr>)}		
+						</tbody>
+					</table>}
+
+							
+					{gameStats.filter(x=> x.correct == 0).length > 0 &&
+					<div className=''>
+						<h3 className='font-bold text-xl text-center'>Would've, Could've, Should've</h3>
+						<table>
+							<thead>
+								<th>Lyric</th>
+								<th>Song</th>
+								<th>Your Ans</th>
+							</thead>
+							<tbody>
+							{/* ${albumColorKey[x.album_key: keyof albumColorKey]} */}
+								{gameStats.filter(x=> x.correct == 0).map((x) =><tr  className={`text-center ${albumColorKey[x.album_key]}`}>
+									<td className="border p-1">{x.lyric}</td>
+									<td className="border p-1">{x.album}</td>
+									<td className="border p-1">{x.userResponse}</td>
+								</tr>)}		
+							</tbody>
+						</table>
 					</div>}
-			
+
+				<button className='m-6 bg-eras_grey p-4' onClick={() => startGame()}>Begin Again</button>					
+				</div>}
 
 				<p>What's my End Game?</p>
 				{/* <p>Curiosity, but if you wanna give me a friendship bracelet in the form of $1s for my TSwift Tix fund...I did have to clean the data and remove all the Oh oh oh lines. </p> */}

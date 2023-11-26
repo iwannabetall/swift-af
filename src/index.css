@@ -28,6 +28,18 @@
 	--eras-tan: rgb(200,174,149);
 	--eras-grey: rgb(207,202,198);
 	--eras-indigo: rgb(67,73,97);
+	--eras-black:rgb(132,126,128);
+	--era-taylor-swift: #A5C9A5;
+	--era-fearless: #EFC180;
+	--era-speak-now: #C7A8CB;
+	--era-red: #7A2E39;
+	--era-1989:#B5E5F8;
+	--era-reputation:#746F70;
+	--era-lover:#F7B0CC;
+	--era-folklore:#CDC9C1;
+	--era-evermore:#C5AC90;
+	--era-midnights:#242E47;
+
 }
 
 h1, h2, h3, h4, h5, h6{
@@ -125,4 +137,36 @@ button:focus-visible {
 
 .eras_indigo{
 	background-color: var(--eras-indigo);
+}
+
+.era-taylor-swift {
+	background-color: var(--era-taylor-swift);
+}
+
+.era-fearless {
+	background-color: var(--era-fearless);
+}
+.era-speak-now {
+	background-color: var(--era-speak-now);
+}
+.era-red {
+	background-color: var(--era-red);
+}
+.era-1989 {
+	background-color: var(--era-1989);
+}
+.era-reputation {
+	background-color: var(--era-reputation);
+}
+.era-lover {
+	background-color: var(--era-lover);
+}
+.era-folklore {
+	background-color: var(--era-folklore);
+}
+.era-evermore {
+	background-color: var(--era-evermore);
+}
+.era-midnights {
+	background-color: var(--era-midnights);
 }
