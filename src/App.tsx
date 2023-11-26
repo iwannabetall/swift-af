@@ -44,7 +44,8 @@ function App() {
 
 		console.log('get data')
 		// get song list 
-		axios.get(`https://swift-api.fly.dev/getSongs`)
+		// axios.get(`https://swift-api.fly.dev/getSongs`)
+		axios.get(`http://localhost:3000/getSongs`)
 			.then(function (response) {	
 				setSongList(response.data.songList)
 			})
@@ -52,7 +53,8 @@ function App() {
 				console.log(error);
 			});	
 
-			axios.get(`https://swift-api.fly.dev/getLyrics`)
+			// axios.get(`https://swift-api.fly.dev/getLyrics`)
+			axios.get(`http://localhost:3000/getLyrics`)
 			.then(function (response) {	
 				setLyricsDB(response.data.lyrics)
 				// setPlayerList(response.data.playerList)
@@ -251,9 +253,11 @@ function App() {
 					
 					{gameStats.filter(x=> x.correct == 1).length > 0 && <table>
 						<thead>
+							<tr>
 							<th>Lyric</th>
 							<th>Song</th>
 							<th>Time</th>
+							</tr>
 						</thead>
 						<tbody>
 							{gameStats.filter(x=> x.correct == 1).map(x =><tr className={`text-center ${albumColorKey[x.album_key]}`}>
@@ -270,9 +274,11 @@ function App() {
 						<h3 className='font-bold text-xl text-center'>Would've, Could've, Should've</h3>
 						<table>
 							<thead>
+								<tr>
 								<th>Lyric</th>
 								<th>Song</th>
 								<th>Your Ans</th>
+								</tr>
 							</thead>
 							<tbody>
 							{/* ${albumColorKey[x.album_key: keyof albumColorKey]} */}
