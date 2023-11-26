@@ -264,13 +264,13 @@ function App() {
 					<button className='m-6 bg-eras_grey p-4' onClick={() => startGame()}>...Ready For It?</button>
 				</div>}
 
-				{gameStarted && !displayStats && <div className=''>
-					<div className='font-bold text-xl text-center p-2'>{displayLyric}</div>
+				{gameStarted && !displayStats && <div className=''>					
+					<div className='font-bold text-xl text-center p-2'>
+						{displayLyric}</div>
 
 					{answerChoices.map((x,i) => <div className={`cursor-pointer rounded-t-xl rounded-b-xl text-center m-4 p-2 text-lg font-bold ${ltErasColors[i]}`}
 						onClick={() => checkAnswer(x)}> {x}</div>)}
-
-					<div>{lyricsDB[3].album}</div>
+				<h3>{secondsElapsed.toFixed(3)}</h3>
 					{/* <form onSubmit={(e: FormEvent<HTMLFormElement>) => submitAnswer(e)}>
 						<label> What song is it?!
 							<input type='text' value={userResponse} onChange={e => setUserResponse(e.target.value)}>
@@ -286,9 +286,8 @@ function App() {
 						<button className='m-6 bg-eras_grey p-4' onClick={() => endGame()}>End Game</button>
 					</div>				
 
-					<div className=''>{song}</div>
 					<div>{result}</div>
-					<h3>{secondsElapsed.toFixed(3)}</h3>
+				
 					
 				</div>}
 
