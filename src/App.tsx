@@ -13,13 +13,10 @@ function App() {
 	const gameDate = new Date()
 	const ltErasColors = ['eras_green', 'eras_gold', 'eras_purple', 'eras_lblue', 'eras_pink', 'eras_maroon', 'eras_indigo', 'eras_tan', 'eras_grey', 'eras_black'];
 
-	// const albumColorKey = [{'Taylor Swift': 'eras_green'}, {'Fearless': 'eras_gold'}, {'Speak Now': 'eras_purple'}, {'Red': 'eras_maroon'}, {'1989': 'eras_lblue'}, {'reputation': 'eras_black'}, {'Lover': 'eras_pink'}, {'folklore': 'eras_grey'}, {'evermore': 'eras_tan'}, {'Midnights': 'eras_indigo'}]
 	const albumColorKey = {'Taylor_Swift': 'era-taylor-swift', 'Fearless': 'era-fearless', 'Speak_Now': 'era-speak-now', 'Red': 'era-red', '1989': 'era-1989', 'reputation': 'era-reputation', 'Lover': 'era-lover', 'folklore': 'era-folklore', 'evermore': 'era-evermore', 'Midnights': 'era-midnights'} as const
 
-	// const gameModes = {'easy': 'this is me trying', 'normal': 'The Classics', 'hard': "Taylor's Version", 'expert': 'my tears richochet' } 
 	const gameModes = [{'key' : 'easy', 'value' : 'this is me trying (easy)'}, {'key' : 'normal', 'value' : "The Classics (rec'd)"}, {'key' : 'hard', 'value' : "Taylor's Version (hard)"}, {'key' : 'expert', 'value' : 'my tears richochet (expert)'}] as const
 
-	// const albumList = ['Taylor Swift', 'Fearless', 'Speak Now', 'Red', '1989', 'reputation', 'Lover', 'folklore', 'evermore', 'Midnights']
 
 	// let songList: SongList[] = []
 
@@ -38,7 +35,7 @@ function App() {
 	const [songList, setSongList] = useState<SongList[]>([])
 	const [lyricsDB, setLyricsDB] = useState<Lyrics[]>([])
 	const [gameId, setGameId] = useState<string>(uuidv4())
-	const [playerName, setPlayerName] = useState<string>('')
+	// const [playerName, setPlayerName] = useState<string>('')
 
  	const [answerChoices, setAnsChoices] = useState<string[]>([])
 	const [result, setResult] = useState<string>() // true, false, null? 
@@ -56,8 +53,8 @@ function App() {
 
 		console.log('get data')
 		// get song list 
-		// axios.get(`https://swift-api.fly.dev/getSongs`)
-		axios.get(`http://localhost:3000/getSongs`)
+		axios.get(`https://swift-api.fly.dev/getSongs`)
+		// axios.get(`http://localhost:3000/getSongs`)
 			.then(function (response) {	
 				setSongList(response.data.songList)
 				songsFullDB = response.data.songList
@@ -67,8 +64,8 @@ function App() {
 				console.log(error);
 			});	
 
-			// axios.get(`https://swift-api.fly.dev/getLyrics`)
-			axios.get(`http://localhost:3000/getLyrics`)
+			axios.get(`https://swift-api.fly.dev/getLyrics`)
+			// axios.get(`http://localhost:3000/getLyrics`)
 			.then(function (response) {	
 				setLyricsDB(response.data.lyrics)
 				lyricsFullDB = response.data.lyrics
@@ -109,7 +106,7 @@ function App() {
 
 	function updateLyricsDB(level: string){
 		// filter/set the lyrics 		
-		console.log('lyricsFullDB', lyricsFullDB)
+		// console.log('lyricsFullDB', lyricsFullDB)
 		if (level == 'easy'){
 			setLyricsDB(lyricsFullDB.filter(x=> x.filler == 0 && x.vault == 0))
 			setSongList(songsFullDB.filter(x=> x.vault == 0))
@@ -131,7 +128,7 @@ function App() {
 	// start timer for beg of game 
 	function startGame() {
 		
-		console.log('start game', lyricsDB)
+		// console.log('start game', lyricsDB)
 		
 		setDisplayStats(false) // in case you're starting another game
 
@@ -159,7 +156,7 @@ function App() {
 	}
 
 	function checkAnswer(clicked: string) {
-		console.log(gameId)
+		// console.log(gameId)
 		// console.log('wtf2', lyricsDB, songList)
 		// console.log(clicked == song, song, clicked)
 		if (albumKey === '') {
@@ -195,13 +192,13 @@ function App() {
 			lyric_id: displayLyricId
 		})
 		.then(function (response) {
-			// console.log(response)
+			console.log(response)
 		})
 		.catch(function (error) {			
 			console.log(error);
 		});
 		// log results 	
-		console.log({'time': secondsElapsed, song: song, userResponse: clicked.trim(), correct: 0, album: album, lyric: displayLyric},gameStats)
+		// console.log({'time': secondsElapsed, song: song, userResponse: clicked.trim(), correct: 0, album: album, lyric: displayLyric},gameStats)
 
 		let rand = Math.floor(Math.random() * lyricsDB.length)
 		// change song, clear input, reset timer
