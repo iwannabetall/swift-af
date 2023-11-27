@@ -1,6 +1,7 @@
 /// <reference types="vite/client" />
 
 interface Lyrics {
+	"id" : number;
 	"song_full_name": string;
 	"album":  string;
 	"album_key": AlbumKey;
@@ -49,6 +50,7 @@ interface GameStats {
 	userResponse: string;	
 	correct: number;
 	lyric: string;
+	lyric_id: number;
 	level: string;
 }
  
