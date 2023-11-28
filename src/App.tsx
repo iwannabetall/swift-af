@@ -1,9 +1,16 @@
 // import { useState, useRef, FormEvent } from 'react'
-import { useState, useRef, useEffect } from 'react'
+import { useState, useRef, useEffect, FormEvent } from 'react'
 // import ReactDOM from 'react-dom';
 import title from '/title.svg'
+import leftarrow from '/left-arrow.svg'
 import axios from 'axios';
 import { v4 as uuidv4 } from 'uuid';
+import {
+	RegExpMatcher,
+	TextCensor,
+	englishDataset,
+	englishRecommendedTransformers,
+} from 'obscenity';
 
 let lyricsFullDB: Lyrics[] = [] // all lyrics 
 let songsFullDB: SongList[] = [] // all songs 
@@ -35,7 +42,8 @@ function App() {
 	const [songList, setSongList] = useState<SongList[]>([])
 	const [lyricsDB, setLyricsDB] = useState<Lyrics[]>([])
 	const [gameId, setGameId] = useState<string>(uuidv4())
-	// const [playerName, setPlayerName] = useState<string>('')
+	const [playerName, setPlayerName] = useState<string>('')
+	const [userNameSet, setUserNameSet] = useState<boolean>(false)
 
  	const [answerChoices, setAnsChoices] = useState<string[]>([])
 	const [result, setResult] = useState<string>() // true, false, null? 
@@ -53,22 +61,22 @@ function App() {
 
 		console.log('get data')
 		// get song list 
-		axios.get(`https://swift-api.fly.dev/getSongs`)
-		// axios.get(`http://localhost:3000/getSongs`)
+		// axios.get(`https://swift-api.fly.dev/getSongs`)
+		axios.get(`http://localhost:3000/getSongs`)
 			.then(function (response) {	
 				setSongList(response.data.songList)
 				songsFullDB = response.data.songList
-				console.log(songsFullDB)
+				// console.log(songsFullDB)
 			})
 			.catch(function (error) {				
 				console.log(error);
 			});	
 
-			axios.get(`https://swift-api.fly.dev/getLyrics`)
-			// axios.get(`http://localhost:3000/getLyrics`)
-			.then(function (response) {	
-				setLyricsDB(response.data.lyrics)
+			// axios.get(`https://swift-api.fly.dev/getLyrics`)
+			axios.get(`http://localhost:3000/getLyrics`)
+			.then(function (response) {								
 				lyricsFullDB = response.data.lyrics
+				updateLyricsDB(gameMode)
 			})
 			.catch(function (error) {				
 				console.log(error);
@@ -106,7 +114,7 @@ function App() {
 
 	function updateLyricsDB(level: string){
 		// filter/set the lyrics 		
-		// console.log('lyricsFullDB', lyricsFullDB)
+		console.log('lyricsFullDB', level, lyricsFullDB)
 		if (level == 'easy'){
 			setLyricsDB(lyricsFullDB.filter(x=> x.filler == 0 && x.vault == 0))
 			setSongList(songsFullDB.filter(x=> x.vault == 0))
@@ -171,17 +179,18 @@ function App() {
 		if (song.trim() == clicked.trim()){ 
 			setResult('Correct!')
 			correct = 1
-			setGameStats([{'time': secondsElapsed, song: song, userResponse: clicked.trim(), correct: 1, album: album, lyric: displayLyric, album_key: albumKey, level: gameMode, lyric_id: displayLyricId}, ...gameStats])
+			setGameStats([{'time': secondsElapsed, song: song, userResponse: clicked.trim(), correct: 1, album: album, lyric: displayLyric, album_key: albumKey, level: gameMode, lyric_id: displayLyricId, id: gameStats.length + 1}, ...gameStats])
 
 		} else {
 			correct = 0
 			setResult(wrongAnswersOnly[Math.floor(Math.random() * wrongAnswersOnly.length)])
-			setGameStats([{'time': secondsElapsed, song: song, userResponse: clicked.trim(), correct: 0, album: album, lyric: displayLyric, album_key: albumKey, level: gameMode, lyric_id: displayLyricId}, ...gameStats])
+			setGameStats([{'time': secondsElapsed, song: song, userResponse: clicked.trim(), correct: 0, album: album, lyric: displayLyric, album_key: albumKey, level: gameMode, lyric_id: displayLyricId, id: gameStats.length + 1}, ...gameStats])
 		}
 
 		
 		// save results before resetting
 		axios.post('http://localhost:3000/saveGameData', {
+		// axios.post('https://swift-api.fly.dev/saveGameData', {
 			level: gameMode,
 			time: secondsElapsed, 
 			lyric: displayLyric,
@@ -189,7 +198,8 @@ function App() {
 			date: `${gameDate.getFullYear()}-${gameDate.getMonth()+1}-${gameDate.getDate()}`,
 			gameId: gameId,
 			song: song,
-			lyric_id: displayLyricId
+			lyric_id: displayLyricId,
+			playerName: playerName
 		})
 		.then(function (response) {
 			console.log(response)
@@ -198,7 +208,7 @@ function App() {
 			console.log(error);
 		});
 		// log results 	
-		// console.log({'time': secondsElapsed, song: song, userResponse: clicked.trim(), correct: 0, album: album, lyric: displayLyric},gameStats)
+		console.log({'time': secondsElapsed, song: song, userResponse: clicked.trim(), correct: 0, album: album, lyric: displayLyric},gameStats)
 
 		let rand = Math.floor(Math.random() * lyricsDB.length)
 		// change song, clear input, reset timer
@@ -217,6 +227,28 @@ function App() {
 	
 	}
 
+	function submitUserName(e: FormEvent<HTMLFormElement>){
+		e.preventDefault()
+		
+		if (playerName == ''){
+			setPlayerName('toolazytotype')
+		} else {
+			// censor for user names
+			const censor = new TextCensor()
+			const matcher = new RegExpMatcher({
+				...englishDataset.build(),
+				...englishRecommendedTransformers,
+			});
+			const matches = matcher.getAllMatches(playerName)
+			
+			const userName = censor.applyTo(playerName, matches)
+			setPlayerName(userName)
+		}
+		
+		setUserNameSet(true)
+
+	}
+
 	function restartGame(){
 		// goes to home page where you can change levels/user names
 		setGameId(uuidv4())		
@@ -225,7 +257,10 @@ function App() {
 	}
 
 	function endGame(){
-		
+	
+		// sort gamestats so it's clumped by album
+		setGameStats(gameStats.sort((a,b) => (a.album > b.album) ? 1 : (b.album > a.album) ? -1 : 0))
+
 		// end game and show game stats
 		setGameStarted(false)
 		if (gameStats.length > 0) {
@@ -247,28 +282,53 @@ function App() {
 				</div>
 				
 				{!gameStarted && !displayStats && <div className='grid grid-cols-1'>
-					<h2>So you think you're the 1? The Swiftest fan?</h2>
+					{!userNameSet && <div>
+						<h2>So you think you're the 1? The Swiftest fan?</h2>
 					<h2>How quickly can you ID the song?</h2>
-					<h6>Pick a level.  It's time to go</h6>
-					<div className='p-4 pt-0 grid grid-cols-1'>
-						<div className="text-center m-4 p-2 text-md">
-						{gameModes.map((x,i)=> <div className={`cursor-pointer rounded-t-xl rounded-b-xl p-2 text-center text-md font-bold ${ltErasColors[i]} ${gameMode == x.key ? '' : 'faded'}`} id={x.key} onClick={() => setGameMode(x.key)}>{x.value}</div>)}
-						
-						<div onClick={() => setShowGameModeQ(!showGameModeQ)}
-						className="cursor-pointer rounded-t-xl rounded-b-xl text-center text-md font-bold m-4" 
-						>Question...?</div>
-						{showGameModeQ && <div>
-							<div>Easy mode: song title might be in the lyric</div>
-							<div>Normal mode: lyrics with song title removed</div>
-							<div>Hard mode: vault songs included</div>
-							<div>Expert mode: vault songs + a surprise ooohhh</div>
-							</div>
-							}
+					</div>}
+					{!userNameSet && <div className='p-4 pt-0 grid grid-cols-1 text-center transition-all ease-in-out duration-300'>
+						<form className="era-evermore cursor-pointer shadow-md rounded px-8 pt-6 pb-8 mb-4" onSubmit={(e: FormEvent<HTMLFormElement>) => submitUserName(e)}>
+							<label className='block'> the leaderboard has a blank space
+								<input className="shadow cursor-pointer appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline text-center" type='text' 
+								value={playerName} 
+								placeholder='Your display name'
+								maxLength={30}
+								onChange={e => setPlayerName(e.target.value)}>
+								</input>
+							</label>
+							<button className='cursor-pointer'>1, 2, 3, LGB </button>
+						</form>
+					</div>}
+					{userNameSet && <div>
 
+						<div className='pt-0 grid grid-cols-1'>
+							<button className="era-evermore cursor-pointer p-4 m-4 shadow-md rounded-t-xl rounded-b-xl" onClick={() => setUserNameSet(false)}>
+								<img src={leftarrow} className='cursor-pointer inline logo h-8 mr-2 pr-2' alt="change name" />cursing my display name, wishing I wasn't {playerName}
+							</button>
 						</div>
+							{/* the old {playerName} is dead */}
+							<h6>Pick a level.  It's time to go</h6>
 						
-						<button className='m-4 bg-eras_grey p-4 text-lg font-bold' onClick={() => startGame()}>...Ready For It</button>
-					</div>
+						<div className='p-4 pt-0 grid grid-cols-1'>
+							<div className="text-center m-4 p-2 text-md">
+							{gameModes.map((x,i)=> <button className={`block min-w-full cursor-pointer rounded-t-xl rounded-b-xl p-2 text-center text-md font-bold ${ltErasColors[i]} ${gameMode == x.key ? '' : 'faded'}`} id={x.key} onClick={() => setGameMode(x.key)}>{x.value}</button>)}
+							
+							<div onClick={() => setShowGameModeQ(!showGameModeQ)}
+							className="cursor-pointer rounded-t-xl rounded-b-xl text-center text-md font-bold m-4" 
+							>Question...?</div>
+							{showGameModeQ && <div>
+								<div>Easy mode: song title might be in the lyric</div>
+								<div>Normal mode: lyrics with song title removed</div>
+								<div>Hard mode: vault songs included</div>
+								<div>Expert mode: vault songs + a surprise ooohhh</div>
+								</div>
+								}
+
+							</div>
+							
+							{playerName && <button className='m-4 bg-eras_grey p-4 text-lg font-bold rounded-t-xl rounded-b-xl' onClick={() => startGame()}>...Ready For It</button>}
+						</div>
+					</div>}
 				</div>}
 
 				{gameStarted && !displayStats && <div className=''>					
@@ -278,12 +338,7 @@ function App() {
 					{answerChoices.map((x,i) => <div className={`cursor-pointer rounded-t-xl rounded-b-xl text-center m-4 p-2 text-lg font-bold ${ltErasColors[i]}`}
 						onClick={() => checkAnswer(x)}> {x}</div>)}
 				<h3>{secondsElapsed.toFixed(3)}</h3>
-					{/* <form onSubmit={(e: FormEvent<HTMLFormElement>) => submitAnswer(e)}>
-						<label> What song is it?!
-							<input type='text' value={userResponse} onChange={e => setUserResponse(e.target.value)}>
-							</input>
-						</label>
-					</form>				 */}
+				
 					<div className='text-lg font-bold m-4 p-2'>
 					{gameStats.length > 0 ? <div>{gameStats.map(x=> x.correct).reduce((total, current) => total + current, 0)}/{gameStats.length} Correct {(100*gameStats.map(x=> x.correct).reduce((total, current) => total + current, 0)/gameStats.length).toFixed(0)}%</div> : ''}
 					</div>

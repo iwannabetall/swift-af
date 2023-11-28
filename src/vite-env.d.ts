@@ -52,5 +52,6 @@ interface GameStats {
 	lyric: string;
 	lyric_id: number;
 	level: string;
+	id: number;
 }
  
