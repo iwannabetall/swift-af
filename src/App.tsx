@@ -12,6 +12,7 @@ import {
 	englishRecommendedTransformers,
 } from 'obscenity';
 
+
 let lyricsFullDB: Lyrics[] = [] // all lyrics 
 let songsFullDB: SongList[] = [] // all songs 
 
@@ -24,6 +25,7 @@ function App() {
 
 	const gameModes = [{'key' : 'easy', 'value' : 'this is me trying (easy)'}, {'key' : 'normal', 'value' : "The Classics (rec'd)"}, {'key' : 'hard', 'value' : "Taylor's Version (hard)"}, {'key' : 'expert', 'value' : 'my tears richochet (expert)'}] as const
 
+	const albums = ["Taylor Swift", "Fearless", "Speak Now", "Red", "1989", "reputation", "Lover", "folklore", "evermore", "Midnights"] as const
 
 	// let songList: SongList[] = []
 
@@ -45,9 +47,12 @@ function App() {
 	const [playerName, setPlayerName] = useState<string>('')
 	const [userNameSet, setUserNameSet] = useState<boolean>(false)
 
+	const [accuracy, setAccuracy] = useState<number>()
+	const [avgSpeed, setAvgSpeed] = useState<number>()
  	const [answerChoices, setAnsChoices] = useState<string[]>([])
 	const [result, setResult] = useState<string>() // true, false, null? 
 	const [gameStats, setGameStats] = useState<GameStats[]>([])  // make this an array of objects with lyric/song/album they got right and the time
+	const [statsByAlbum, setStatsByAlbum] = useState<StatsByAlbum[]>([])
 	const [gameStarted, setGameStarted] = useState<boolean>(false)
 	const [displayStats, setDisplayStats] = useState<boolean>(false);
 
@@ -114,7 +119,7 @@ function App() {
 
 	function updateLyricsDB(level: string){
 		// filter/set the lyrics 		
-		console.log('lyricsFullDB', level, lyricsFullDB)
+		// console.log('lyricsFullDB', level, lyricsFullDB)
 		if (level == 'easy'){
 			setLyricsDB(lyricsFullDB.filter(x=> x.filler == 0 && x.vault == 0))
 			setSongList(songsFullDB.filter(x=> x.vault == 0))
@@ -264,11 +269,39 @@ function App() {
 		// end game and show game stats
 		setGameStarted(false)
 		if (gameStats.length > 0) {
+			getPostGameReport()
 			setDisplayStats(true)
 		} 
 		
 	}
-	
+
+	function getPostGameReport(){
+
+		// calc stats by album and other various stats
+		let overall = 100*parseInt((gameStats.filter(x=> x.correct).length/gameStats.length).toFixed(0))
+		setAccuracy(overall)
+
+		setAvgSpeed((gameStats.map(x=> x.time).reduce((total, current) => total + current, 0)/gameStats.length).toFixed(2))
+
+		let allStatsByAlbums: StatsByAlbum[] = []
+
+		for (let i = 0; i < albums.length; i++) {
+			let calcStats: StatsByAlbum = {}
+			calcStats.album = albums[i]
+
+			let albumStats = gameStats.filter(x=> x.album == albums[i])
+			calcStats.correct = albumStats.filter(x=> x.correct).length
+			calcStats.total = albumStats.length
+			calcStats.avgTime = albumStats.map(x=> x.time).reduce((acc,curr) => acc + curr, 0)
+
+			allStatsByAlbums.push(calcStats)
+
+		}
+
+		setStatsByAlbum(allStatsByAlbums)
+		
+	}
+
 	let secondsElapsed = 0;
   if (startTime != null && currentTime != null) {
     secondsElapsed = (currentTime - startTime) / 1000;
@@ -276,8 +309,8 @@ function App() {
 	
   return (
     <>
-			<div className='md:flex flex-col p-4'>
-				<div>
+			<div className='md:flex flex-col p-4 items-center'>
+				<div className=''>
 					<img src={title} className={`logo p-4 ${(gameStarted || displayStats) ? 'max-h-32' : ''}`} alt="Swift AF" />				
 				</div>
 				
@@ -301,9 +334,10 @@ function App() {
 					</div>}
 					{userNameSet && <div>
 
-						<div className='pt-0 grid grid-cols-1'>
-							<button className="era-evermore cursor-pointer p-4 m-4 shadow-md rounded-t-xl rounded-b-xl" onClick={() => setUserNameSet(false)}>
-								<img src={leftarrow} className='cursor-pointer inline logo h-8 mr-2 pr-2' alt="change name" />cursing my display name, wishing I wasn't {playerName}
+						<div className='pr-4 pl-4 pt-0 grid grid-cols-1'>
+						
+						<button className="era-folklore cursor-pointer p-2 m-4 shadow-md rounded-t-xl rounded-b-xl" onClick={() => setUserNameSet(false)}><img src={leftarrow} className='cursor-pointer inline logo h-8 mr-2 pr-2 ' alt="change name" />
+								cursing my display name, wishing I wasn't {playerName}
 							</button>
 						</div>
 							{/* the old {playerName} is dead */}
@@ -326,7 +360,7 @@ function App() {
 
 							</div>
 							
-							{playerName && <button className='m-4 bg-eras_grey p-4 text-lg font-bold rounded-t-xl rounded-b-xl' onClick={() => startGame()}>...Ready For It</button>}
+							{playerName && <button className='m-4 era-reputation p-4 text-lg font-bold rounded-t-xl rounded-b-xl' onClick={() => startGame()}>...Ready For It</button>}
 						</div>
 					</div>}
 				</div>}
@@ -352,15 +386,23 @@ function App() {
 									
 				</div>}
 
-				{(gameStats.length > 0) && displayStats && <div>
-					<div>long story short</div>
-					<div>{gameStats.map(x=> x.correct).reduce((total, current) => total + current, 0)}/{gameStats.length} Correct 
+				{(gameStats.length > 0) && displayStats && <div className='p-4 pt-0 grid grid-cols-1'>
+					<h3 className='font-bold text-xl text-center'>long story short</h3>
+					<div className='font-bold text-xl text-center p-2'>{accuracy < 40 ? "Shake it off, soon you'll get better" : accuracy > 70 ? "Tell Me How" : ''}</div>
+					<div className='flex justify-center font-bold'>
+					<h1>{gameStats.map(x=> x.correct).reduce((total, current) => total + current, 0)}/{gameStats.length} 
+					</h1>	
+					<h1>{accuracy*100}%</h1>
+					<h1>{avgSpeed}spl</h1>
 					</div>
-
+					{/* <div>{gameStats.map(x=> x.correct).reduce((total, current) => total + current, 0)}/{gameStats.length} Correct 
+					</div>					
+					<div>{(gameStats.map(x=> x.time).reduce((total, current) => total + current, 0)/gameStats.length).toFixed(2)} seconds per lyric</div>					 */}
 					
-					<div>{(gameStats.map(x=> x.time).reduce((total, current) => total + current, 0)/gameStats.length).toFixed(2)} seconds per lyric</div>					
-					
-					{gameStats.filter(x=> x.correct == 1).length > 0 && <table>
+					<h3 className='font-bold text-xl text-center'>happiness</h3> 
+					{gameStats.filter(x=> x.correct == 1).length > 0 && 
+						
+						<table className='mb-4'>
 						<thead>
 							<tr>
 							<th>Lyric</th>
@@ -375,13 +417,14 @@ function App() {
 								<td className="border p-1">{x.time.toFixed(1)}s</td>
 							</tr>)}		
 						</tbody>
-					</table>}
+					</table>
+					}
 
 							
 					{gameStats.filter(x=> x.correct == 0).length > 0 &&
 					<div className=''>
 						<h3 className='font-bold text-xl text-center'>Would've, Could've, Should've</h3>
-						<table>
+						<table className='mb-4'>
 							<thead>
 								<tr>
 								<th>Lyric</th>

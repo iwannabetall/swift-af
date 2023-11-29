@@ -1,5 +1,7 @@
 /// <reference types="vite/client" />
 
+declare module 'obscenity';
+
 interface Lyrics {
 	"id" : number;
 	"song_full_name": string;
@@ -40,6 +42,13 @@ interface SongList {
 declare global {
 	var lyricsFullDB: Lyrics[];
 	var songList: SongList[];
+}
+
+interface StatsByAlbum {
+	album: string;
+	correct: number;
+	total: number;
+	avgTime: number;
 }
 
 interface GameStats {
