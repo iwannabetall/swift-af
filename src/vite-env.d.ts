@@ -48,7 +48,8 @@ interface StatsByAlbum {
 	album: string;
 	correct: number;
 	total: number;
-	avgTime: number;
+	avgTime: string;
+	albumKey: string;
 }
 
 interface GameStats {

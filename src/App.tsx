@@ -47,8 +47,8 @@ function App() {
 	const [playerName, setPlayerName] = useState<string>('')
 	const [userNameSet, setUserNameSet] = useState<boolean>(false)
 
-	const [accuracy, setAccuracy] = useState<number>()
-	const [avgSpeed, setAvgSpeed] = useState<number>()
+	const [accuracy, setAccuracy] = useState<string | undefined>()
+	const [avgSpeed, setAvgSpeed] = useState<string | undefined>()
  	const [answerChoices, setAnsChoices] = useState<string[]>([])
 	const [result, setResult] = useState<string>() // true, false, null? 
 	const [gameStats, setGameStats] = useState<GameStats[]>([])  // make this an array of objects with lyric/song/album they got right and the time
@@ -228,7 +228,6 @@ function App() {
 		
 		setStartTime(Date.now())
 		setCurrentTime(Date.now())
-
 	
 	}
 
@@ -277,28 +276,39 @@ function App() {
 
 	function getPostGameReport(){
 
-		// calc stats by album and other various stats
-		let overall = 100*parseInt((gameStats.filter(x=> x.correct).length/gameStats.length).toFixed(0))
-		setAccuracy(overall)
+		if (gameStats.length > 0) {
+			// calc stats by album and other various stats
+			let overall = (100*gameStats.filter(x=> x.correct == 1).length/gameStats.length).toFixed(0)
+			console.log((100*gameStats.filter(x=> x.correct == 1).length/gameStats.length).toFixed(0))
 
-		setAvgSpeed((gameStats.map(x=> x.time).reduce((total, current) => total + current, 0)/gameStats.length).toFixed(2))
+			setAccuracy(overall)
 
-		let allStatsByAlbums: StatsByAlbum[] = []
+			setAvgSpeed((gameStats.map(x=> x.time).reduce((total, current) => total + current, 0)/gameStats.length).toFixed(2))
+		
+			let allStatsByAlbums: StatsByAlbum[] = []
 
-		for (let i = 0; i < albums.length; i++) {
-			let calcStats: StatsByAlbum = {}
-			calcStats.album = albums[i]
+			for (let i = 0; i < albums.length; i++) {
+				let calcStats: StatsByAlbum = {}
+				calcStats.album = albums[i]				
 
-			let albumStats = gameStats.filter(x=> x.album == albums[i])
-			calcStats.correct = albumStats.filter(x=> x.correct).length
-			calcStats.total = albumStats.length
-			calcStats.avgTime = albumStats.map(x=> x.time).reduce((acc,curr) => acc + curr, 0)
+				let albumStats = gameStats.filter(x=> x.album == albums[i])
 
-			allStatsByAlbums.push(calcStats)
+				if (albumStats.length > 0) {
+					calcStats.correct = albumStats.filter(x=> x.correct).length
+					calcStats.total = albumStats.length
+					calcStats.avgTime = albumStats.map(x=> x.time).reduce((acc,curr) => acc + curr, 0).toFixed(2)
+					calcStats.albumKey = albumStats[0].album_key
 
+					allStatsByAlbums.push(calcStats)
+
+				}
+				
+			}
+
+			console.log(allStatsByAlbums)
+
+			setStatsByAlbum(allStatsByAlbums)
 		}
-
-		setStatsByAlbum(allStatsByAlbums)
 		
 	}
 
@@ -387,14 +397,13 @@ function App() {
 				</div>}
 
 				{(gameStats.length > 0) && displayStats && <div className='p-4 pt-0 grid grid-cols-1'>
-					<h3 className='font-bold text-xl text-center'>long story short</h3>
-					<div className='font-bold text-xl text-center p-2'>{accuracy < 40 ? "Shake it off, soon you'll get better" : accuracy > 70 ? "Tell Me How" : ''}</div>
-					<div className='flex justify-center font-bold'>
-					<h1>{gameStats.map(x=> x.correct).reduce((total, current) => total + current, 0)}/{gameStats.length} 
-					</h1>	
-					<h1>{accuracy*100}%</h1>
-					<h1>{avgSpeed}spl</h1>
+					<h3 className='font-bold text-xl text-center'>long story short for your {gameStats.length} tries</h3>
+					<div className='font-bold text-xl text-center p-2'>{accuracy < 40 ? "Shake it off, soon you'll get better" : accuracy > 70 ? "I knew I saw a light in you, Superstar" : ''}</div>
+					<div className='flex justify-center font-bold flex-row flex-wrap'>
+					<h1 className='era-midnights shadow-md pr-4 pl-4 pt-2 pb-2 m-2'>{accuracy}%</h1>
+					<h1 className='era-midnights shadow-md pr-4 pl-4 pt-2 pb-2 m-2'>{avgSpeed} sec/line</h1>
 					</div>
+
 					{/* <div>{gameStats.map(x=> x.correct).reduce((total, current) => total + current, 0)}/{gameStats.length} Correct 
 					</div>					
 					<div>{(gameStats.map(x=> x.time).reduce((total, current) => total + current, 0)/gameStats.length).toFixed(2)} seconds per lyric</div>					 */}
@@ -440,6 +449,27 @@ function App() {
 									<td className="border p-1">{x.userResponse}</td>
 								</tr>)}		
 							</tbody>
+						</table>
+					</div>}
+					
+					{/* stats by album if you do enough */}
+					{statsByAlbum.length > 0 && gameStats.length > 10 && <div>
+						<table>
+							<thead>
+								<tr>
+								<th>Album</th>
+								<th>Total</th>
+								<th>Time</th>
+								</tr>
+							</thead>
+							<tbody>
+								{statsByAlbum.map(x =><tr className={`text-center text-[#68416d] ${albumColorKey[x.albumKey as keyof typeof albumColorKey]}`}>
+									<td className="border p-1">{x.album}</td>
+									<td className="border p-1">{x.correct}/{x.total}</td>
+									<td className="border p-1">{x.avgTime}</td>
+								</tr>)}		
+							</tbody>					
+
 						</table>
 					</div>}
 
