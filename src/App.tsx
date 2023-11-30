@@ -354,7 +354,7 @@ function App() {
 				<div className=''>
 					<img src={title} className={`logo p-4 ${(gameStarted || displayStats) ? 'max-h-32' : ''}`} alt="Swift AF" />				
 				</div>			
-				<Scoreboard data={scoreboardData}/>	
+				{/* <Scoreboard data={scoreboardData}/>	 */}
 				{!gameStarted && !displayStats && <div className='grid grid-cols-1'>
 					{!userNameSet && <div>
 						<h2>So you think you're the 1? The Swiftest fan?</h2>

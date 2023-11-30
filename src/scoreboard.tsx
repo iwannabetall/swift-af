@@ -2,7 +2,7 @@ function Scoreboard({ data } : { data : Scoreboard[] }) {
 	
 	return (
 		<div>
-			<table className='mb-4'>
+			{data.length > 0 && <table className='mb-4'>
 				<thead>
 					<tr>
 					<th>Player</th>
@@ -17,7 +17,7 @@ function Scoreboard({ data } : { data : Scoreboard[] }) {
 						<td className="border p-1">{x.correct}/{x.total} ({x.accuracy.toFixed(0)}%)</td>
 					</tr>)}		
 				</tbody>
-			</table>
+			</table>}
 		</div>
 	)
 
