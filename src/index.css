@@ -194,3 +194,7 @@ button:focus-visible {
 .faded{
 	opacity: 0.3;
 }
+
+.selected{
+	border: black solid 2px;
+}

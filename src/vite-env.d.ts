@@ -31,7 +31,12 @@ interface Lyrics {
 // 	'Midnights': string;
 		
 // }
+
 type AlbumKey = "Taylor_Swift" | "Fearless" | "Speak_Now" | 'Red' | '1989' | 'reputation' | 'Lover' | 'folklore' | 'evermore' | 'Midnights' 
+
+type Album = "Taylor Swift" | "Fearless" | "Speak Now" | 'Red' | '1989' | 'reputation' | 'Lover' | 'folklore' | 'evermore' | 'Midnights' 
+
+type accuracy = string;
 
 interface SongList {
 	"song": string;
@@ -49,7 +54,7 @@ interface StatsByAlbum {
 	correct: number;
 	total: number;
 	avgTime: string;
-	albumKey: string;
+	albumKey: AlbumKey;
 }
 
 interface GameStats {
@@ -65,3 +70,16 @@ interface GameStats {
 	id: number;
 }
  
+
+interface Scoreboard {
+	player_name: string; 
+	accuracy: number;
+	accuracy_rk: number;
+	accuracy_pctl: number;
+	time: number;
+	speed_rk: number;
+	speed_pctl: number;
+	correct: number;
+	total: number;
+	gameMode: string;
+}

@@ -12,9 +12,12 @@ import {
 	englishRecommendedTransformers,
 } from 'obscenity';
 
+import Scoreboard from './scoreboard';
+
 
 let lyricsFullDB: Lyrics[] = [] // all lyrics 
 let songsFullDB: SongList[] = [] // all songs 
+let scoreboardFullDB: Scoreboard[] = []
 
 function App() {
 	
@@ -23,7 +26,9 @@ function App() {
 
 	const albumColorKey = {'Taylor_Swift': 'era-taylor-swift', 'Fearless': 'era-fearless', 'Speak_Now': 'era-speak-now', 'Red': 'era-red', '1989': 'era-1989', 'reputation': 'era-reputation', 'Lover': 'era-lover', 'folklore': 'era-folklore', 'evermore': 'era-evermore', 'Midnights': 'era-midnights'} as const
 
-	const gameModes = [{'key' : 'easy', 'value' : 'this is me trying (easy)'}, {'key' : 'normal', 'value' : "The Classics (rec'd)"}, {'key' : 'hard', 'value' : "Taylor's Version (hard)"}, {'key' : 'expert', 'value' : 'my tears richochet (expert)'}] as const
+	const albumKeyLkup = { "Taylor Swift" : "Taylor_Swift", "Fearless" : "Fearless", "Speak Now" : "Speak_Now", 'Red' : 'Red', '1989' : '1989', 'reputation' : 'reputation', 'Lover' : 'Lover', 'folklore' : 'folklore', 'evermore' : 'evermore', 'Midnights' : 'Midnights'} as const
+
+	const gameModes = [{'key' : 'easy', 'value' : 'this is me trying (easy)'}, {'key' : 'normal', 'value' : "The Classics (rec'd)"}, {'key' : 'hard', 'value' : "Taylor's Version (hard)"}, {'key' : 'expert', 'value' : 'my tears richochet (expert)'}, {'key' : 'album', 'value' : 'the 1 (album)'}] as const
 
 	const albums = ["Taylor Swift", "Fearless", "Speak Now", "Red", "1989", "reputation", "Lover", "folklore", "evermore", "Midnights"] as const
 
@@ -40,6 +45,7 @@ function App() {
 	const [album, setAlbum] = useState<string>('')
 	const [albumKey, setAlbumKey] = useState<AlbumKey | ''>('')
 	const [gameMode, setGameMode] = useState<string>('normal')
+	const [albumMode, setAlbumMode] = useState<Album | '' >('')
 	const [showGameModeQ, setShowGameModeQ] = useState<boolean>(false)
 	const [songList, setSongList] = useState<SongList[]>([])
 	const [lyricsDB, setLyricsDB] = useState<Lyrics[]>([])
@@ -52,6 +58,7 @@ function App() {
  	const [answerChoices, setAnsChoices] = useState<string[]>([])
 	const [result, setResult] = useState<string>() // true, false, null? 
 	const [gameStats, setGameStats] = useState<GameStats[]>([])  // make this an array of objects with lyric/song/album they got right and the time
+	const [scoreboardData, setScoreboardData] = useState<Scoreboard[]>([])
 	const [statsByAlbum, setStatsByAlbum] = useState<StatsByAlbum[]>([])
 	const [gameStarted, setGameStarted] = useState<boolean>(false)
 	const [displayStats, setDisplayStats] = useState<boolean>(false);
@@ -78,10 +85,19 @@ function App() {
 			});	
 
 			// axios.get(`https://swift-api.fly.dev/getLyrics`)
-			axios.get(`http://localhost:3000/getLyrics`)
+		axios.get(`http://localhost:3000/getLyrics`)
 			.then(function (response) {								
-				lyricsFullDB = response.data.lyrics
-				updateLyricsDB(gameMode)
+				lyricsFullDB = response.data.lyrics				
+			})
+			.catch(function (error) {				
+				console.log(error);
+			});	
+		
+		axios.get(`http://localhost:3000/getScoreboard`)
+			.then(function (response) {								
+				scoreboardFullDB = response.data.scoreBoard
+				console.log(scoreboardFullDB)
+				setScoreboardData(scoreboardFullDB)
 			})
 			.catch(function (error) {				
 				console.log(error);
@@ -95,6 +111,7 @@ function App() {
 		let answerChoices = []
 		// array of indexes, we remove when we get a match 
 		let songIndices = Array(songList.length).fill(1).map((x,i) => x + i)
+		console.log(songIndices, songList)
 		// remove the song that is the answer so we don't get dupes
 		songIndices.splice(songList.map(x=> x.song).indexOf(correctAnswer), 1)
 
@@ -117,52 +134,64 @@ function App() {
 	}
 
 
-	function updateLyricsDB(level: string){
+	function filterLyricsDB(level: string){
 		// filter/set the lyrics 		
 		// console.log('lyricsFullDB', level, lyricsFullDB)
+		let songBank: SongList[]
+		let lyricsBank: Lyrics[]
+
 		if (level == 'easy'){
-			setLyricsDB(lyricsFullDB.filter(x=> x.filler == 0 && x.vault == 0))
-			setSongList(songsFullDB.filter(x=> x.vault == 0))
+			lyricsBank = lyricsFullDB.filter(x=> x.filler == 0 && x.vault == 0)
+			songBank = songsFullDB.filter(x=> x.vault == 0)
 		} else if (level == 'normal') {
-			setLyricsDB(lyricsFullDB.filter(x=> x.filler == 0 && x.vault == 0 && x.title_in_lyric_match < 70))
-			setSongList(songsFullDB.filter(x=> x.vault == 0))
+			lyricsBank = lyricsFullDB.filter(x=> x.filler == 0 && x.vault == 0 && x.title_in_lyric_match < 70)
+			songBank = songsFullDB.filter(x=> x.vault == 0)
 		} else if (level == 'hard') {
 			// hard is all + more recent vault songs but no filler
-			setLyricsDB(lyricsFullDB.filter(x=> x.filler == 0 && x.title_in_lyric_match < 70))
-			setSongList(songsFullDB)
+			lyricsBank = lyricsFullDB.filter(x=> x.filler == 0 && x.title_in_lyric_match < 70)
+			songBank = songsFullDB
+		} else if (level == 'expert') {
+			// expert level has vault songs and only filler words lmao
+			lyricsBank = lyricsFullDB.filter(x=> x.filler == 1)
+			songBank = songsFullDB
 		} else {
-			// expert level has vault songs, filler words, and 
-			setLyricsDB(lyricsFullDB.filter(x=> x.title_in_lyric_match < 70))
-			setSongList(songsFullDB)
+			// filter by album 
+			lyricsBank = lyricsFullDB.filter(x=> x.album == albumMode && x.filler == 0 && x.title_in_lyric_match < 70)
+			songBank = songsFullDB.filter(x=> x.album == albumMode)
 		}
+
+		return { songBank: songBank, lyricsBank: lyricsBank}
 		
 	}
 
 	// start timer for beg of game 
 	function startGame() {
 		
-		// console.log('start game', lyricsDB)
-		
+		// filter lyrics and set state -- use the returned value to set the init state bc the new state wont change fast enough
+		let { songBank, lyricsBank } = filterLyricsDB(gameMode)
+		console.log(lyricsBank, songBank, albumMode)
+
+		setSongList(songBank)
+		setLyricsDB(lyricsBank)
+
 		setDisplayStats(false) // in case you're starting another game
 
 		setStartTime(Date.now())
 		setCurrentTime(Date.now())
 		setGameStats([])
 		setGameStarted(true)
-		setGameId(uuidv4())
-
-		updateLyricsDB(gameMode)
+		setGameId(uuidv4())		
 
 		const randInd = Math.floor(Math.random() * lyricsDB.length)
 		
 		clearInterval(intervalRef.current as NodeJS.Timeout)
 		// start timer and display a lyric 
-		setAnsChoices(pickRandomAns(lyricsDB[randInd].song))
-		setDisplayLyric(lyricsDB[randInd].lyric)
-		setDisplayLyricId(lyricsDB[randInd].id)
-		setSong(lyricsDB[randInd].song.trim())
-		setAlbum(lyricsDB[randInd].album.trim())
-		setAlbumKey(lyricsDB[randInd].album_key)
+		setAnsChoices(pickRandomAns(lyricsBank[randInd].song))
+		setDisplayLyric(lyricsBank[randInd].lyric)
+		setDisplayLyricId(lyricsBank[randInd].id)
+		setSong(lyricsBank[randInd].song.trim())
+		setAlbum(lyricsBank[randInd].album.trim())
+		setAlbumKey(lyricsBank[randInd].album_key)
 		intervalRef.current = setInterval(() => setCurrentTime(Date.now()), 10)		
 		// console.log(randInd, lyricsDB[randInd])
 
@@ -204,7 +233,8 @@ function App() {
 			gameId: gameId,
 			song: song,
 			lyric_id: displayLyricId,
-			playerName: playerName
+			playerName: playerName,
+			albumMode: albumMode
 		})
 		.then(function (response) {
 			console.log(response)
@@ -287,11 +317,12 @@ function App() {
 		
 			let allStatsByAlbums: StatsByAlbum[] = []
 
+			// either create a function where it returns the type or create the type/obj at the beg
 			for (let i = 0; i < albums.length; i++) {
-				let calcStats: StatsByAlbum = {}
-				calcStats.album = albums[i]				
-
 				let albumStats = gameStats.filter(x=> x.album == albums[i])
+				let calcStats: StatsByAlbum = { album: albums[i], correct: 0, total: 0, avgTime: '', albumKey: albumKeyLkup[albums[i]]}
+			
+				// calcStats.album = albums[i]				
 
 				if (albumStats.length > 0) {
 					calcStats.correct = albumStats.filter(x=> x.correct).length
@@ -322,15 +353,15 @@ function App() {
 			<div className='md:flex flex-col p-4 items-center'>
 				<div className=''>
 					<img src={title} className={`logo p-4 ${(gameStarted || displayStats) ? 'max-h-32' : ''}`} alt="Swift AF" />				
-				</div>
-				
+				</div>			
+				<Scoreboard data={scoreboardData}/>	
 				{!gameStarted && !displayStats && <div className='grid grid-cols-1'>
 					{!userNameSet && <div>
 						<h2>So you think you're the 1? The Swiftest fan?</h2>
 					<h2>How quickly can you ID the song?</h2>
 					</div>}
 					{!userNameSet && <div className='p-4 pt-0 grid grid-cols-1 text-center transition-all ease-in-out duration-300'>
-						<form className="era-evermore cursor-pointer shadow-md rounded px-8 pt-6 pb-8 mb-4" onSubmit={(e: FormEvent<HTMLFormElement>) => submitUserName(e)}>
+						<form className="era-1989 cursor-pointer shadow-md rounded px-8 pt-6 pb-8 mb-4" onSubmit={(e: FormEvent<HTMLFormElement>) => submitUserName(e)}>
 							<label className='block'> the leaderboard has a blank space
 								<input className="shadow cursor-pointer appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline text-center" type='text' 
 								value={playerName} 
@@ -339,34 +370,47 @@ function App() {
 								onChange={e => setPlayerName(e.target.value)}>
 								</input>
 							</label>
-							<button className='cursor-pointer'>1, 2, 3, LGB </button>
+							<button className='era-midnights cursor-pointer'>Hi, it's me.</button>
 						</form>
 					</div>}
 					{userNameSet && <div>
 
-						<div className='pr-4 pl-4 pt-0 grid grid-cols-1'>
-						
+						<div className='pr-4 pl-4 pt-0 grid grid-cols-1'>						
 						<button className="era-folklore cursor-pointer p-2 m-4 shadow-md rounded-t-xl rounded-b-xl" onClick={() => setUserNameSet(false)}><img src={leftarrow} className='cursor-pointer inline logo h-8 mr-2 pr-2 ' alt="change name" />
 								cursing my display name, wishing I wasn't {playerName}
 							</button>
 						</div>
 							{/* the old {playerName} is dead */}
 							<h6>Pick a level.  It's time to go</h6>
-						
+
+						<div className="cursor-pointer rounded-t-xl rounded-b-xl text-center m-4" onClick={() => setShowGameModeQ(!showGameModeQ)}>
+							<div className='text-md font-bold'>Question...?</div>
+							{showGameModeQ && <div>								
+								<div>Easy mode: song title might be in the lyric</div>
+								<div>Classics mode: lyrics with song title removed; no vault songs</div>
+								<div>Hard mode: vault songs included</div>
+								<div>Expert mode: vault + a surprise ooohhh</div>
+								<div>the 1: focus on one album</div>
+								</div>}
+						</div>
 						<div className='p-4 pt-0 grid grid-cols-1'>
 							<div className="text-center m-4 p-2 text-md">
-							{gameModes.map((x,i)=> <button className={`block min-w-full cursor-pointer rounded-t-xl rounded-b-xl p-2 text-center text-md font-bold ${ltErasColors[i]} ${gameMode == x.key ? '' : 'faded'}`} id={x.key} onClick={() => setGameMode(x.key)}>{x.value}</button>)}
-							
-							<div onClick={() => setShowGameModeQ(!showGameModeQ)}
-							className="cursor-pointer rounded-t-xl rounded-b-xl text-center text-md font-bold m-4" 
-							>Question...?</div>
-							{showGameModeQ && <div>
-								<div>Easy mode: song title might be in the lyric</div>
-								<div>Normal mode: lyrics with song title removed</div>
-								<div>Hard mode: vault songs included</div>
-								<div>Expert mode: vault songs + a surprise ooohhh</div>
-								</div>
-								}
+							{gameModes.map((x,i)=> 
+							<button 
+								className={`block min-w-full cursor-pointer rounded-t-xl rounded-b-xl p-2 text-center text-md font-bold ${ltErasColors[i]} ${gameMode == x.key ? '' : 'faded'}`} id={x.key} 
+								onClick={() => {
+									setAlbumMode(''); 
+									setGameMode(x.key);
+								}}>{x.value}
+							</button>)}
+
+							{gameMode == 'album' && <div className='p-4 grid grid-cols-1'>
+								{albums.map((x,i)=> <button className={`block min-w-full cursor-pointer rounded-t-xl rounded-b-xl text-center p-2 text-[#68416d] ${albumMode == x ? '' : 'faded'} ${albumColorKey[albumKeyLkup[x] as keyof typeof albumColorKey]}`}
+								onClick={() => {
+									setGameMode('album')
+									setAlbumMode(x)}}
+								>{albums[i]}</button>)}
+								</div>}
 
 							</div>
 							
@@ -388,8 +432,8 @@ function App() {
 					</div>
 
 					<div className='md:flex justify-center'>
-						<button className='m-6 bg-eras_grey p-4' onClick={() => restartGame()}>Begin Again</button>
-						<button className='m-6 bg-eras_grey p-4' onClick={() => endGame()}>End Game</button>
+						<button className='m-6 era-red p-4' onClick={() => restartGame()}>Begin Again</button>
+						<button className='m-6 era-reputation p-4' onClick={() => endGame()}>End Game</button>
 					</div>				
 
 					<div>{result}</div>
@@ -398,10 +442,10 @@ function App() {
 
 				{(gameStats.length > 0) && displayStats && <div className='p-4 pt-0 grid grid-cols-1'>
 					<h3 className='font-bold text-xl text-center'>long story short for your {gameStats.length} tries</h3>
-					<div className='font-bold text-xl text-center p-2'>{accuracy < 40 ? "Shake it off, soon you'll get better" : accuracy > 70 ? "I knew I saw a light in you, Superstar" : ''}</div>
+					<div className='font-bold text-xl text-center p-2'>{accuracy === undefined ? '' : parseFloat(accuracy || "0") < 40 ? "Shake it off, soon you'll get better" : parseFloat(accuracy) > 70 ? "I knew I saw a light in you, Superstar" : ''}</div>
 					<div className='flex justify-center font-bold flex-row flex-wrap'>
-					<h1 className='era-midnights shadow-md pr-4 pl-4 pt-2 pb-2 m-2'>{accuracy}%</h1>
-					<h1 className='era-midnights shadow-md pr-4 pl-4 pt-2 pb-2 m-2'>{avgSpeed} sec/line</h1>
+					<h1 className={`${albumMode != '' ? albumColorKey[albumKeyLkup[albumMode]] : 'era-midnights'} shadow-md pr-4 pl-4 pt-2 pb-2 m-2`}>{accuracy}%</h1>
+					<h1 className={`${albumMode != '' ? albumColorKey[albumKeyLkup[albumMode]] : 'era-midnights'} shadow-md pr-4 pl-4 pt-2 pb-2 m-2`}>{avgSpeed} sec/line</h1>
 					</div>
 
 					{/* <div>{gameStats.map(x=> x.correct).reduce((total, current) => total + current, 0)}/{gameStats.length} Correct 
@@ -472,8 +516,9 @@ function App() {
 
 						</table>
 					</div>}
-
-				<button className='m-6 bg-eras_grey p-4' onClick={() => restartGame()}>Begin Again</button>					
+					<Scoreboard data={scoreboardData}/>
+										
+				<button className='m-6 era-red p-4' onClick={() => restartGame()}>Begin Again</button>	
 				</div>}
 
 				{/* <p>Curiosity, but if you wanna give me a friendship bracelet in the form of $1s for my TSwift Tix fund...I did have to clean the data and remove all the Oh oh oh lines. </p> */}
