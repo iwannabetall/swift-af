@@ -81,5 +81,6 @@ interface Scoreboard {
 	speed_pctl: number;
 	correct: number;
 	total: number;
-	gameMode: string;
+	album_mode: string;
+	game_mode: string;	
 }

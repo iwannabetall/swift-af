@@ -44,7 +44,7 @@ function App() {
 	const [song, setSong] = useState<string>('')
 	const [album, setAlbum] = useState<string>('')
 	const [albumKey, setAlbumKey] = useState<AlbumKey | ''>('')
-	const [gameMode, setGameMode] = useState<string>('normal')
+	const [gameMode, setGameMode] = useState<string>('')
 	const [albumMode, setAlbumMode] = useState<Album | '' >('')
 	const [showGameModeQ, setShowGameModeQ] = useState<boolean>(false)
 	const [songList, setSongList] = useState<SongList[]>([])
@@ -93,8 +93,8 @@ function App() {
 				console.log(error);
 			});	
 
-		axios.get(`https://swift-api.fly.dev/getScoreboard`)
-		// axios.get(`http://localhost:3000/getScoreboard`)
+		// axios.get(`https://swift-api.fly.dev/getScoreboard`)
+		axios.get(`http://localhost:3000/getScoreboard`)
 			.then(function (response) {								
 				scoreboardFullDB = response.data.scoreBoard
 				console.log(scoreboardFullDB)
@@ -111,10 +111,11 @@ function App() {
 		// pick 3 random songs that aren't the same as the answer 
 		let answerChoices = []
 		// array of indexes, we remove when we get a match 
-		let songIndices = Array(songList.length).fill(1).map((x,i) => x + i)
-		console.log(songIndices, songList)
+		let songIndices = Array(songList.length).fill(0).map((x,i) => x + i)
+		// console.log(songIndices, songList)
 		// remove the song that is the answer so we don't get dupes
 		songIndices.splice(songList.map(x=> x.song).indexOf(correctAnswer), 1)
+		// console.log('spliced', songIndices, songList)
 
 		for (let i = 0; i < 4; i++) {
 			let randInd = songIndices[Math.floor(Math.random() * (songIndices.length - 1))]			// sometimes the randint is 162 and we get undefined??? do i need a -1 or no?? 
@@ -134,6 +135,11 @@ function App() {
 
 	}
 
+	useEffect(() => {
+		// need use effect so that the song/lyric db for the diff game types update fast enough
+		filterLyricsDB(gameMode)
+
+	}, [albumMode, gameMode, gameStarted])
 
 	function filterLyricsDB(level: string){
 		// filter/set the lyrics 		
@@ -161,19 +167,14 @@ function App() {
 			songBank = songsFullDB.filter(x=> x.album == albumMode)
 		}
 
-		return { songBank: songBank, lyricsBank: lyricsBank}
+		setSongList(songBank)
+		setLyricsDB(lyricsBank)
+		// return { songBank: songBank, lyricsBank: lyricsBank}
 		
 	}
 
 	// start timer for beg of game 
-	function startGame() {
-		
-		// filter lyrics and set state -- use the returned value to set the init state bc the new state wont change fast enough
-		let { songBank, lyricsBank } = filterLyricsDB(gameMode)
-		console.log(lyricsBank, songBank, albumMode)
-
-		setSongList(songBank)
-		setLyricsDB(lyricsBank)
+	function startGame() {	
 
 		setDisplayStats(false) // in case you're starting another game
 
@@ -187,12 +188,12 @@ function App() {
 		
 		clearInterval(intervalRef.current as NodeJS.Timeout)
 		// start timer and display a lyric 
-		setAnsChoices(pickRandomAns(lyricsBank[randInd].song))
-		setDisplayLyric(lyricsBank[randInd].lyric)
-		setDisplayLyricId(lyricsBank[randInd].id)
-		setSong(lyricsBank[randInd].song.trim())
-		setAlbum(lyricsBank[randInd].album.trim())
-		setAlbumKey(lyricsBank[randInd].album_key)
+		setAnsChoices(pickRandomAns(lyricsDB[randInd].song))
+		setDisplayLyric(lyricsDB[randInd].lyric)
+		setDisplayLyricId(lyricsDB[randInd].id)
+		setSong(lyricsDB[randInd].song.trim())
+		setAlbum(lyricsDB[randInd].album.trim())
+		setAlbumKey(lyricsDB[randInd].album_key)
 		intervalRef.current = setInterval(() => setCurrentTime(Date.now()), 10)		
 		// console.log(randInd, lyricsDB[randInd])
 
@@ -237,8 +238,8 @@ function App() {
 			playerName: playerName,
 			albumMode: albumMode
 		})
-		.then(function (response) {
-			console.log(response)
+		.then(function () {
+			// console.log(response)
 		})
 		.catch(function (error) {			
 			console.log(error);
@@ -281,6 +282,7 @@ function App() {
 		}
 		
 		setUserNameSet(true)
+		setGameMode('normal')  // trigger filtering data
 
 	}
 
@@ -289,13 +291,20 @@ function App() {
 		setGameId(uuidv4())		
 		setDisplayStats(false)
 		setGameStarted(false)
+
+		console.log('restartGame', lyricsDB)
 	}
 
 	function endGame(){
 	
 		// sort gamestats so it's clumped by album
-		setGameStats(gameStats.sort((a,b) => (a.album > b.album) ? 1 : (b.album > a.album) ? -1 : 0))
+		if (gameMode == 'album') {
+			setGameStats(gameStats.sort((a,b) => (a.song > b.song) ? 1 : (b.song > a.song) ? -1 : 0))
 
+		} else {
+			setGameStats(gameStats.sort((a,b) => (a.album > b.album) ? 1 : (b.album > a.album) ? -1 : 0))
+		}
+		
 		// end game and show game stats
 		setGameStarted(false)
 		if (gameStats.length > 0) {
@@ -328,7 +337,7 @@ function App() {
 				if (albumStats.length > 0) {
 					calcStats.correct = albumStats.filter(x=> x.correct).length
 					calcStats.total = albumStats.length
-					calcStats.avgTime = albumStats.map(x=> x.time).reduce((acc,curr) => acc + curr, 0).toFixed(2)
+					calcStats.avgTime = (100*albumStats.map(x=> x.time).reduce((acc,curr) => acc + curr, 0)/albumStats.length).toFixed(1)
 					calcStats.albumKey = albumStats[0].album_key
 
 					allStatsByAlbums.push(calcStats)
@@ -382,12 +391,12 @@ function App() {
 							</button>
 						</div>
 							{/* the old {playerName} is dead */}
-							<h6>Pick a level.  It's time to go</h6>
+							<h6>Pick a mode!</h6>
 
 						<div className="cursor-pointer rounded-t-xl rounded-b-xl text-center m-4" onClick={() => setShowGameModeQ(!showGameModeQ)}>
 							<div className='text-md font-bold'>Question...?</div>
 							{showGameModeQ && <div>								
-								<div>Easy mode: song title might be in the lyric</div>
+								<div>Easy mode: song title might be in the lyric; no vault songs</div>
 								<div>Classics mode: lyrics with song title removed; no vault songs</div>
 								<div>Hard mode: vault songs included</div>
 								<div>Expert mode: vault + a surprise ooohhh</div>
@@ -414,7 +423,7 @@ function App() {
 								</div>}
 
 							</div>
-							
+							{/* <div>{gameMode == 'easy' ? "don't waste all your potential" : gameMode == 'normal' ? "The classics! it's time to go" : gameMode == 'hard' ? '' : gameMode == 'expert' ? 'hahahah good luck' : gameMode == 'album' ? `so you think you're a ${albumMode} Superstar?` : ''}</div> */}
 							{playerName && <button className='m-4 era-reputation p-4 text-lg font-bold rounded-t-xl rounded-b-xl' onClick={() => startGame()}>...Ready For It</button>}
 						</div>
 					</div>}
@@ -441,7 +450,7 @@ function App() {
 									
 				</div>}
 
-				{(gameStats.length > 0) && displayStats && <div className='p-4 pt-0 grid grid-cols-1'>
+				{(gameStats.length > 0) && displayStats && <div className='p-4 pt-0 grid grid-cols-1 justify-center'>
 					<h3 className='font-bold text-xl text-center'>long story short for your {gameStats.length} tries</h3>
 					<div className='font-bold text-xl text-center p-2'>{accuracy === undefined ? '' : parseFloat(accuracy || "0") < 40 ? "Shake it off, soon you'll get better" : parseFloat(accuracy) > 70 ? "I knew I saw a light in you, Superstar" : ''}</div>
 					<div className='flex justify-center font-bold flex-row flex-wrap'>
@@ -498,7 +507,7 @@ function App() {
 					</div>}
 					
 					{/* stats by album if you do enough */}
-					{statsByAlbum.length > 0 && gameStats.length > 10 && <div>
+					{statsByAlbum.length > 0 && gameStats.length > 10 && gameMode != 'album' && <div>
 						<table>
 							<thead>
 								<tr>
