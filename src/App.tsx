@@ -13,26 +13,33 @@ import {
 } from 'obscenity';
 
 import Scoreboard from './scoreboard';
-import {
-  FacebookShareButton,  
-	FacebookIcon,
-  FacebookMessengerIcon,
-  FacebookMessengerShareButton,
-	TumblrIcon,
-  TumblrShareButton,
-  TwitterShareButton,
-	XIcon,
-	WhatsappIcon,
-  WhatsappShareButton,
-	TelegramIcon,
-  TelegramShareButton,
-} from "react-share";
+// import {
+//   FacebookShareButton,  
+// 	FacebookIcon,
+//   FacebookMessengerIcon,
+//   FacebookMessengerShareButton,
+// 	TumblrIcon,
+//   TumblrShareButton,
+//   TwitterShareButton,
+// 	XIcon,
+// 	WhatsappIcon,
+//   WhatsappShareButton,
+// 	TelegramIcon,
+//   TelegramShareButton,
+// } from "react-share";
+
+// import {
+//   QueryClient,
+//   QueryClientProvider,
+//   useQuery,
+// } from '@tanstack/react-query'
 
 let lyricsFullDB: Lyrics[] = [] // all lyrics 
 let songsFullDB: SongList[] = [] // all songs 
 let scoreboardFullDB: Scoreboard[] = []
+// const queryClient = new QueryClient()
 
-function App() {
+function App() {	
 	
 	const gameDate = new Date()
 	const ltErasColors = ['eras_green', 'eras_gold', 'eras_purple', 'eras_lblue', 'eras_pink', 'eras_maroon', 'eras_indigo', 'eras_tan', 'eras_grey', 'eras_black'];
@@ -45,7 +52,7 @@ function App() {
 
 	const albums = ["Taylor Swift", "Fearless", "Speak Now", "Red", "1989", "reputation", "Lover", "folklore", "evermore", "Midnights"] as const
 
-	const shareUrl = 'https://swift-af.com/' as const
+	// const shareUrl = 'https://swift-af.com/' as const
 	// let songList: SongList[] = []
 
 	const intervalRef: {current: NodeJS.Timeout | null } = useRef(null);
@@ -67,6 +74,7 @@ function App() {
 	const [playerName, setPlayerName] = useState<string>('')
 	const [userNameSet, setUserNameSet] = useState<boolean>(false)
 	const [filterLeaderboard, setFilterLeaderboard] = useState<filterLeaderboard>('all')
+	const [isLoading, setIsLoading] = useState<boolean>(false)
 
 	const [postGameDisplay, setPostGameDisplay] = useState<postGameDisplay>('stats')
 	const [accuracy, setAccuracy] = useState<string | undefined>()
@@ -84,9 +92,9 @@ function App() {
 	useEffect(() => {
 		delayedDataFetch()					
 	}, [])
-	
-	async function delayedDataFetch() {
 
+	async function delayedDataFetch() {
+		setIsLoading(true)
 		console.log('get data')
 		// get song list 
 		axios.get(`https://swift-api.fly.dev/getSongs`)
@@ -99,21 +107,23 @@ function App() {
 			.catch(function (error) {				
 				console.log(error);
 			});	
-
+		
 			axios.get(`https://swift-api.fly.dev/getLyrics`)
 		// axios.get(`http://localhost:3000/getLyrics`)
 			.then(function (response) {								
-				lyricsFullDB = response.data.lyrics				
+				lyricsFullDB = response.data.lyrics	
+				setIsLoading(false)
+				console.log('got lyrics')	
 			})
 			.catch(function (error) {				
 				console.log(error);
 			});	
 
-		// axios.get(`https://swift-api.fly.dev/getScoreboard`)
-		axios.get(`http://localhost:3000/getScoreboard`)
+		axios.get(`https://swift-api.fly.dev/getScoreboard`)
+		// axios.get(`http://localhost:3000/getScoreboard`)
 			.then(function (response) {								
 				scoreboardFullDB = response.data.scoreBoard
-				console.log(scoreboardFullDB)
+				// console.log(scoreboardFullDB)
 				setScoreboardData(scoreboardFullDB.filter(x=> x.game_mode != 'album'))
 			})
 			.catch(function (error) {				
@@ -156,7 +166,14 @@ function App() {
 		filterLyricsDB(gameMode)
 		// console.log(songList, lyricsDB, gameMode, albumMode)
 
-	}, [albumMode, gameMode, gameStarted])
+	}, [albumMode, gameMode, gameStarted, isLoading])
+
+	useEffect(()=> {
+		// if we tried to start the game and it's not ready yet
+		if (gameStarted){
+			startGame()
+		}		
+	}, [isLoading])
 
 	useEffect(()=> {
 		if (filterLeaderboard == 'all') {
@@ -169,7 +186,7 @@ function App() {
 
 	function filterLyricsDB(level: string){
 		// filter/set the lyrics 		
-		// console.log('lyricsFullDB', level, lyricsFullDB)
+		console.log('lyricsFullDB', level, lyricsFullDB)
 		let songBank: SongList[]
 		let lyricsBank: Lyrics[]
 
@@ -193,7 +210,7 @@ function App() {
 			songBank = songsFullDB.filter(x=> x.album == albumMode)
 		}
 
-		// console.log('filterLyricsDB', songList, lyricsDB, gameMode, albumMode)
+		console.log('filterLyricsDB', songList, lyricsDB, gameMode, albumMode)
 
 		setSongList(songBank)
 		setLyricsDB(lyricsBank)
@@ -202,32 +219,40 @@ function App() {
 	}
 
 	// start timer for beg of game 
-	function startGame() {	
+	function startGame() {
+		console.log(
+			'startGame', isLoading, gameStarted
+		)
+		setGameStarted(true)
 
-		if (gameMode == 'album' && albumMode == '') {
-			alert("Don't forget to pick an album")
-		} else {
-			setDisplayStats(false) // in case you're starting another game
-
-			setStartTime(Date.now())
-			setCurrentTime(Date.now())
-			setGameStats([])
-			setGameStarted(true)
-			setGameId(uuidv4())		
-
-			const randInd = Math.floor(Math.random() * lyricsDB.length)
+		if (!isLoading){
+			if (gameMode == 'album' && albumMode == '') {
+				alert("Don't forget to pick an album")
+			} else {
+				console.log('start', lyricsFullDB)
+				console.log('startGame', gameMode, albumMode, lyricsDB, songList)
+				setDisplayStats(false) // in case you're starting another game
+	
+				setStartTime(Date.now())
+				setCurrentTime(Date.now())
+				setGameStats([])
 			
-			clearInterval(intervalRef.current as NodeJS.Timeout)
-			// start timer and display a lyric 
-			setAnsChoices(pickRandomAns(lyricsDB[randInd].song))
-			setDisplayLyric(lyricsDB[randInd].lyric)
-			setDisplayLyricId(lyricsDB[randInd].id)
-			setSong(lyricsDB[randInd].song.trim())
-			setAlbum(lyricsDB[randInd].album.trim())
-			setAlbumKey(lyricsDB[randInd].album_key)
-			intervalRef.current = setInterval(() => setCurrentTime(Date.now()), 10)		
-			// console.log(randInd, lyricsDB[randInd])
-		}
+				setGameId(uuidv4())		
+	
+				const randInd = Math.floor(Math.random() * lyricsDB.length)
+				
+				clearInterval(intervalRef.current as NodeJS.Timeout)
+				// start timer and display a lyric 
+				setAnsChoices(pickRandomAns(lyricsDB[randInd].song))
+				setDisplayLyric(lyricsDB[randInd].lyric)
+				setDisplayLyricId(lyricsDB[randInd].id)
+				setSong(lyricsDB[randInd].song.trim())
+				setAlbum(lyricsDB[randInd].album.trim())
+				setAlbumKey(lyricsDB[randInd].album_key)
+				intervalRef.current = setInterval(() => setCurrentTime(Date.now()), 10)		
+				// console.log(randInd, lyricsDB[randInd])
+			}
+		}		
 		
 	}
 
@@ -315,6 +340,7 @@ function App() {
 		
 		setUserNameSet(true)
 		setGameMode('normal')  // trigger filtering data
+		console.log('submit name')
 
 	}
 
@@ -369,7 +395,7 @@ function App() {
 				if (albumStats.length > 0) {
 					calcStats.correct = albumStats.filter(x=> x.correct).length
 					calcStats.total = albumStats.length
-					calcStats.avgTime = (100*albumStats.map(x=> x.time).reduce((acc,curr) => acc + curr, 0)/albumStats.length).toFixed(1)
+					calcStats.avgTime = (albumStats.map(x=> x.time).reduce((acc,curr) => acc + curr, 0)/albumStats.length).toFixed(1)
 					calcStats.albumKey = albumStats[0].album_key
 
 					allStatsByAlbums.push(calcStats)
@@ -401,11 +427,14 @@ function App() {
 					<div onClick = {() => setPostGameDisplay('leaderboard')} 
 					className={`era-evermore inline-flex justify-center text-xl font-bold shadow cursor-pointer appearance-none border w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline text-center ${postGameDisplay == 'leaderboard' ? '' : 'faded'}`}>swift af boi</div>
 				</div>}
+
+				{gameStarted && isLoading && <h2>Ah we're not ready for it, data is loading. Stay, stay, stay. I'll say "Don't go."</h2>}
+
 				{/* <Scoreboard data={scoreboardData}/>	 */}
-				{!gameStarted && !displayStats && <div className='grid grid-cols-1'>
+				{!gameStarted && !displayStats && !isLoading && <div className='grid grid-cols-1'>
 					{!userNameSet && <div>
 						<h2>So you think you're the 1? The Swiftest fan?</h2>
-					<h2>How quickly can you ID the song?</h2>
+					<h2>How quickly can you name the song given a line?</h2>
 					</div>}
 					{!userNameSet && <div className='p-2 pt-0 grid grid-cols-1 text-center transition-all ease-in-out duration-300'>
 						<form className="era-1989 cursor-pointer shadow-md rounded px-8 pt-6 pb-6 mb-4" onSubmit={(e: FormEvent<HTMLFormElement>) => submitUserName(e)}>
@@ -462,12 +491,13 @@ function App() {
 							</div>
 							{/* <div>{gameMode == 'easy' ? "don't waste all your potential" : gameMode == 'normal' ? "The classics! it's time to go" : gameMode == 'hard' ? '' : gameMode == 'expert' ? 'hahahah good luck' : gameMode == 'album' ? `so you think you're a ${albumMode} Superstar?` : ''}</div> */}
 							{playerName && <button className='m-4 era-reputation p-4 text-lg font-bold rounded-t-xl rounded-b-xl' onClick={() => startGame()}>...Ready For It</button>}
+							
 						</div>
 					</div>}
 				</div>}
 
 				{/* GAME BOARD */}
-				{gameStarted && !displayStats && <div className=''>					
+				{gameStarted && !displayStats && !isLoading && <div className=''>					
 					<div className='font-bold text-xl text-center p-2'>
 						{displayLyric}</div>
 
@@ -583,7 +613,7 @@ function App() {
 				<button className='m-6 era-red p-3 min-w-[250px] text-xl font-bold' onClick={() => restartGame()}>Begin Again</button>	
 				</div>}
 
-				<div>
+				{/* <div className = 'mt-12'>
 				<FacebookShareButton
           url={shareUrl}
           className="inline mr-2"
@@ -592,7 +622,7 @@ function App() {
         </FacebookShareButton>
 				<WhatsappShareButton
           url={shareUrl}
-          title={'Swift AF Swifties'}
+          title={title}
           separator=":: "
           className="inline mr-2"
         >
@@ -619,7 +649,7 @@ function App() {
         >
           <TumblrIcon size={32} round />
         </TumblrShareButton>
-				
+
 				<TelegramShareButton
           url={shareUrl}
           title={title}
@@ -628,7 +658,7 @@ function App() {
           <TelegramIcon size={32} round />
         </TelegramShareButton>
 
-				</div>
+				</div> */}
 				{/* <p>Curiosity, but if you wanna give me a friendship bracelet in the form of $1s for my TSwift Tix fund...I did have to clean the data and remove all the Oh oh oh lines. </p> */}
 			</div>
 		</>
