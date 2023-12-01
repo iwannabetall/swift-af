@@ -13,7 +13,20 @@ import {
 } from 'obscenity';
 
 import Scoreboard from './scoreboard';
-
+import {
+  FacebookShareButton,  
+	FacebookIcon,
+  FacebookMessengerIcon,
+  FacebookMessengerShareButton,
+	TumblrIcon,
+  TumblrShareButton,
+  TwitterShareButton,
+	XIcon,
+	WhatsappIcon,
+  WhatsappShareButton,
+	TelegramIcon,
+  TelegramShareButton,
+} from "react-share";
 
 let lyricsFullDB: Lyrics[] = [] // all lyrics 
 let songsFullDB: SongList[] = [] // all songs 
@@ -32,6 +45,7 @@ function App() {
 
 	const albums = ["Taylor Swift", "Fearless", "Speak Now", "Red", "1989", "reputation", "Lover", "folklore", "evermore", "Midnights"] as const
 
+	const shareUrl = 'https://swift-af.com/' as const
 	// let songList: SongList[] = []
 
 	const intervalRef: {current: NodeJS.Timeout | null } = useRef(null);
@@ -564,10 +578,57 @@ function App() {
 						<Scoreboard data={scoreboardData}/>
 						<h3>Minimum 8 correct and 50% accuracy</h3>
 					</div>}
-						
+							
+				
 				<button className='m-6 era-red p-3 min-w-[250px] text-xl font-bold' onClick={() => restartGame()}>Begin Again</button>	
 				</div>}
 
+				<div>
+				<FacebookShareButton
+          url={shareUrl}
+          className="inline mr-2"
+        >
+          <FacebookIcon size={32} round />
+        </FacebookShareButton>
+				<WhatsappShareButton
+          url={shareUrl}
+          title={'Swift AF Swifties'}
+          separator=":: "
+          className="inline mr-2"
+        >
+          <WhatsappIcon size={32} round />
+        </WhatsappShareButton>
+				<TwitterShareButton
+          url={shareUrl}
+          title={title}
+          className="inline mr-2"
+        >
+          <XIcon size={32} round />
+        </TwitterShareButton>
+				<FacebookMessengerShareButton
+          url={shareUrl}
+          appId="521270401588372"
+          className="inline mr-2"
+        >
+          <FacebookMessengerIcon size={32} round />
+        </FacebookMessengerShareButton>
+				<TumblrShareButton
+          url={shareUrl}
+          title={title}
+          className="inline mr-2"
+        >
+          <TumblrIcon size={32} round />
+        </TumblrShareButton>
+				
+				<TelegramShareButton
+          url={shareUrl}
+          title={title}
+          className="Demo__some-network__share-button"
+        >
+          <TelegramIcon size={32} round />
+        </TelegramShareButton>
+
+				</div>
 				{/* <p>Curiosity, but if you wanna give me a friendship bracelet in the form of $1s for my TSwift Tix fund...I did have to clean the data and remove all the Oh oh oh lines. </p> */}
 			</div>
 		</>
