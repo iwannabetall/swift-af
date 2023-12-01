@@ -36,7 +36,8 @@ type AlbumKey = "Taylor_Swift" | "Fearless" | "Speak_Now" | 'Red' | '1989' | 're
 
 type Album = "Taylor Swift" | "Fearless" | "Speak Now" | 'Red' | '1989' | 'reputation' | 'Lover' | 'folklore' | 'evermore' | 'Midnights' 
 
-type accuracy = string;
+type postGameDisplay = "stats" | "leaderboard"
+type filterLeaderboard = 'all' | 'album'
 
 interface SongList {
 	"song": string;

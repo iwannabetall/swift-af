@@ -52,7 +52,9 @@ function App() {
 	const [gameId, setGameId] = useState<string>(uuidv4())
 	const [playerName, setPlayerName] = useState<string>('')
 	const [userNameSet, setUserNameSet] = useState<boolean>(false)
+	const [filterLeaderboard, setFilterLeaderboard] = useState<filterLeaderboard>('all')
 
+	const [postGameDisplay, setPostGameDisplay] = useState<postGameDisplay>('stats')
 	const [accuracy, setAccuracy] = useState<string | undefined>()
 	const [avgSpeed, setAvgSpeed] = useState<string | undefined>()
  	const [answerChoices, setAnsChoices] = useState<string[]>([])
@@ -98,7 +100,7 @@ function App() {
 			.then(function (response) {								
 				scoreboardFullDB = response.data.scoreBoard
 				console.log(scoreboardFullDB)
-				setScoreboardData(scoreboardFullDB)
+				setScoreboardData(scoreboardFullDB.filter(x=> x.game_mode != 'album'))
 			})
 			.catch(function (error) {				
 				console.log(error);
@@ -138,8 +140,18 @@ function App() {
 	useEffect(() => {
 		// need use effect so that the song/lyric db for the diff game types update fast enough
 		filterLyricsDB(gameMode)
+		// console.log(songList, lyricsDB, gameMode, albumMode)
 
 	}, [albumMode, gameMode, gameStarted])
+
+	useEffect(()=> {
+		if (filterLeaderboard == 'all') {
+			setScoreboardData(scoreboardFullDB.filter(x=> x.game_mode != 'album'))
+		} else {
+			setScoreboardData(scoreboardFullDB.filter(x=> x.game_mode == 'album'))
+		}
+		
+	}, [filterLeaderboard])
 
 	function filterLyricsDB(level: string){
 		// filter/set the lyrics 		
@@ -167,6 +179,8 @@ function App() {
 			songBank = songsFullDB.filter(x=> x.album == albumMode)
 		}
 
+		// console.log('filterLyricsDB', songList, lyricsDB, gameMode, albumMode)
+
 		setSongList(songBank)
 		setLyricsDB(lyricsBank)
 		// return { songBank: songBank, lyricsBank: lyricsBank}
@@ -176,27 +190,31 @@ function App() {
 	// start timer for beg of game 
 	function startGame() {	
 
-		setDisplayStats(false) // in case you're starting another game
+		if (gameMode == 'album' && albumMode == '') {
+			alert("Don't forget to pick an album")
+		} else {
+			setDisplayStats(false) // in case you're starting another game
 
-		setStartTime(Date.now())
-		setCurrentTime(Date.now())
-		setGameStats([])
-		setGameStarted(true)
-		setGameId(uuidv4())		
+			setStartTime(Date.now())
+			setCurrentTime(Date.now())
+			setGameStats([])
+			setGameStarted(true)
+			setGameId(uuidv4())		
 
-		const randInd = Math.floor(Math.random() * lyricsDB.length)
+			const randInd = Math.floor(Math.random() * lyricsDB.length)
+			
+			clearInterval(intervalRef.current as NodeJS.Timeout)
+			// start timer and display a lyric 
+			setAnsChoices(pickRandomAns(lyricsDB[randInd].song))
+			setDisplayLyric(lyricsDB[randInd].lyric)
+			setDisplayLyricId(lyricsDB[randInd].id)
+			setSong(lyricsDB[randInd].song.trim())
+			setAlbum(lyricsDB[randInd].album.trim())
+			setAlbumKey(lyricsDB[randInd].album_key)
+			intervalRef.current = setInterval(() => setCurrentTime(Date.now()), 10)		
+			// console.log(randInd, lyricsDB[randInd])
+		}
 		
-		clearInterval(intervalRef.current as NodeJS.Timeout)
-		// start timer and display a lyric 
-		setAnsChoices(pickRandomAns(lyricsDB[randInd].song))
-		setDisplayLyric(lyricsDB[randInd].lyric)
-		setDisplayLyricId(lyricsDB[randInd].id)
-		setSong(lyricsDB[randInd].song.trim())
-		setAlbum(lyricsDB[randInd].album.trim())
-		setAlbumKey(lyricsDB[randInd].album_key)
-		intervalRef.current = setInterval(() => setCurrentTime(Date.now()), 10)		
-		// console.log(randInd, lyricsDB[randInd])
-
 	}
 
 	function checkAnswer(clicked: string) {
@@ -319,7 +337,7 @@ function App() {
 		if (gameStats.length > 0) {
 			// calc stats by album and other various stats
 			let overall = (100*gameStats.filter(x=> x.correct == 1).length/gameStats.length).toFixed(0)
-			console.log((100*gameStats.filter(x=> x.correct == 1).length/gameStats.length).toFixed(0))
+			// console.log((100*gameStats.filter(x=> x.correct == 1).length/gameStats.length).toFixed(0))
 
 			setAccuracy(overall)
 
@@ -360,18 +378,23 @@ function App() {
 	
   return (
     <>
-			<div className='md:flex flex-col p-4 items-center'>
+			<div className='grid grid-cols-1 p-4 items-center'>
 				<div className=''>
-					<img src={title} className={`logo p-4 ${(gameStarted || displayStats) ? 'max-h-32' : ''}`} alt="Swift AF" />				
+					<img src={title} className={`mx-auto logo p-4 ${(gameStarted || displayStats) ? 'max-h-32' : ''}`} alt="Swift AF" />				
 				</div>			
+				{(gameStats.length > 0) && displayStats && <div className='flex min-w-full items-center'>
+					<div onClick = {() => setPostGameDisplay('stats')} className={`era-evermore inline-flex justify-center text-xl font-bold shadow cursor-pointer appearance-none border w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline text-center ${postGameDisplay == 'stats' ? '' : 'faded'}`}>long story short</div>
+					<div onClick = {() => setPostGameDisplay('leaderboard')} 
+					className={`era-evermore inline-flex justify-center text-xl font-bold shadow cursor-pointer appearance-none border w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline text-center ${postGameDisplay == 'leaderboard' ? '' : 'faded'}`}>swift af boi</div>
+				</div>}
 				{/* <Scoreboard data={scoreboardData}/>	 */}
 				{!gameStarted && !displayStats && <div className='grid grid-cols-1'>
 					{!userNameSet && <div>
 						<h2>So you think you're the 1? The Swiftest fan?</h2>
 					<h2>How quickly can you ID the song?</h2>
 					</div>}
-					{!userNameSet && <div className='p-4 pt-0 grid grid-cols-1 text-center transition-all ease-in-out duration-300'>
-						<form className="era-1989 cursor-pointer shadow-md rounded px-8 pt-6 pb-8 mb-4" onSubmit={(e: FormEvent<HTMLFormElement>) => submitUserName(e)}>
+					{!userNameSet && <div className='p-2 pt-0 grid grid-cols-1 text-center transition-all ease-in-out duration-300'>
+						<form className="era-1989 cursor-pointer shadow-md rounded px-8 pt-6 pb-6 mb-4" onSubmit={(e: FormEvent<HTMLFormElement>) => submitUserName(e)}>
 							<label className='block'> the leaderboard has a blank space
 								<input className="shadow cursor-pointer appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline text-center" type='text' 
 								value={playerName} 
@@ -380,7 +403,7 @@ function App() {
 								onChange={e => setPlayerName(e.target.value)}>
 								</input>
 							</label>
-							<button className='era-midnights cursor-pointer'>Hi, it's me.</button>
+							<button className='era-midnights mt-4 cursor-pointer'>Hi, it's me.</button>
 						</form>
 					</div>}
 					{userNameSet && <div>
@@ -429,106 +452,120 @@ function App() {
 					</div>}
 				</div>}
 
+				{/* GAME BOARD */}
 				{gameStarted && !displayStats && <div className=''>					
 					<div className='font-bold text-xl text-center p-2'>
 						{displayLyric}</div>
 
 					{answerChoices.map((x,i) => <div className={`cursor-pointer rounded-t-xl rounded-b-xl text-center m-4 p-2 text-lg font-bold ${ltErasColors[i]}`}
 						onClick={() => checkAnswer(x)}> {x}</div>)}
-				<h3>{secondsElapsed.toFixed(3)}</h3>
+					<h3>{secondsElapsed.toFixed(3)}</h3>
 				
 					<div className='text-lg font-bold m-4 p-2'>
 					{gameStats.length > 0 ? <div>{gameStats.map(x=> x.correct).reduce((total, current) => total + current, 0)}/{gameStats.length} Correct {(100*gameStats.map(x=> x.correct).reduce((total, current) => total + current, 0)/gameStats.length).toFixed(0)}%</div> : ''}
 					</div>
 
-					<div className='md:flex justify-center'>
-						<button className='m-6 era-red p-4' onClick={() => restartGame()}>Begin Again</button>
-						<button className='m-6 era-reputation p-4' onClick={() => endGame()}>End Game</button>
+					<div className='flex justify-center flex-row'>
+						<button className='m-6 era-red p-4 min-w-[150px] text-xl font-bold' onClick={() => restartGame()}>Begin Again</button>
+						<button className='m-6 era-reputation p-4 min-w-[150px] text-xl font-bold' onClick={() => endGame()}>End Game</button>
 					</div>				
 
 					<div>{result}</div>
 									
 				</div>}
 
-				{(gameStats.length > 0) && displayStats && <div className='p-4 pt-0 grid grid-cols-1 justify-center'>
-					<h3 className='font-bold text-xl text-center'>long story short for your {gameStats.length} tries</h3>
-					<div className='font-bold text-xl text-center p-2'>{accuracy === undefined ? '' : parseFloat(accuracy || "0") < 40 ? "Shake it off, soon you'll get better" : parseFloat(accuracy) > 70 ? "I knew I saw a light in you, Superstar" : ''}</div>
-					<div className='flex justify-center font-bold flex-row flex-wrap'>
-					<h1 className={`${albumMode != '' ? albumColorKey[albumKeyLkup[albumMode]] : 'era-midnights'} shadow-md pr-4 pl-4 pt-2 pb-2 m-2`}>{accuracy}%</h1>
-					<h1 className={`${albumMode != '' ? albumColorKey[albumKeyLkup[albumMode]] : 'era-midnights'} shadow-md pr-4 pl-4 pt-2 pb-2 m-2`}>{avgSpeed} sec/line</h1>
-					</div>
 
-					{/* <div>{gameStats.map(x=> x.correct).reduce((total, current) => total + current, 0)}/{gameStats.length} Correct 
-					</div>					
-					<div>{(gameStats.map(x=> x.time).reduce((total, current) => total + current, 0)/gameStats.length).toFixed(2)} seconds per lyric</div>					 */}
-					
-					<h3 className='font-bold text-xl text-center'>happiness</h3> 
-					{gameStats.filter(x=> x.correct == 1).length > 0 && 
+				{/* GAME STATS */}
+				{(gameStats.length > 0) && displayStats && <div className='p-0 pt-0 flex flex-col items-center justify-center'>
+					{/* <h3 className='font-bold text-xl text-center'>long story short for your {gameStats.length} tries</h3> */}
+					{postGameDisplay == 'stats' && <div className='p-0 pt-0 flex flex-col items-center justify-center'>
+						<div className='font-bold text-xl text-center p-2 m-2'>{accuracy === undefined ? '' : parseFloat(accuracy || "0") < 40 ? "Shake it off, soon you'll get better" : parseFloat(accuracy) > 70 ? "I knew I saw a light in you, Superstar" : ''}</div>
+						<div className='flex justify-center font-bold flex-row flex-wrap'>
+						<h1 className={`${albumMode != '' ? albumColorKey[albumKeyLkup[albumMode]] : 'era-midnights'} shadow-md pr-4 pl-4 pt-2 pb-2 m-2`}>{accuracy}%</h1>
+						<h1 className={`${albumMode != '' ? albumColorKey[albumKeyLkup[albumMode]] : 'era-midnights'} shadow-md pr-4 pl-4 pt-2 pb-2 m-2`}>{avgSpeed} sec/line</h1>
+						</div>
+
+						{/* <div>{gameStats.map(x=> x.correct).reduce((total, current) => total + current, 0)}/{gameStats.length} Correct 
+						</div>					
+						<div>{(gameStats.map(x=> x.time).reduce((total, current) => total + current, 0)/gameStats.length).toFixed(2)} seconds per lyric</div>					 */}
+												
+						{gameStats.filter(x=> x.correct == 1).length > 0 && 
+							<div>
+								<h3 className='font-bold text-xl text-center'>happiness</h3> 
+									<table className='mb-4'>
+										<thead>
+											<tr>
+											<th>Lyric</th>
+											<th>Song</th>
+											<th>Time</th>
+											</tr>
+										</thead>
+										<tbody>
+											{gameStats.filter(x=> x.correct == 1).map(x =><tr className={`text-center text-[#68416d] ${albumColorKey[x.album_key as keyof typeof albumColorKey]}`}>
+												<td className="border p-1">{x.lyric}</td>
+												<td className="border p-1">{x.song}</td>
+												<td className="border p-1">{x.time.toFixed(1)}s</td>
+											</tr>)}		
+										</tbody>
+									</table>
+							</div>
+						}
+								
+						{gameStats.filter(x=> x.correct == 0).length > 0 &&
+						<div className=''>
+							<h3 className='font-bold text-xl text-center'>Would've, Could've, Should've</h3>
+							<table className='mb-4'>
+								<thead>
+									<tr>
+									<th>Lyric</th>
+									<th>Song</th>
+									<th>Your Ans</th>
+									</tr>
+								</thead>
+								<tbody>
+								{/* ${albumColorKey[x.album_key: keyof albumColorKey]} */}
+									{gameStats.filter(x=> x.correct == 0).map((x) =><tr  className={`text-center text-[#513355] ${albumColorKey[x.album_key]}`}>
+										<td className="border p-1">{x.lyric}</td>
+										<td className="border p-1">{x.song}</td>
+										<td className="border p-1">{x.userResponse}</td>
+									</tr>)}		
+								</tbody>
+							</table>
+						</div>}
 						
-						<table className='mb-4'>
-						<thead>
-							<tr>
-							<th>Lyric</th>
-							<th>Song</th>
-							<th>Time</th>
-							</tr>
-						</thead>
-						<tbody>
-							{gameStats.filter(x=> x.correct == 1).map(x =><tr className={`text-center text-[#68416d] ${albumColorKey[x.album_key as keyof typeof albumColorKey]}`}>
-								<td className="border p-1">{x.lyric}</td>
-								<td className="border p-1">{x.song}</td>
-								<td className="border p-1">{x.time.toFixed(1)}s</td>
-							</tr>)}		
-						</tbody>
-					</table>
-					}
+						{/* stats by album if you do enough */}
+						{statsByAlbum.length > 0 && gameStats.length > 10 && gameMode != 'album' && <div className='mb-4'>
+							<table>
+								<thead>
+									<tr>
+									<th>Album</th>
+									<th>Total</th>
+									<th>Time</th>
+									</tr>
+								</thead>
+								<tbody>
+									{statsByAlbum.map(x =><tr className={`text-center text-[#68416d] ${albumColorKey[x.albumKey as keyof typeof albumColorKey]}`}>
+										<td className="border p-1">{x.album}</td>
+										<td className="border p-1">{x.correct}/{x.total}</td>
+										<td className="border p-1">{x.avgTime}</td>
+									</tr>)}		
+								</tbody>					
 
-							
-					{gameStats.filter(x=> x.correct == 0).length > 0 &&
-					<div className=''>
-						<h3 className='font-bold text-xl text-center'>Would've, Could've, Should've</h3>
-						<table className='mb-4'>
-							<thead>
-								<tr>
-								<th>Lyric</th>
-								<th>Song</th>
-								<th>Your Ans</th>
-								</tr>
-							</thead>
-							<tbody>
-							{/* ${albumColorKey[x.album_key: keyof albumColorKey]} */}
-								{gameStats.filter(x=> x.correct == 0).map((x) =><tr  className={`text-center text-[#513355] ${albumColorKey[x.album_key]}`}>
-									<td className="border p-1">{x.lyric}</td>
-									<td className="border p-1">{x.song}</td>
-									<td className="border p-1">{x.userResponse}</td>
-								</tr>)}		
-							</tbody>
-						</table>
+							</table>
+						</div>}
 					</div>}
-					
-					{/* stats by album if you do enough */}
-					{statsByAlbum.length > 0 && gameStats.length > 10 && gameMode != 'album' && <div>
-						<table>
-							<thead>
-								<tr>
-								<th>Album</th>
-								<th>Total</th>
-								<th>Time</th>
-								</tr>
-							</thead>
-							<tbody>
-								{statsByAlbum.map(x =><tr className={`text-center text-[#68416d] ${albumColorKey[x.albumKey as keyof typeof albumColorKey]}`}>
-									<td className="border p-1">{x.album}</td>
-									<td className="border p-1">{x.correct}/{x.total}</td>
-									<td className="border p-1">{x.avgTime}</td>
-								</tr>)}		
-							</tbody>					
-
-						</table>
+					{postGameDisplay == 'leaderboard' && <div>
+						<div className='flex flex-row m-2 p-2 bold text-center justify-center'>
+							<div className={`${filterLeaderboard == 'all' ? 'era-reputation' : 'faded'} inline p-2 min-w-[120px] inline-flex justify-center text-l font-bold shadow cursor-pointer border w-full leading-tight focus:outline-none focus:shadow-outline text-center`}
+								onClick={() => setFilterLeaderboard('all')}>All</div>
+							<div className={`${filterLeaderboard == 'album' ? 'era-reputation' : 'faded'} inline p-2 min-w-[120px] inline-flex justify-center text-l font-bold shadow cursor-pointer border w-full leading-tight focus:outline-none focus:shadow-outline text-center`}
+								onClick={() => setFilterLeaderboard('album')}>By Album</div>
+						</div>
+						<Scoreboard data={scoreboardData}/>
+						<h3>Minimum 8 correct and 50% accuracy</h3>
 					</div>}
-					<Scoreboard data={scoreboardData}/>
-										
-				<button className='m-6 era-red p-4' onClick={() => restartGame()}>Begin Again</button>	
+						
+				<button className='m-6 era-red p-3 min-w-[250px] text-xl font-bold' onClick={() => restartGame()}>Begin Again</button>	
 				</div>}
 
 				{/* <p>Curiosity, but if you wanna give me a friendship bracelet in the form of $1s for my TSwift Tix fund...I did have to clean the data and remove all the Oh oh oh lines. </p> */}

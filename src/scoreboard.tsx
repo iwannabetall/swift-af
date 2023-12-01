@@ -1,12 +1,12 @@
 function Scoreboard({ data } : { data : Scoreboard[] }) {
 	
 	return (
-		<div>
+		<div className="mt-4">
 			{data.length > 0 && <table className='mb-4'>
 				<thead>
 					<tr>
 					<th>Player</th>
-					<th>Speed (s)</th>
+					<th>Speed</th>
 					<th>Accuracy</th>
 					<th>Mode</th>
 					</tr>
