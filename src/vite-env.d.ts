@@ -72,7 +72,7 @@ interface GameStats {
 }
  
 
-interface Scoreboard {
+interface Leaderboard {
 	player_name: string; 
 	accuracy: number;
 	accuracy_rk: number;

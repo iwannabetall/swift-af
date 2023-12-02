@@ -1,6 +1,7 @@
 // import { useState, useRef, FormEvent } from 'react'
 import { useState, useRef, useEffect, FormEvent } from 'react'
 // import ReactDOM from 'react-dom';
+
 import title from '/title.svg'
 import leftarrow from '/left-arrow.svg'
 import axios from 'axios';
@@ -12,7 +13,7 @@ import {
 	englishRecommendedTransformers,
 } from 'obscenity';
 
-import Scoreboard from './scoreboard';
+import Leaderboard from './Leaderboard.tsx'
 // import {
 //   FacebookShareButton,  
 // 	FacebookIcon,
@@ -36,7 +37,7 @@ import Scoreboard from './scoreboard';
 
 let lyricsFullDB: Lyrics[] = [] // all lyrics 
 let songsFullDB: SongList[] = [] // all songs 
-let scoreboardFullDB: Scoreboard[] = []
+let leaderboardFullDB: Leaderboard[] = []
 // const queryClient = new QueryClient()
 
 function App() {	
@@ -82,7 +83,7 @@ function App() {
  	const [answerChoices, setAnsChoices] = useState<string[]>([])
 	const [result, setResult] = useState<string>() // true, false, null? 
 	const [gameStats, setGameStats] = useState<GameStats[]>([])  // make this an array of objects with lyric/song/album they got right and the time
-	const [scoreboardData, setScoreboardData] = useState<Scoreboard[]>([])
+	const [leaderboardData, setLeaderboardData] = useState<Leaderboard[]>([])
 	const [statsByAlbum, setStatsByAlbum] = useState<StatsByAlbum[]>([])
 	const [gameStarted, setGameStarted] = useState<boolean>(false)
 	const [displayStats, setDisplayStats] = useState<boolean>(false);
@@ -122,9 +123,9 @@ function App() {
 		axios.get(`https://swift-api.fly.dev/getScoreboard`)
 		// axios.get(`http://localhost:3000/getScoreboard`)
 			.then(function (response) {								
-				scoreboardFullDB = response.data.scoreBoard
-				// console.log(scoreboardFullDB)
-				setScoreboardData(scoreboardFullDB.filter(x=> x.game_mode != 'album'))
+				leaderboardFullDB = response.data.scoreBoard
+				// console.log(leaderboardFullDB)
+				setLeaderboardData(leaderboardFullDB.filter(x=> x.game_mode != 'album'))
 			})
 			.catch(function (error) {				
 				console.log(error);
@@ -177,9 +178,9 @@ function App() {
 
 	useEffect(()=> {
 		if (filterLeaderboard == 'all') {
-			setScoreboardData(scoreboardFullDB.filter(x=> x.game_mode != 'album'))
+			setLeaderboardData(leaderboardFullDB.filter(x=> x.game_mode != 'album'))
 		} else {
-			setScoreboardData(scoreboardFullDB.filter(x=> x.game_mode == 'album'))
+			setLeaderboardData(leaderboardFullDB.filter(x=> x.game_mode == 'album'))
 		}
 		
 	}, [filterLeaderboard])
@@ -282,8 +283,8 @@ function App() {
 
 		
 		// save results before resetting
-		axios.post('http://localhost:3000/saveGameData', {
-		// axios.post('https://swift-api.fly.dev/saveGameData', {
+		// axios.post('http://localhost:3000/saveGameData', {
+		axios.post('https://swift-api.fly.dev/saveGameData', {
 			level: gameMode,
 			time: secondsElapsed, 
 			lyric: displayLyric,
@@ -428,9 +429,9 @@ function App() {
 					className={`era-evermore inline-flex justify-center text-xl font-bold shadow cursor-pointer appearance-none border w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline text-center ${postGameDisplay == 'leaderboard' ? '' : 'faded'}`}>swift af boi</div>
 				</div>}
 
-				{gameStarted && isLoading && <h2>Ah we're not ready for it, data is loading. Stay, stay, stay. I'll say "Don't go."</h2>}
+				{gameStarted && isLoading && <h2>Ah we're not ready for it, the server give me nothin' back yet. Stay, stay, stay. Don't go.</h2>}
 
-				{/* <Scoreboard data={scoreboardData}/>	 */}
+				{/* <Scoreboard data={leaderboardData}/>	 */}
 				{!gameStarted && !displayStats && !isLoading && <div className='grid grid-cols-1'>
 					{!userNameSet && <div>
 						<h2>So you think you're the 1? The Swiftest fan?</h2>
@@ -605,7 +606,7 @@ function App() {
 							<div className={`${filterLeaderboard == 'album' ? 'era-reputation' : 'faded'} inline p-2 min-w-[120px] inline-flex justify-center text-l font-bold shadow cursor-pointer border w-full leading-tight focus:outline-none focus:shadow-outline text-center`}
 								onClick={() => setFilterLeaderboard('album')}>By Album</div>
 						</div>
-						<Scoreboard data={scoreboardData}/>
+						<Leaderboard data={leaderboardData}/>
 						<h3>Minimum 8 correct and 50% accuracy</h3>
 					</div>}
 							
