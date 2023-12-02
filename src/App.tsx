@@ -12,22 +12,9 @@ import {
 	englishDataset,
 	englishRecommendedTransformers,
 } from 'obscenity';
-
+import Nav from './Nav.tsx'
 import Leaderboard from './Leaderboard.tsx'
-// import {
-//   FacebookShareButton,  
-// 	FacebookIcon,
-//   FacebookMessengerIcon,
-//   FacebookMessengerShareButton,
-// 	TumblrIcon,
-//   TumblrShareButton,
-//   TwitterShareButton,
-// 	XIcon,
-// 	WhatsappIcon,
-//   WhatsappShareButton,
-// 	TelegramIcon,
-//   TelegramShareButton,
-// } from "react-share";
+
 
 // import {
 //   QueryClient,
@@ -41,6 +28,7 @@ let leaderboardFullDB: Leaderboard[] = []
 // const queryClient = new QueryClient()
 
 function App() {	
+	// const location = useLocation()
 	
 	const gameDate = new Date()
 	const ltErasColors = ['eras_green', 'eras_gold', 'eras_purple', 'eras_lblue', 'eras_pink', 'eras_maroon', 'eras_indigo', 'eras_tan', 'eras_grey', 'eras_black'];
@@ -121,10 +109,10 @@ function App() {
 			});	
 
 		axios.get(`https://swift-api.fly.dev/getScoreboard`)
-		// axios.get(`http://localhost:3000/getScoreboard`)
+		// axios.get(`http://localhost:3000/getLeaderboard`)
 			.then(function (response) {								
-				leaderboardFullDB = response.data.scoreBoard
-				// console.log(leaderboardFullDB)
+				leaderboardFullDB = response.data.leaderBoard
+				console.log(leaderboardFullDB)
 				setLeaderboardData(leaderboardFullDB.filter(x=> x.game_mode != 'album'))
 			})
 			.catch(function (error) {				
@@ -419,18 +407,19 @@ function App() {
 	
   return (
     <>
-			<div className='grid grid-cols-1 p-4 items-center'>
+			{!gameStarted && <Nav location={location}></Nav>}
+			<div className='grid grid-cols-1 p-4 items-center mt-20 lg:ml-8 lg:mr-8 sm:ml-2 sm:mr-2'>
 				<div className=''>
 					<img src={title} className={`mx-auto logo p-4 ${(gameStarted || displayStats) ? 'max-h-32' : ''}`} alt="Swift AF" />				
 				</div>			
 				{(gameStats.length > 0) && displayStats && <div className='flex min-w-full items-center'>
-					<div onClick = {() => setPostGameDisplay('stats')} className={`era-evermore inline-flex justify-center text-xl font-bold shadow cursor-pointer appearance-none border w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline text-center ${postGameDisplay == 'stats' ? '' : 'faded'}`}>long story short</div>
+					<div onClick = {() => setPostGameDisplay('stats')} className={`era-evermore display inline-flex justify-center text-xl font-bold shadow cursor-pointer appearance-none border w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline text-center ${postGameDisplay == 'stats' ? '' : 'faded'}`}>long story short</div>
 					<div onClick = {() => setPostGameDisplay('leaderboard')} 
-					className={`era-evermore inline-flex justify-center text-xl font-bold shadow cursor-pointer appearance-none border w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline text-center ${postGameDisplay == 'leaderboard' ? '' : 'faded'}`}>swift af boi</div>
+					className={`era-evermore display inline-flex justify-center text-xl font-bold shadow cursor-pointer appearance-none border w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline text-center ${postGameDisplay == 'leaderboard' ? '' : 'faded'}`}>swift af boi</div>
 				</div>}
 
 				{gameStarted && isLoading && <h2>Ah we're not ready for it, the server give me nothin' back yet. Stay, stay, stay. Don't go.</h2>}
-
+				
 				{/* <Scoreboard data={leaderboardData}/>	 */}
 				{!gameStarted && !displayStats && !isLoading && <div className='grid grid-cols-1'>
 					{!userNameSet && <div>
@@ -511,8 +500,8 @@ function App() {
 					</div>
 
 					<div className='flex justify-center flex-row'>
-						<button className='m-6 era-red p-4 min-w-[150px] text-xl font-bold' onClick={() => restartGame()}>Begin Again</button>
-						<button className='m-6 era-reputation p-4 min-w-[150px] text-xl font-bold' onClick={() => endGame()}>End Game</button>
+						<button className='era-red btn text-xl font-bold' onClick={() => restartGame()}>Begin Again</button>
+						<button className='era-reputation btn text-xl font-bold' onClick={() => endGame()}>End Game</button>
 					</div>				
 
 					<div>{result}</div>
@@ -607,59 +596,14 @@ function App() {
 								onClick={() => setFilterLeaderboard('album')}>By Album</div>
 						</div>
 						<Leaderboard data={leaderboardData}/>
-						<h3>Minimum 8 correct and 50% accuracy</h3>
+						<h3>Minimum 8 correct and 50% accuracy.  No easy mode</h3>
 					</div>}
 							
 				
 				<button className='m-6 era-red p-3 min-w-[250px] text-xl font-bold' onClick={() => restartGame()}>Begin Again</button>	
 				</div>}
 
-				{/* <div className = 'mt-12'>
-				<FacebookShareButton
-          url={shareUrl}
-          className="inline mr-2"
-        >
-          <FacebookIcon size={32} round />
-        </FacebookShareButton>
-				<WhatsappShareButton
-          url={shareUrl}
-          title={title}
-          separator=":: "
-          className="inline mr-2"
-        >
-          <WhatsappIcon size={32} round />
-        </WhatsappShareButton>
-				<TwitterShareButton
-          url={shareUrl}
-          title={title}
-          className="inline mr-2"
-        >
-          <XIcon size={32} round />
-        </TwitterShareButton>
-				<FacebookMessengerShareButton
-          url={shareUrl}
-          appId="521270401588372"
-          className="inline mr-2"
-        >
-          <FacebookMessengerIcon size={32} round />
-        </FacebookMessengerShareButton>
-				<TumblrShareButton
-          url={shareUrl}
-          title={title}
-          className="inline mr-2"
-        >
-          <TumblrIcon size={32} round />
-        </TumblrShareButton>
-
-				<TelegramShareButton
-          url={shareUrl}
-          title={title}
-          className="Demo__some-network__share-button"
-        >
-          <TelegramIcon size={32} round />
-        </TelegramShareButton>
-
-				</div> */}
+			
 				{/* <p>Curiosity, but if you wanna give me a friendship bracelet in the form of $1s for my TSwift Tix fund...I did have to clean the data and remove all the Oh oh oh lines. </p> */}
 			</div>
 		</>

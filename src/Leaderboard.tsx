@@ -5,8 +5,8 @@ function Leaderboard({ data } : { data : Leaderboard[] }) {
 	const albumKeyLkup = { "Taylor Swift" : "Taylor_Swift", "Fearless" : "Fearless", "Speak Now" : "Speak_Now", 'Red' : 'Red', '1989' : '1989', 'reputation' : 'reputation', 'Lover' : 'Lover', 'folklore' : 'folklore', 'evermore' : 'evermore', 'Midnights' : 'Midnights'} as const
 
 	return (
-		<div className="mt-4">
-			{data.length > 0 && <table className='mb-4'>
+		<div className="mt-4 flex flex-col m-2 p-2 bold text-center justify-center">
+			{data && <table className='mb-4'>
 				<thead>
 					<tr>
 					<th>Player</th>

@@ -74,6 +74,7 @@ interface GameStats {
 
 interface Leaderboard {
 	player_name: string; 
+	game_id: string;
 	accuracy: number;
 	accuracy_rk: number;
 	accuracy_pctl: number;

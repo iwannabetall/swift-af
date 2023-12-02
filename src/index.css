@@ -64,18 +64,22 @@ h2{
 	font-weight: bold;
 }
 
+p {
+	margin: 10px
+}
+
 a {
   font-weight: 500;
-  color: #646cff;
+  /* color: #646cff; */
   text-decoration: inherit;
 }
 a:hover {
-  color: #535bf2;
+  /* color: #535bf2; */
 }
 
 body {
   margin: 0;
-  display: flex;
+  /* display: flex; */
   place-items: center;
 	justify-content: center;
   min-width: 320px;
@@ -112,9 +116,9 @@ button:focus-visible {
     color: #213547;
     background-color: #ffffff;
   }
-  a:hover {
+  /* a:hover {
     color: #747bff;
-  }
+  } */
   button {
     background-color: #f9f9f9;
   }
@@ -198,3 +202,42 @@ button:focus-visible {
 .selected{
 	border: black solid 2px;
 }
+
+
+.btn { 
+	min-width: 200px;
+	padding:10px;
+	margin: 10px;
+}
+/* ipad */
+@media (max-width:768px){
+	
+    
+}
+/*iphone 6/7/8 Plus -- should be max-width of 420 but making it smaller for browser/player header*/
+@media (max-width:414px){
+	.btn { 
+		min-width: 160px;
+		margin: 10px;
+	}
+
+}
+/*iphone 6/7/8/X*/
+@media (max-width:375px){
+	.display{
+		font-size: 1em;
+	}
+    
+}
+/*iphone 5s*/
+@media (max-width:320px){
+	.btn {
+		min-width: 120px;
+		margin: px
+	}
+    
+}
+/*if screen > 992 px*/
+@media (min-width:768px){
+}
+
