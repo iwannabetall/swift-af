@@ -30,7 +30,8 @@ function LeaderboardPage() {
 	}, [filterLeaderboard])
 
 	async function delayedDataFetch() {
-		axios.get(`http://localhost:3000/getLeaderboard`)
+		// axios.get(`http://localhost:3000/getLeaderboard`)
+		axios.get(`https://swift-api.fly.dev/getLeaderboard`)
 		.then(function (response) {								
 			leaderboardFullDB = response.data.leaderBoard
 			console.log(leaderboardFullDB)
