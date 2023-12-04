@@ -51,6 +51,18 @@
 
 }
 
+.albums {
+	max-height: 60px;
+	margin: 6px;
+	display: inline;
+	cursor: pointer;
+	border-radius: 50%;
+}
+
+.link{
+	color: blue;
+	text-decoration: underline;
+}
 h1, h2, h3, h4, h5, h6{
 	text-align: center;
 	margin: 10px;
@@ -209,6 +221,21 @@ button:focus-visible {
 	padding:10px;
 	margin: 10px;
 }
+
+.container{
+	margin: 10px;
+	padding: 10px
+}
+
+.leaderboardContainer {
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	justify-content: center;
+	min-width: 250px;
+}
+
+
 /* ipad */
 @media (max-width:768px){
 	
@@ -221,6 +248,16 @@ button:focus-visible {
 		margin: 10px;
 	}
 
+	.container{
+		margin: 0px;
+		padding:0px;
+	}
+
+	.leaderboardContainer{
+		flex-direction: column;
+		padding-top: 20px;
+		padding-bottom: 20px
+	}
 }
 /*iphone 6/7/8/X*/
 @media (max-width:375px){

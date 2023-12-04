@@ -4,6 +4,7 @@ import { useState, useRef, useEffect, FormEvent } from 'react'
 
 import title from '/title.svg'
 import leftarrow from '/left-arrow.svg'
+
 import axios from 'axios';
 import { v4 as uuidv4 } from 'uuid';
 import {
@@ -14,7 +15,6 @@ import {
 } from 'obscenity';
 import Nav from './Nav.tsx'
 import Leaderboard from './Leaderboard.tsx'
-
 
 // import {
 //   QueryClient,
@@ -37,9 +37,15 @@ function App() {
 
 	const albumKeyLkup = { "Taylor Swift" : "Taylor_Swift", "Fearless" : "Fearless", "Speak Now" : "Speak_Now", 'Red' : 'Red', '1989' : '1989', 'reputation' : 'reputation', 'Lover' : 'Lover', 'folklore' : 'folklore', 'evermore' : 'evermore', 'Midnights' : 'Midnights'} as const
 
-	const gameModes = [{'key' : 'easy', 'value' : 'this is me trying (easy)'}, {'key' : 'normal', 'value' : "The Classics (rec'd)"}, {'key' : 'hard', 'value' : "Taylor's Version (hard)"}, {'key' : 'expert', 'value' : 'my tears richochet (expert)'}, {'key' : 'album', 'value' : 'the 1 (album)'}] as const
+	const gameModes = [{'key' : 'easy', 'value' : 'this is me trying (easy)'}, {'key' : 'classics version', 'value' : "The Classics (rec'd)"}, {'key' : "Taylor's Version", 'value' : "Taylor's Version (hard)"}, {'key' : 'cult version', 'value' : 'my tears richochet (cult)'}, {'key' : 'album', 'value' : 'the 1 (album)'}] as const
 
 	const albums = ["Taylor Swift", "Fearless", "Speak Now", "Red", "1989", "reputation", "Lover", "folklore", "evermore", "Midnights"] as const
+
+	const albumCovers = ["Taylor_Swift", "Fearless", "Speak_Now", "Red", "TS1989", "reputation", "Lover", "folklore", "evermore", "Midnights"] as const
+
+	const normal = "classics version" as const
+	const hard = "Taylor's Version" as const
+	const expert = 'cult version' as const
 
 	// const shareUrl = 'https://swift-af.com/' as const
 	// let songList: SongList[] = []
@@ -65,6 +71,9 @@ function App() {
 	const [filterLeaderboard, setFilterLeaderboard] = useState<filterLeaderboard>('all')
 	const [isLoading, setIsLoading] = useState<boolean>(false)
 
+	const [fighter, setFighter] = useState<AlbumArt | ''>('')
+	const [fighterChosen, setFighterChosen] = useState<boolean>(false)
+
 	const [postGameDisplay, setPostGameDisplay] = useState<postGameDisplay>('stats')
 	const [accuracy, setAccuracy] = useState<string | undefined>()
 	const [avgSpeed, setAvgSpeed] = useState<string | undefined>()
@@ -86,8 +95,8 @@ function App() {
 		setIsLoading(true)
 		console.log('get data')
 		// get song list 
-		axios.get(`https://swift-api.fly.dev/getSongs`)
-		// axios.get(`http://localhost:3000/getSongs`)
+		// axios.get(`https://swift-api.fly.dev/getSongs`)
+		axios.get(`http://localhost:3000/getSongs`)
 			.then(function (response) {	
 				setSongList(response.data.songList)
 				songsFullDB = response.data.songList
@@ -97,8 +106,8 @@ function App() {
 				console.log(error);
 			});	
 		
-			axios.get(`https://swift-api.fly.dev/getLyrics`)
-		// axios.get(`http://localhost:3000/getLyrics`)
+			// axios.get(`https://swift-api.fly.dev/getLyrics`)
+		axios.get(`http://localhost:3000/getLyrics`)
 			.then(function (response) {								
 				lyricsFullDB = response.data.lyrics	
 				setIsLoading(false)
@@ -108,8 +117,8 @@ function App() {
 				console.log(error);
 			});	
 
-		axios.get(`https://swift-api.fly.dev/getScoreboard`)
-		// axios.get(`http://localhost:3000/getLeaderboard`)
+		// axios.get(`https://swift-api.fly.dev/getLeaderboard`)
+		axios.get(`http://localhost:3000/getLeaderboard`)
 			.then(function (response) {								
 				leaderboardFullDB = response.data.leaderBoard
 				console.log(leaderboardFullDB)
@@ -182,14 +191,14 @@ function App() {
 		if (level == 'easy'){
 			lyricsBank = lyricsFullDB.filter(x=> x.filler == 0 && x.vault == 0)
 			songBank = songsFullDB.filter(x=> x.vault == 0)
-		} else if (level == 'normal') {
+		} else if (level == normal) {
 			lyricsBank = lyricsFullDB.filter(x=> x.filler == 0 && x.vault == 0 && x.title_in_lyric_match < 70)
 			songBank = songsFullDB.filter(x=> x.vault == 0)
-		} else if (level == 'hard') {
+		} else if (level == hard) {
 			// hard is all + more recent vault songs but no filler
 			lyricsBank = lyricsFullDB.filter(x=> x.filler == 0 && x.title_in_lyric_match < 70)
 			songBank = songsFullDB
-		} else if (level == 'expert') {
+		} else if (level == expert) {
 			// expert level has vault songs and only filler words lmao
 			lyricsBank = lyricsFullDB.filter(x=> x.filler == 1)
 			songBank = songsFullDB
@@ -214,14 +223,20 @@ function App() {
 		)
 		setGameStarted(true)
 
+		// if fighter is null, 
+		if (fighter == '') {
+			setFighter('imtheproblem')
+		}
+
 		if (!isLoading){
 			if (gameMode == 'album' && albumMode == '') {
+				setGameStarted(false)
 				alert("Don't forget to pick an album")
 			} else {
 				console.log('start', lyricsFullDB)
 				console.log('startGame', gameMode, albumMode, lyricsDB, songList)
 				setDisplayStats(false) // in case you're starting another game
-	
+								
 				setStartTime(Date.now())
 				setCurrentTime(Date.now())
 				setGameStats([])
@@ -271,8 +286,8 @@ function App() {
 
 		
 		// save results before resetting
-		// axios.post('http://localhost:3000/saveGameData', {
-		axios.post('https://swift-api.fly.dev/saveGameData', {
+		axios.post('http://localhost:3000/saveGameData', {
+		// axios.post('https://swift-api.fly.dev/saveGameData', {
 			level: gameMode,
 			time: secondsElapsed, 
 			lyric: displayLyric,
@@ -282,7 +297,8 @@ function App() {
 			song: song,
 			lyric_id: displayLyricId,
 			playerName: playerName,
-			albumMode: albumMode
+			albumMode: albumMode,
+			fighter: fighter
 		})
 		.then(function () {
 			// console.log(response)
@@ -328,7 +344,7 @@ function App() {
 		}
 		
 		setUserNameSet(true)
-		setGameMode('normal')  // trigger filtering data
+		setGameMode("classics version")  // trigger filtering data
 		console.log('submit name')
 
 	}
@@ -421,7 +437,7 @@ function App() {
 				{gameStarted && isLoading && <h2>Ah we're not ready for it, the server give me nothin' back yet. Stay, stay, stay. Don't go.</h2>}
 				
 				{/* <Scoreboard data={leaderboardData}/>	 */}
-				{!gameStarted && !displayStats && !isLoading && <div className='grid grid-cols-1'>
+				{!gameStarted && !displayStats && <div className='grid grid-cols-1'>
 					{!userNameSet && <div>
 						<h2>So you think you're the 1? The Swiftest fan?</h2>
 					<h2>How quickly can you name the song given a line?</h2>
@@ -432,7 +448,7 @@ function App() {
 								<input className="shadow cursor-pointer appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline text-center" type='text' 
 								value={playerName} 
 								placeholder='Your display name'
-								maxLength={30}
+								maxLength={20}
 								onChange={e => setPlayerName(e.target.value)}>
 								</input>
 							</label>
@@ -442,21 +458,33 @@ function App() {
 					{userNameSet && <div>
 
 						<div className='pr-4 pl-4 pt-0 grid grid-cols-1'>						
-						<button className="era-folklore cursor-pointer p-2 m-4 shadow-md rounded-t-xl rounded-b-xl" onClick={() => setUserNameSet(false)}><img src={leftarrow} className='cursor-pointer inline logo h-8 mr-2 pr-2 ' alt="change name" />
+						<button className="era-folklore cursor-pointer p-2 m-2 shadow-md rounded-t-xl rounded-b-xl" onClick={() => setUserNameSet(false)}><img src={leftarrow} className='cursor-pointer inline logo h-8 mr-2 pr-2 ' alt="change name" />
 								cursing my display name, wishing I wasn't {playerName}
 							</button>
 						</div>
-							{/* the old {playerName} is dead */}
-							<h6>Pick a mode!</h6>
 
-						<div className="cursor-pointer rounded-t-xl rounded-b-xl text-center m-4" onClick={() => setShowGameModeQ(!showGameModeQ)}>
+						<div>
+							<h2>Choose your fighter</h2>							
+							<div className='flex flex-row flex-wrap justify-center'>
+							{albumCovers.map(x=> <img src={`/icons/${x}.jpg`}  className ={`albums ${(fighterChosen && fighter != x) ? 'faded' : fighterChosen && fighter == x ? 'selected' : ''}`} onClick={()=> {
+								setFighter(x);
+								setFighterChosen(true);
+								}}></img>)}	
+							
+							</div>
+
+						</div>
+							{/* the old {playerName} is dead */}
+							<h2>Pick a mode</h2>
+
+						<div className="cursor-pointer rounded-t-xl rounded-b-xl text-center mt-4" onClick={() => setShowGameModeQ(!showGameModeQ)}>
 							<div className='text-md font-bold'>Question...?</div>
 							{showGameModeQ && <div>								
-								<div>Easy mode: song title might be in the lyric; no vault songs</div>
-								<div>Classics mode: lyrics with song title removed; no vault songs</div>
-								<div>Hard mode: vault songs included</div>
-								<div>Expert mode: vault + a surprise ooohhh</div>
-								<div>the 1: focus on one album</div>
+								<div>Easy: song title might be in the lyric; no vault songs</div>
+								<div>Classics: lyrics with song title should be removed; no vault songs</div>
+								<div>Hard: vault songs included</div>
+								<div>Cult: vault + a surprise ooohhh good luck</div>
+								<div>the 1: focus on one album, deluxe + vault</div>
 								</div>}
 						</div>
 						<div className='p-4 pt-0 grid grid-cols-1'>

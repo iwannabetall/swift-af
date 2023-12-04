@@ -43,19 +43,31 @@ function LeaderboardPage() {
 	return (
 		<>
 			<Nav location={location}></Nav>
-			<div className='grid grid-cols-1 p-4 items-center mt-20 lg:ml-8 lg:mr-8 sm:ml-2 sm:mr-2'>
+			<div className='grid grid-cols-1 p-2 items-center mt-20 lg:ml-8 lg:mr-8 sm:ml-2 sm:mr-2'>
 				
 				<div className=''>
 					<img src={title} className='mx-auto logo p-4 max-h-32' alt="Swift AF" />				
 				</div>	
 				
-				<div className='flex flex-col m-2 p-2 bold text-center justify-center'>
-					<div className='flex flex-row m-2 p-2 bold text-center justify-center'>
+				<div className='flex flex-col container bold text-center justify-center items-center'>
+					<div className='flex flex-row container bold text-center justify-center'>
 						<div className={`${filterLeaderboard == 'all' ? 'era-reputation' : 'faded'} inline p-2 min-w-[120px] inline-flex justify-center text-l font-bold shadow cursor-pointer border w-full leading-tight focus:outline-none focus:shadow-outline text-center`}
 							onClick={() => setFilterLeaderboard('all')}>All</div>
 						<div className={`${filterLeaderboard == 'album' ? 'era-reputation' : 'faded'} inline p-2 min-w-[120px] inline-flex justify-center text-l font-bold shadow cursor-pointer border w-full leading-tight focus:outline-none focus:shadow-outline text-center`}
 							onClick={() => setFilterLeaderboard('album')}>By Album</div>
 					</div>
+					{leaderboardData && <div>
+						{leaderboardData.map(x=> <div className={`leaderboardContainer ${x.game_mode == 'album' ? albumColorKey[albumKeyLkup[x.album_mode as keyof typeof albumKeyLkup]] : 'era-reputation '} text-center m-4 p-2 shadow-md rounded`}>
+							<img className='albums' src={`/icons/${x.fighter}.jpg`}></img>						
+							<div className='m-2 text-xl font-bold'>{x.player_name}</div>
+							<div className='flex flex-col m-2'>
+								<div className='text-xl m-1'>{x.time.toFixed(2)}s</div>	
+								<div className='text-xl m-1'>{x.correct}/{x.total} ({x.accuracy.toFixed(0)}%)</div>
+							</div>
+							<div className={`text-sm ml-2 italic`}>{x.game_mode == 'album' ? x.album_mode : x.game_mode}</div>
+							</div>)}
+						</div>
+						}
 					{leaderboardData && <table className='mb-4'>
 						<thead>
 							<tr>
@@ -75,7 +87,7 @@ function LeaderboardPage() {
 						</tbody>
 					</table>}
 				</div>
-				<h3>Minimum 8 correct and 50% accuracy.  No easy mode</h3>
+				<h3>Minimum 8 correct and 50% accuracy.  No easy mode.  Filter subject to change.</h3>
 			</div>
 		</>
 	)

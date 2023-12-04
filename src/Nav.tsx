@@ -23,9 +23,9 @@ export default function Nav({ location } : {location: {pathname: string}}){
 
 	return (
 		<div className="era-reputation left-0">
-			<nav className="era-reputation min-w-full fixed p-4 top-0 block flex flex-row justify-between mx-auto">
-				<ul >
-					{paths.map(x=> <li className={`era-reputation inline m-2 p-2 ${location.pathname == x.key ? 'underline' :'faded'}`}><a className="color-white" href={x.key}>{x.value}</a></li>)}					
+			<nav className="era-reputation min-w-full fixed p-2 top-0 block justify-between mx-auto">
+				<ul className='flex flex-row flex-wrap'>
+					{paths.map(x=> <li className={`era-reputation inline ml-1 mr-1 p-1 ${location.pathname == x.key ? 'underline' :'faded'}`}><a className="color-white" href={x.key}>{x.value}</a></li>)}					
 				</ul>
 				
 			</nav>

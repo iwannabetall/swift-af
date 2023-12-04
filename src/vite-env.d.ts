@@ -34,6 +34,9 @@ interface Lyrics {
 
 type AlbumKey = "Taylor_Swift" | "Fearless" | "Speak_Now" | 'Red' | '1989' | 'reputation' | 'Lover' | 'folklore' | 'evermore' | 'Midnights' 
 
+type AlbumArt = "Taylor_Swift" | "Fearless" | "Speak_Now" | 'Red' | 'TS1989' | 'reputation' | 'Lover' | 'folklore' | 'evermore' | 'Midnights' | 'imtheproblem'
+
+
 type Album = "Taylor Swift" | "Fearless" | "Speak Now" | 'Red' | '1989' | 'reputation' | 'Lover' | 'folklore' | 'evermore' | 'Midnights' 
 
 type postGameDisplay = "stats" | "leaderboard"
@@ -85,4 +88,5 @@ interface Leaderboard {
 	total: number;
 	album_mode: string;
 	game_mode: string;	
+	fighter: string;
 }
