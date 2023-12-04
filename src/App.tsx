@@ -95,8 +95,8 @@ function App() {
 		setIsLoading(true)
 		console.log('get data')
 		// get song list 
-		// axios.get(`https://swift-api.fly.dev/getSongs`)
-		axios.get(`http://localhost:3000/getSongs`)
+		axios.get(`https://swift-api.fly.dev/getSongs`)
+		// axios.get(`http://localhost:3000/getSongs`)
 			.then(function (response) {	
 				setSongList(response.data.songList)
 				songsFullDB = response.data.songList
@@ -106,8 +106,8 @@ function App() {
 				console.log(error);
 			});	
 		
-			// axios.get(`https://swift-api.fly.dev/getLyrics`)
-		axios.get(`http://localhost:3000/getLyrics`)
+			axios.get(`https://swift-api.fly.dev/getLyrics`)
+		// axios.get(`http://localhost:3000/getLyrics`)
 			.then(function (response) {								
 				lyricsFullDB = response.data.lyrics	
 				setIsLoading(false)
@@ -117,8 +117,8 @@ function App() {
 				console.log(error);
 			});	
 
-		// axios.get(`https://swift-api.fly.dev/getLeaderboard`)
-		axios.get(`http://localhost:3000/getLeaderboard`)
+		axios.get(`https://swift-api.fly.dev/getLeaderboard`)
+		// axios.get(`http://localhost:3000/getLeaderboard`)
 			.then(function (response) {								
 				leaderboardFullDB = response.data.leaderBoard
 				console.log(leaderboardFullDB)
@@ -286,8 +286,8 @@ function App() {
 
 		
 		// save results before resetting
-		axios.post('http://localhost:3000/saveGameData', {
-		// axios.post('https://swift-api.fly.dev/saveGameData', {
+		// axios.post('http://localhost:3000/saveGameData', {
+		axios.post('https://swift-api.fly.dev/saveGameData', {
 			level: gameMode,
 			time: secondsElapsed, 
 			lyric: displayLyric,
@@ -624,7 +624,7 @@ function App() {
 								onClick={() => setFilterLeaderboard('album')}>By Album</div>
 						</div>
 						<Leaderboard data={leaderboardData}/>
-						<h3>Minimum 8 correct and 50% accuracy.  No easy mode</h3>
+						<h6 className='text-sm'>Minimum 8 correct and 50% accuracy.  No easy mode.  Filter subject to change.</h6>
 					</div>}
 							
 				

@@ -22,7 +22,7 @@ function About() {
 				<p>Share with your friends!  We can find out which lines are most well known and which songs/albums have the most recognizable lyrics</p>
 				<p>If you have a job you wanna offer or want to chip in a dollar to help buy me a taco/friendship bracelet/help pay for servers/hosting...not gonna stop ya lol</p>
 				
-				<h2>I have a game idea request/want to report a bug/have a pun to add to the snark/have a question for this page.</h2>
+				<h2>I have a game idea request/fighter suggestion/want to report a bug/have a pun to add to the snark/have a question for this page.</h2>
 				<p>I am too lazy to create an email but message me on <a className='link' href='https://www.instagram.com/annazhaopian' target="_blank">instagram</a>. If you really want my attention, message me on <a className='link' target="_blank" href='https://account.venmo.com/u/Anna-Zhao-2'>venmo</a> or <a className='link' target="_blank" href='https://www.buymeacoffee.com/azhao'>buy me a <span className='line-through'>coffee</span> taco</a> lol</p>
 				{/* https://www.buymeacoffee.com/azhao */}
 

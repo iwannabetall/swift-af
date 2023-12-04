@@ -89,4 +89,5 @@ interface Leaderboard {
 	album_mode: string;
 	game_mode: string;	
 	fighter: string;
+	game_date: string;
 }

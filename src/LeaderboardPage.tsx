@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import title from '/title.svg'
 import axios from 'axios';
 import Nav from './Nav.tsx'
+import moment from 'moment';
 
 let leaderboardFullDB: Leaderboard[] = []
 
@@ -56,38 +57,22 @@ function LeaderboardPage() {
 						<div className={`${filterLeaderboard == 'album' ? 'era-reputation' : 'faded'} inline p-2 min-w-[120px] inline-flex justify-center text-l font-bold shadow cursor-pointer border w-full leading-tight focus:outline-none focus:shadow-outline text-center`}
 							onClick={() => setFilterLeaderboard('album')}>By Album</div>
 					</div>
-					{leaderboardData && <div>
+					{leaderboardData && <div className='flex flex-row flex-wrap items-center justify-center'>
 						{leaderboardData.map(x=> <div className={`leaderboardContainer ${x.game_mode == 'album' ? albumColorKey[albumKeyLkup[x.album_mode as keyof typeof albumKeyLkup]] : 'era-reputation '} text-center m-4 p-2 shadow-md rounded`}>
-							<img className='albums' src={`/icons/${x.fighter}.jpg`}></img>						
-							<div className='m-2 text-xl font-bold'>{x.player_name}</div>
+							<img className='albums' src={`/icons/${x.fighter}.jpg`}></img>
+							<div className='m-2 text-xl font-bold'>{x.speed_rk == 1 ? '🏆' : x.speed_rk == 2 ? '🥈' : x.speed_rk == 3 ? '🥉' : '⭐'} {x.player_name} {x.speed_rk == 1 ? '🏆' : x.speed_rk == 2 ? '🥈' : x.speed_rk == 3 ? '🥉' : '⭐'} </div>
+							<span className='italic text-sm'>{moment(x.game_date).format('MMM D, YYYY')}</span>
 							<div className='flex flex-col m-2'>
-								<div className='text-xl m-1'>{x.time.toFixed(2)}s</div>	
-								<div className='text-xl m-1'>{x.correct}/{x.total} ({x.accuracy.toFixed(0)}%)</div>
+								<div className='text-xl mb-1'>speed: {x.time.toFixed(2)}s</div>	
+								<div className='text-xl mb-1'>accuracy: {x.correct}/{x.total} ({x.accuracy.toFixed(0)}%)</div>
 							</div>
-							<div className={`text-sm ml-2 italic`}>{x.game_mode == 'album' ? x.album_mode : x.game_mode}</div>
+							<div className={`text-sm italic`}>{x.game_mode == 'album' ? x.album_mode : x.game_mode}</div>
+							<div className='mt-1'>Can you beat me? swift-af.com</div>
 							</div>)}
 						</div>
-						}
-					{leaderboardData && <table className='mb-4'>
-						<thead>
-							<tr>
-							<th>Player</th>
-							<th>Speed</th>
-							<th>Accuracy</th>
-							<th>Mode</th>
-							</tr>
-						</thead>
-						<tbody>
-							{leaderboardData.map(x =><tr key={x.game_id} className={`${albumColorKey[albumKeyLkup[x.album_mode as keyof typeof albumKeyLkup]]} text-center`}>
-								<td className="border p-1">{x.player_name}</td>
-								<td className="border p-1">{x.time.toFixed(2)}s</td>
-								<td className="border p-1">{x.correct}/{x.total} ({x.accuracy.toFixed(0)}%)</td>
-								<td className="border p-1">{x.game_mode == 'album' ? x.album_mode : x.game_mode} </td>
-							</tr>)}		
-						</tbody>
-					</table>}
+					}					
 				</div>
-				<h3>Minimum 8 correct and 50% accuracy.  No easy mode.  Filter subject to change.</h3>
+				<h6 className='text-sm'>Minimum 8 correct and 50% accuracy.  No easy mode.  Filter subject to change.</h6>
 			</div>
 		</>
 	)
