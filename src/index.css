@@ -213,6 +213,7 @@ button:focus-visible {
 
 .selected{
 	border: black solid 2px;
+	text-decoration: underline;
 }
 
 

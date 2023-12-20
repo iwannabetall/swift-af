@@ -74,7 +74,7 @@ function App() {
 	const [fighter, setFighter] = useState<AlbumArt | ''>('')
 	const [fighterChosen, setFighterChosen] = useState<boolean>(false)
 
-	const [postGameDisplay, setPostGameDisplay] = useState<postGameDisplay>('stats')
+	const [postGameDisplay, setPostGameDisplay] = useState<postGameDisplay>('leaderboard')
 	const [accuracy, setAccuracy] = useState<string | undefined>()
 	const [avgSpeed, setAvgSpeed] = useState<string | undefined>()
  	const [answerChoices, setAnsChoices] = useState<string[]>([])
@@ -85,7 +85,7 @@ function App() {
 	const [gameStarted, setGameStarted] = useState<boolean>(false)
 	const [displayStats, setDisplayStats] = useState<boolean>(false);
 
-	const wrongAnswersOnly = ["This is why we can't have nice things", "Would you like closure and know the song", "Is this you trying", "It's you, you're the problem", "Not sure how long we're gonna tolerate this for", "I wish you would get the right answer", "That was not the 1", "you'll have an ephiphany on it later", "Made my tears richochet with that one","You forgot that song existed", "Death by a thousand wrongs", "False Swiftie", "You're on your own, kid", "Answer...?", "brain Glitch", "I bet you'll think about that", "You did something bad", "Typing with your hands tied?", "Exhiling you", "tis not the damn song", "Shake it off", "Clean slate", "That was sweet nothing"]
+	const wrongAnswersOnly = ["This is why we can't have nice things", "Would you like closure and know the song", "Is this you trying", "It's you, you're the problem", "Not sure how long we're gonna tolerate this for", "I wish you would get the right answer", "That was not the 1", "you'll have an ephiphany on it later", "Made my tears richochet with that one","You forgot that song existed", "Death by a thousand wrongs", "False Swiftie", "You're on your own, kid", "Answer...?", "brain Glitch", "I bet you'll think about that", "You did something bad", "Exhiling you", "tis not the damn song", "Shake it off", "That was sweet nothing"]
 
 	useEffect(() => {
 		delayedDataFetch()					
@@ -359,7 +359,7 @@ function App() {
 	}
 
 	function endGame(){
-	
+
 		// sort gamestats so it's clumped by album
 		if (gameMode == 'album') {
 			setGameStats(gameStats.sort((a,b) => (a.song > b.song) ? 1 : (b.song > a.song) ? -1 : 0))
@@ -380,9 +380,27 @@ function App() {
 	function getPostGameReport(){
 
 		if (gameStats.length > 0) {
+			
 			// calc stats by album and other various stats
 			let overall = (100*gameStats.filter(x=> x.correct == 1).length/gameStats.length).toFixed(0)
 			// console.log((100*gameStats.filter(x=> x.correct == 1).length/gameStats.length).toFixed(0))
+
+			// if they guessed 50% correct/at least 8 correct, then pull scoreboard stats again 
+			if (gameStats.filter(x=> x.correct == 1).length > 2 && parseInt(overall) > 20) {
+				setIsLoading(true)
+				axios.get(`https://swift-api.fly.dev/getLeaderboard`)
+				// axios.get(`http://localhost:3000/getLeaderboard`)
+					.then(function (response) {								
+						leaderboardFullDB = response.data.leaderBoard
+						console.log(leaderboardFullDB)
+						setLeaderboardData(leaderboardFullDB.filter(x=> x.game_mode != 'album'))
+						setIsLoading(false)
+					})
+					.catch(function (error) {				
+						console.log(error);
+					});	
+
+			}
 
 			setAccuracy(overall)
 
@@ -427,11 +445,11 @@ function App() {
 			<div className='grid grid-cols-1 p-4 items-center mt-20 lg:ml-8 lg:mr-8 sm:ml-2 sm:mr-2'>
 				<div className=''>
 					<img src={title} className={`mx-auto logo p-4 ${(gameStarted || displayStats) ? 'max-h-32' : ''}`} alt="Swift AF" />				
-				</div>			
+				</div>
 				{(gameStats.length > 0) && displayStats && <div className='flex min-w-full items-center'>
-					<div onClick = {() => setPostGameDisplay('stats')} className={`era-evermore display inline-flex justify-center text-xl font-bold shadow cursor-pointer appearance-none border w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline text-center ${postGameDisplay == 'stats' ? '' : 'faded'}`}>long story short</div>
 					<div onClick = {() => setPostGameDisplay('leaderboard')} 
-					className={`era-evermore display inline-flex justify-center text-xl font-bold shadow cursor-pointer appearance-none border w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline text-center ${postGameDisplay == 'leaderboard' ? '' : 'faded'}`}>swift af boi</div>
+					className={`era-evermore display inline-flex justify-center text-xl font-bold shadow cursor-pointer appearance-none border w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline text-center ${postGameDisplay == 'leaderboard' ? 'underline' : 'faded'}`}>swift af boi</div>
+					<div onClick = {() => setPostGameDisplay('stats')} className={`era-evermore display inline-flex justify-center text-xl font-bold shadow cursor-pointer appearance-none border w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline text-center ${postGameDisplay == 'stats' ? 'underline' : 'faded'}`}>long story short</div>					
 				</div>}
 
 				{gameStarted && isLoading && <h2>Ah we're not ready for it, the server give me nothin' back yet. Stay, stay, stay. Don't go.</h2>}
@@ -523,16 +541,15 @@ function App() {
 						onClick={() => checkAnswer(x)}> {x}</div>)}
 					<h3>{secondsElapsed.toFixed(3)}</h3>
 				
-					<div className='text-lg font-bold m-4 p-2'>
-					{gameStats.length > 0 ? <div>{gameStats.map(x=> x.correct).reduce((total, current) => total + current, 0)}/{gameStats.length} Correct {(100*gameStats.map(x=> x.correct).reduce((total, current) => total + current, 0)/gameStats.length).toFixed(0)}%</div> : ''}
+					<div className='text-lg font-bold m-4 p-2'>{result}
+					{gameStats.length > 0 ? <div>
+						{gameStats.map(x=> x.correct).reduce((total, current) => total + current, 0)}/{gameStats.length} Correct {(100*gameStats.map(x=> x.correct).reduce((total, current) => total + current, 0)/gameStats.length).toFixed(0)}%</div> : ''}
 					</div>
 
 					<div className='flex justify-center flex-row'>
 						<button className='era-red btn text-xl font-bold' onClick={() => restartGame()}>Begin Again</button>
 						<button className='era-reputation btn text-xl font-bold' onClick={() => endGame()}>End Game</button>
-					</div>				
-
-					<div>{result}</div>
+					</div>
 									
 				</div>}
 
@@ -616,16 +633,20 @@ function App() {
 							</table>
 						</div>}
 					</div>}
-					{postGameDisplay == 'leaderboard' && <div>
+					{postGameDisplay == 'leaderboard' && !isLoading && <div>
 						<div className='flex flex-row m-2 p-2 bold text-center justify-center'>
 							<div className={`${filterLeaderboard == 'all' ? 'era-reputation' : 'faded'} inline p-2 min-w-[120px] inline-flex justify-center text-l font-bold shadow cursor-pointer border w-full leading-tight focus:outline-none focus:shadow-outline text-center`}
-								onClick={() => setFilterLeaderboard('all')}>All</div>
+								onClick={() => setFilterLeaderboard('all')}>The Eras</div>
 							<div className={`${filterLeaderboard == 'album' ? 'era-reputation' : 'faded'} inline p-2 min-w-[120px] inline-flex justify-center text-l font-bold shadow cursor-pointer border w-full leading-tight focus:outline-none focus:shadow-outline text-center`}
 								onClick={() => setFilterLeaderboard('album')}>By Album</div>
 						</div>
 						<Leaderboard data={leaderboardData}/>
 						<h6 className='text-sm'>Minimum 8 correct and 50% accuracy.  No easy mode.  Filter subject to change.</h6>
 					</div>}
+
+					{postGameDisplay == 'leaderboard' && isLoading && <div>
+						<h3>Checking to see if you made the leaderboard!</h3>						
+						</div>}
 							
 				
 				<button className='m-6 era-red p-3 min-w-[250px] text-xl font-bold' onClick={() => restartGame()}>Begin Again</button>	

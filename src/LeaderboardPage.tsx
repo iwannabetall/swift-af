@@ -14,6 +14,8 @@ function LeaderboardPage() {
 
 	const [leaderboardData, setLeaderboardData] = useState<Leaderboard[]>([])
 
+	const [isLoading, setIsLoading] = useState<boolean>(false)
+
 	const [filterLeaderboard, setFilterLeaderboard] = useState<filterLeaderboard>('all')
 
 	useEffect(() => {
@@ -30,12 +32,14 @@ function LeaderboardPage() {
 	}, [filterLeaderboard])
 
 	async function delayedDataFetch() {
+		setIsLoading(true)
 		// axios.get(`http://localhost:3000/getLeaderboard`)
 		axios.get(`https://swift-api.fly.dev/getLeaderboard`)
 		.then(function (response) {								
 			leaderboardFullDB = response.data.leaderBoard
 			console.log(leaderboardFullDB)
 			setLeaderboardData(leaderboardFullDB.filter(x=> x.game_mode != 'album'))
+			setIsLoading(false)
 		})
 		.catch(function (error) {				
 			console.log(error);
@@ -45,7 +49,12 @@ function LeaderboardPage() {
 	return (
 		<>
 			<Nav location={location}></Nav>
-			<div className='grid grid-cols-1 p-2 items-center mt-20 lg:ml-8 lg:mr-8 sm:ml-2 sm:mr-2'>
+			{isLoading && <div>
+				<div className=''>
+					<img src={title} className='mx-auto logo p-4 max-h-32' alt="Swift AF" />				
+				</div>
+				<h2>Wait, don't go. Getting the swiftest swifties!</h2></div>}
+			{!isLoading && <div className='grid grid-cols-1 p-2 items-center mt-20 lg:ml-8 lg:mr-8 sm:ml-2 sm:mr-2'>
 				
 				<div className=''>
 					<img src={title} className='mx-auto logo p-4 max-h-32' alt="Swift AF" />				
@@ -74,7 +83,7 @@ function LeaderboardPage() {
 					}					
 				</div>
 				<h6 className='text-sm'>Minimum 8 correct and 50% accuracy.  No easy mode.  Filter subject to change.</h6>
-			</div>
+			</div>}
 		</>
 	)
 

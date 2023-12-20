@@ -9,7 +9,7 @@ function Leaderboard({ data } : { data : Leaderboard[] }) {
 	return (
 		<div className="mt-4 flex flex-col m-2 p-2 bold text-center justify-center">
 			{data && <div className='flex flex-row flex-wrap items-center justify-center'>
-				{data.map(x=> <div className={`leaderboardContainer ${x.game_mode == 'album' ? albumColorKey[albumKeyLkup[x.album_mode as keyof typeof albumKeyLkup]] : 'era-reputation '} text-center m-4 p-2 shadow-md rounded`}>
+				{data.map(x=> <div key={x.game_id} className={`leaderboardContainer ${x.game_mode == 'album' ? albumColorKey[albumKeyLkup[x.album_mode as keyof typeof albumKeyLkup]] : 'era-reputation '} text-center m-4 p-2 shadow-md rounded`}>
 					<img className='albums' src={`/icons/${x.fighter}.jpg`}></img>
 					<div className='m-2 text-xl font-bold'>{x.speed_rk == 1 ? '🏆' : x.speed_rk == 2 ? '🥈' : x.speed_rk == 3 ? '🥉' : '⭐'} {x.player_name} {x.speed_rk == 1 ? '🏆' : x.speed_rk == 2 ? '🥈' : x.speed_rk == 3 ? '🥉' : '⭐'} </div>
 					<span className='italic text-sm'>{moment(x.game_date).format('MMM D, YYYY')}</span>
