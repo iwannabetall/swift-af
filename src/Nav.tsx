@@ -19,13 +19,13 @@ export default function Nav({ location } : {location: {pathname: string}}){
 	// const title = "im swift af boi. are you??"
 	// const size = 24
 	
-	const paths = [{key: '/lfg', value: 'Home'}, {key: '/answers', value: 'Question...?'}, {key: '/leaderboard', value: "This is why we can't have nice things"}] as const; 
+	const paths = [{key: '/', value: 'Home'}, {key: '/answers', value: 'Question...?'}, {key: '/leaderboard', value: "This is why we can't have nice things"}] as const; 
 
 	return (
 		<div className="era-reputation left-0">
 			<nav className="era-reputation min-w-full fixed p-2 top-0 block justify-between mx-auto">
 				<ul className='flex flex-row flex-wrap'>
-					{paths.map(x=> <li className={`era-reputation inline ml-1 mr-1 p-1 ${location.pathname == x.key ? 'underline' :'faded'}`}><a className="color-white" href={x.key}>{location.pathname == '/lfg' && x.value == 'Home' ? 'Begin' : x.value == 'Home' ? 'Begin Again' : x.value}</a></li>)}					
+					{paths.map(x=> <li className={`era-reputation inline ml-1 mr-1 p-1 ${location.pathname == x.key ? 'underline' :'faded'}`}><a className="color-white" href={x.key}>{location.pathname == '/' && x.value == 'Home' ? 'Begin' : x.value == 'Home' ? 'Begin Again' : x.value}</a></li>)}					
 				</ul>
 				
 			</nav>
