@@ -386,7 +386,7 @@ function App() {
 			// console.log((100*gameStats.filter(x=> x.correct == 1).length/gameStats.length).toFixed(0))
 
 			// if they guessed 50% correct/at least 8 correct, then pull scoreboard stats again 
-			if (gameStats.filter(x=> x.correct == 1).length > 2 && parseInt(overall) > 20) {
+			if (gameStats.filter(x=> x.correct == 1).length > 7 && parseInt(overall) >= 50) {
 				setIsLoading(true)
 				axios.get(`https://swift-api.fly.dev/getLeaderboard`)
 				// axios.get(`http://localhost:3000/getLeaderboard`)
