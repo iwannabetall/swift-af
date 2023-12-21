@@ -30,6 +30,9 @@ let leaderboardFullDB: Leaderboard[] = []
 function App() {	
 	// const location = useLocation()
 	
+	const min_accuracy = 60;
+	const min_correct = 10;
+
 	const ltErasColors = ['eras_green', 'eras_gold', 'eras_purple', 'eras_lblue', 'eras_pink', 'eras_maroon', 'eras_indigo', 'eras_tan', 'eras_grey', 'eras_black'];
 
 	const albumColorKey = {'Taylor_Swift': 'era-taylor-swift', 'Fearless': 'era-fearless', 'Speak_Now': 'era-speak-now', 'Red': 'era-red', '1989': 'era-1989', 'reputation': 'era-reputation', 'Lover': 'era-lover', 'folklore': 'era-folklore', 'evermore': 'era-evermore', 'Midnights': 'era-midnights'} as const
@@ -56,7 +59,7 @@ function App() {
 
 	const [startTime, setStartTime] = useState<number>(0.0)
 	const [currentTime, setCurrentTime] = useState<number>(0.0)
-	const [gameDate, setGameDate] = useState<string>()
+	const [gameDate, setGameDate] = useState<string>((new Date).toISOString())
 	const [displayLyric, setDisplayLyric] = useState<string>('')
 	const [displayLyricId, setDisplayLyricId] = useState<number | undefined>()
 	const [song, setSong] = useState<string>('')
@@ -76,9 +79,9 @@ function App() {
 	const [fighter, setFighter] = useState<AlbumArt | ''>('')
 	const [fighterChosen, setFighterChosen] = useState<boolean>(false)
 
-	const [postGameDisplay, setPostGameDisplay] = useState<postGameDisplay>('leaderboard')
+	const [postGameDisplay, setPostGameDisplay] = useState<postGameDisplay>('stats')
 	const [accuracy, setAccuracy] = useState<string | undefined>()
-	const [avgSpeed, setAvgSpeed] = useState<string | undefined>()
+	// const [avgSpeed, setAvgSpeed] = useState<string | undefined>()
  	const [answerChoices, setAnsChoices] = useState<string[]>([])
 	const [result, setResult] = useState<string>() // true, false, null? 
 	const [gameStats, setGameStats] = useState<GameStats[]>([])  // make this an array of objects with lyric/song/album they got right and the time
@@ -86,6 +89,8 @@ function App() {
 	const [statsByAlbum, setStatsByAlbum] = useState<StatsByAlbum[]>([])
 	const [gameStarted, setGameStarted] = useState<boolean>(false)
 	const [displayStats, setDisplayStats] = useState<boolean>(false);
+	const [gameRank, setGameRank] = useState<Leaderboard[]>([])
+
 
 	const wrongAnswersOnly = ["This is why we can't have nice things", "Would you like closure and know the song", "Is this you trying", "It's you, you're the problem", "Not sure how long we're gonna tolerate this for", "I wish you would get the right answer", "That was not the 1", "you'll have an ephiphany on it later", "Made my tears richochet with that one","You forgot that song existed", "Death by a thousand wrongs", "False Swiftie", "You're on your own, kid", "Answer...?", "brain Glitch", "I bet you'll think about that", "You did something bad", "Exhiling you", "tis not the damn song", "Shake it off", "That was sweet nothing"]
 
@@ -186,7 +191,7 @@ function App() {
 
 	function filterLyricsDB(level: string){
 		// filter/set the lyrics 		
-		console.log('lyricsFullDB', level, lyricsFullDB)
+		// console.log('lyricsFullDB', level, lyricsFullDB)
 		let songBank: SongList[]
 		let lyricsBank: Lyrics[]
 
@@ -210,7 +215,7 @@ function App() {
 			songBank = songsFullDB.filter(x=> x.album == albumMode)
 		}
 
-		console.log('filterLyricsDB', songList, lyricsDB, gameMode, albumMode)
+		// console.log('filterLyricsDB', songList, lyricsDB, gameMode, albumMode)
 
 		setSongList(songBank)
 		setLyricsDB(lyricsBank)
@@ -220,9 +225,9 @@ function App() {
 
 	// start timer for beg of game 
 	function startGame() {
-		console.log(
-			'startGame', isLoading, gameStarted
-		)
+		// console.log(
+		// 	'startGame', isLoading, gameStarted
+		// )
 		const today = new Date()
 	
 		setGameDate(today.toISOString())
@@ -238,8 +243,8 @@ function App() {
 				setGameStarted(false)
 				alert("Don't forget to pick an album")
 			} else {
-				console.log('start', lyricsFullDB)
-				console.log('startGame', gameMode, albumMode, lyricsDB, songList)
+				// console.log('start', lyricsFullDB)
+				// console.log('startGame', gameMode, albumMode, lyricsDB, songList)
 				setDisplayStats(false) // in case you're starting another game
 								
 				setStartTime(Date.now())
@@ -292,7 +297,7 @@ function App() {
 		
 		// save results before resetting
 		// axios.post('http://localhost:3000/saveGameData', {
-			console.log(gameDate)
+			// console.log(gameDate)
 		axios.post('https://swift-api.fly.dev/saveGameData', {
 			level: gameMode,
 			time: secondsElapsed, 
@@ -313,7 +318,7 @@ function App() {
 			console.log(error);
 		});
 		// log results 	
-		console.log({'time': secondsElapsed, song: song, userResponse: clicked.trim(), correct: 0, album: album, lyric: displayLyric},gameStats)
+		// console.log({'time': secondsElapsed, song: song, userResponse: clicked.trim(), correct: 0, album: album, lyric: displayLyric},gameStats)
 
 		let rand = Math.floor(Math.random() * lyricsDB.length)
 		// change song, clear input, reset timer
@@ -384,42 +389,57 @@ function App() {
 		
 	}
 
-	function getPostGameReport(){
-
-		if (gameStats.length > 0) {
+	async function getPostGameReport(){
 			
-			// calc stats by album and other various stats
-			let overall = (100*gameStats.filter(x=> x.correct == 1).length/gameStats.length).toFixed(0)
-			// console.log((100*gameStats.filter(x=> x.correct == 1).length/gameStats.length).toFixed(0))
+		// runs only if they played at least one round 
 
-			if (gameMode == 'album') {
+		// calc stats by album and other various stats
+		let overall = (100*gameStats.filter(x=> x.correct == 1).length/gameStats.length).toFixed(0)
 
-			}
-			// if they guessed 50% correct/at least 8 correct, then pull scoreboard stats again 
-			setIsLoading(true)
-			axios.get(`https://swift-api.fly.dev/getLeaderboard`)
-			// axios.get(`http://localhost:3000/getLeaderboard`)
-				.then(function (response) {								
-					leaderboardFullDB = response.data.leaderBoard
-					console.log(leaderboardFullDB)
-					setLeaderboardData(leaderboardFullDB.filter(x=> x.game_mode != 'album'))
-					setIsLoading(false)
-				})
-				.catch(function (error) {				
-					console.log(error);
-				});	
+		setIsLoading(true)
+		// console.log('gameid', gameId)		
+
+		axios.get(`https://swift-api.fly.dev/getLeaderboard`)
+		// axios.get(`http://localhost:3000/getLeaderboard`)
+			.then(function (response) {								
+				leaderboardFullDB = response.data.leaderBoard
+				console.log('new leaderboard', leaderboardFullDB)
+				let gameRk = leaderboardFullDB.filter(x=> x.game_id == gameId)
+				setLeaderboardData(leaderboardFullDB.filter(x=> x.game_mode != 'album'))
+
+				// console.log('gameRk', gameRk)
+				// if didnt make leaderboard, need to calc data 
+				if (gameRk.length == 0) {
+					gameRk.push({ 'player_name' : playerName,
+					'game_id' : gameId, 
+					'accuracy' : parseInt(overall), 
+					'accuracy_rk' : 100, 
+					'accuracy_pctl' : 20, 
+					'time' : parseFloat((gameStats.map(x=> x.time).reduce((total, current) => total + current, 0)/gameStats.length).toFixed(2)),
+					'speed_rk': parseInt(overall) < 30 ? 1000 : parseInt(overall) < 45 ? 500 : 100, 
+					'speed_pctl' : 20, 
+					'correct' : gameStats.filter(x=> x.correct == 1).length,
+					'total' : gameStats.length,
+					'album_mode' : albumMode, 
+					'game_mode' : gameMode, 
+					'fighter' : fighter, 
+					'game_date' : gameDate?.toString()
+					})				
+
+					console.log('calculated gameRk', gameRk)
+				}
 				
-			if (gameStats.filter(x=> x.correct == 1).length > 7 && parseInt(overall) >= 50) {
-				
+				setGameRank(gameRk)
 
-			} else {
-				// if they didn't play well enough to show up in the leaderboard, display their game stats
-				setPostGameDisplay('stats')
-			}
-
+				setIsLoading(false)
+			})
+			.catch(function (error) {				
+				console.log(error);
+			});	
+							
 			setAccuracy(overall)
 
-			setAvgSpeed((gameStats.map(x=> x.time).reduce((total, current) => total + current, 0)/gameStats.length).toFixed(2))
+			// setAvgSpeed((gameStats.map(x=> x.time).reduce((total, current) => total + current, 0)/gameStats.length).toFixed(2))
 		
 			let allStatsByAlbums: StatsByAlbum[] = []
 
@@ -445,7 +465,7 @@ function App() {
 			console.log(allStatsByAlbums)
 
 			setStatsByAlbum(allStatsByAlbums)
-		}
+		
 		
 	}
 
@@ -462,9 +482,10 @@ function App() {
 					<img src={title} className={`mx-auto logo p-4 ${(gameStarted || displayStats) ? 'max-h-32' : ''}`} alt="Swift AF" />				
 				</div>
 				{(gameStats.length > 0) && displayStats && <div className='flex min-w-full items-center'>
+					<div onClick = {() => setPostGameDisplay('stats')} className={`era-evermore display inline-flex justify-center text-xl font-bold shadow cursor-pointer appearance-none border w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline text-center ${postGameDisplay == 'stats' ? 'underline' : 'faded'}`}>long story short</div>	
 					<div onClick = {() => setPostGameDisplay('leaderboard')} 
 					className={`era-evermore display inline-flex justify-center text-xl font-bold shadow cursor-pointer appearance-none border w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline text-center ${postGameDisplay == 'leaderboard' ? 'underline' : 'faded'}`}>swift af boi</div>
-					<div onClick = {() => setPostGameDisplay('stats')} className={`era-evermore display inline-flex justify-center text-xl font-bold shadow cursor-pointer appearance-none border w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline text-center ${postGameDisplay == 'stats' ? 'underline' : 'faded'}`}>long story short</div>					
+					
 				</div>}
 
 				{gameStarted && isLoading && <h2>Ah we're not ready for it, the server give me nothin' back yet. Stay, stay, stay. Don't go.</h2>}
@@ -531,7 +552,8 @@ function App() {
 								}}>{x.value}
 							</button>)}
 
-							<h2>or pick an album</h2>
+							<h2>or Pick an Album</h2>
+							<h6>Album dropdown will appear when you select "the 1"</h6>
 							{<button 
 								className={`block min-w-full cursor-pointer rounded-t-xl rounded-b-xl p-2 text-center text-md font-bold ${ltErasColors[0]} ${gameMode == 'album' ? '' : 'faded'}`} id={'album'} 
 								onClick={() => {
@@ -583,11 +605,11 @@ function App() {
 					{/* <h3 className='font-bold text-xl text-center'>long story short for your {gameStats.length} tries</h3> */}
 					{postGameDisplay == 'stats' && <div className='p-0 pt-0 flex flex-col items-center justify-center'>
 						<div className='font-bold text-xl text-center p-2 m-2'>{accuracy === undefined ? '' : parseFloat(accuracy || "0") < 40 ? "Shake it off, soon you'll get better" : parseFloat(accuracy) > 70 ? "I knew I saw a light in you, Superstar" : ''}</div>
-						{/* <Leaderboard data={gameStats}/> */}
-						<div className='flex justify-center font-bold flex-row flex-wrap'>
+						<Leaderboard data={gameRank}/>
+						{/* <div className='flex justify-center font-bold flex-row flex-wrap'>
 						<h1 className={`${albumMode != '' ? albumColorKey[albumKeyLkup[albumMode]] : 'era-midnights'} shadow-md pr-4 pl-4 pt-2 pb-2 m-2`}>{accuracy}%</h1>
 						<h1 className={`${albumMode != '' ? albumColorKey[albumKeyLkup[albumMode]] : 'era-midnights'} shadow-md pr-4 pl-4 pt-2 pb-2 m-2`}>{avgSpeed} sec/line</h1>
-						</div>
+						</div> */}
 
 						{/* <div>{gameStats.map(x=> x.correct).reduce((total, current) => total + current, 0)}/{gameStats.length} Correct 
 						</div>					
@@ -666,7 +688,7 @@ function App() {
 								onClick={() => setFilterLeaderboard('album')}>By Album</div>
 						</div>
 						<Leaderboard data={leaderboardData}/>
-						<h6 className='text-sm'>Minimum 10 correct and 60% accuracy.  No easy mode.  Filter subject to change.</h6>
+						<h6 className='text-sm'>{`Minimum ${min_correct} correct and ${min_accuracy}% accuracy.  No easy mode.  Filter subject to change.`}</h6>
 					</div>}
 
 					{postGameDisplay == 'leaderboard' && isLoading && <div>

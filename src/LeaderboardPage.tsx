@@ -8,6 +8,9 @@ let leaderboardFullDB: Leaderboard[] = []
 
 function LeaderboardPage() {
 	
+	const min_accuracy = 60;
+	const min_correct = 10;
+	
 	const albumColorKey = {'Taylor_Swift': 'era-taylor-swift', 'Fearless': 'era-fearless', 'Speak_Now': 'era-speak-now', 'Red': 'era-red', '1989': 'era-1989', 'reputation': 'era-reputation', 'Lover': 'era-lover', 'folklore': 'era-folklore', 'evermore': 'era-evermore', 'Midnights': 'era-midnights'} as const
 
 	const albumKeyLkup = { "Taylor Swift" : "Taylor_Swift", "Fearless" : "Fearless", "Speak Now" : "Speak_Now", 'Red' : 'Red', '1989' : '1989', 'reputation' : 'reputation', 'Lover' : 'Lover', 'folklore' : 'folklore', 'evermore' : 'evermore', 'Midnights' : 'Midnights'} as const
@@ -67,6 +70,7 @@ function LeaderboardPage() {
 						<div className={`${filterLeaderboard == 'album' ? 'era-reputation' : 'faded'} inline p-2 min-w-[120px] inline-flex justify-center text-l font-bold shadow cursor-pointer border w-full leading-tight focus:outline-none focus:shadow-outline text-center`}
 							onClick={() => setFilterLeaderboard('album')}>By Album</div>
 					</div>
+					<h6 className='text-sm'>{`Minimum ${min_correct} correct and ${min_accuracy}% accuracy.  No easy mode.  Filter subject to change.`}</h6>
 					{leaderboardData && <div className='flex flex-row flex-wrap items-center justify-center'>
 						{leaderboardData.map(x=> <div className={`leaderboardContainer ${x.game_mode == 'album' ? albumColorKey[albumKeyLkup[x.album_mode as keyof typeof albumKeyLkup]] : 'era-reputation '} text-center m-4 p-2 shadow-md rounded`}>
 							<img className='albums' src={`/icons/${x.fighter}.jpg`}></img>
@@ -82,7 +86,7 @@ function LeaderboardPage() {
 						</div>
 					}					
 				</div>
-				<h6 className='text-sm'>Minimum 10 correct and 60% accuracy.  No easy mode.  Filter subject to change.</h6>
+				
 			</div>}
 		</>
 	)
