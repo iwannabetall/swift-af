@@ -585,7 +585,7 @@ function App() {
 
 					{answerChoices.map((x,i) => <div className={`cursor-pointer rounded-t-xl rounded-b-xl text-center m-4 p-2 text-lg font-bold ${ltErasColors[i]}`}
 						onClick={() => checkAnswer(x)}> {x}</div>)}
-					<h3>{secondsElapsed.toFixed(3)}</h3>
+					<h3>seconds: {secondsElapsed.toFixed(0)}</h3>
 				
 					<div className='text-lg font-bold m-4 p-2'>{result}
 					{gameStats.length > 0 ? <div>
