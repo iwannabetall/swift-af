@@ -82,7 +82,7 @@ function LeaderboardPage() {
 						</div>
 					}					
 				</div>
-				<h6 className='text-sm'>Minimum 8 correct and 50% accuracy.  No easy mode.  Filter subject to change.</h6>
+				<h6 className='text-sm'>Minimum 10 correct and 60% accuracy.  No easy mode.  Filter subject to change.</h6>
 			</div>}
 		</>
 	)

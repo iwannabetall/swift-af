@@ -30,8 +30,6 @@ let leaderboardFullDB: Leaderboard[] = []
 function App() {	
 	// const location = useLocation()
 	
-	const gameDate = new Date()
-
 	const ltErasColors = ['eras_green', 'eras_gold', 'eras_purple', 'eras_lblue', 'eras_pink', 'eras_maroon', 'eras_indigo', 'eras_tan', 'eras_grey', 'eras_black'];
 
 	const albumColorKey = {'Taylor_Swift': 'era-taylor-swift', 'Fearless': 'era-fearless', 'Speak_Now': 'era-speak-now', 'Red': 'era-red', '1989': 'era-1989', 'reputation': 'era-reputation', 'Lover': 'era-lover', 'folklore': 'era-folklore', 'evermore': 'era-evermore', 'Midnights': 'era-midnights'} as const
@@ -58,12 +56,13 @@ function App() {
 
 	const [startTime, setStartTime] = useState<number>(0.0)
 	const [currentTime, setCurrentTime] = useState<number>(0.0)
+	const [gameDate, setGameDate] = useState<string>()
 	const [displayLyric, setDisplayLyric] = useState<string>('')
 	const [displayLyricId, setDisplayLyricId] = useState<number | undefined>()
 	const [song, setSong] = useState<string>('')
 	const [album, setAlbum] = useState<string>('')
 	const [albumKey, setAlbumKey] = useState<AlbumKey | ''>('')
-	const [gameMode, setGameMode] = useState<string>('')
+	const [gameMode, setGameMode] = useState<game_mode | ''>('')
 	const [albumMode, setAlbumMode] = useState<Album | '' >('')
 	const [showGameModeQ, setShowGameModeQ] = useState<boolean>(false)
 	const [songList, setSongList] = useState<SongList[]>([])
@@ -224,6 +223,9 @@ function App() {
 		console.log(
 			'startGame', isLoading, gameStarted
 		)
+		const today = new Date()
+	
+		setGameDate(today.toISOString())
 		setGameStarted(true)
 
 		// if fighter is null, 
@@ -290,12 +292,13 @@ function App() {
 		
 		// save results before resetting
 		// axios.post('http://localhost:3000/saveGameData', {
+			console.log(gameDate)
 		axios.post('https://swift-api.fly.dev/saveGameData', {
 			level: gameMode,
 			time: secondsElapsed, 
 			lyric: displayLyric,
 			correct: correct, 
-			date: `${gameDate.toISOString().slice(0, 10)}`,
+			date: gameDate,
 			gameId: gameId,
 			song: song,
 			lyric_id: displayLyricId,
@@ -357,6 +360,7 @@ function App() {
 		setGameId(uuidv4())		
 		setDisplayStats(false)
 		setGameStarted(false)
+		setResult('')
 
 		console.log('restartGame', lyricsDB)
 	}
@@ -388,20 +392,25 @@ function App() {
 			let overall = (100*gameStats.filter(x=> x.correct == 1).length/gameStats.length).toFixed(0)
 			// console.log((100*gameStats.filter(x=> x.correct == 1).length/gameStats.length).toFixed(0))
 
+			if (gameMode == 'album') {
+
+			}
 			// if they guessed 50% correct/at least 8 correct, then pull scoreboard stats again 
+			setIsLoading(true)
+			axios.get(`https://swift-api.fly.dev/getLeaderboard`)
+			// axios.get(`http://localhost:3000/getLeaderboard`)
+				.then(function (response) {								
+					leaderboardFullDB = response.data.leaderBoard
+					console.log(leaderboardFullDB)
+					setLeaderboardData(leaderboardFullDB.filter(x=> x.game_mode != 'album'))
+					setIsLoading(false)
+				})
+				.catch(function (error) {				
+					console.log(error);
+				});	
+				
 			if (gameStats.filter(x=> x.correct == 1).length > 7 && parseInt(overall) >= 50) {
-				setIsLoading(true)
-				axios.get(`https://swift-api.fly.dev/getLeaderboard`)
-				// axios.get(`http://localhost:3000/getLeaderboard`)
-					.then(function (response) {								
-						leaderboardFullDB = response.data.leaderBoard
-						console.log(leaderboardFullDB)
-						setLeaderboardData(leaderboardFullDB.filter(x=> x.game_mode != 'album'))
-						setIsLoading(false)
-					})
-					.catch(function (error) {				
-						console.log(error);
-					});	
+				
 
 			} else {
 				// if they didn't play well enough to show up in the leaderboard, display their game stats
@@ -574,6 +583,7 @@ function App() {
 					{/* <h3 className='font-bold text-xl text-center'>long story short for your {gameStats.length} tries</h3> */}
 					{postGameDisplay == 'stats' && <div className='p-0 pt-0 flex flex-col items-center justify-center'>
 						<div className='font-bold text-xl text-center p-2 m-2'>{accuracy === undefined ? '' : parseFloat(accuracy || "0") < 40 ? "Shake it off, soon you'll get better" : parseFloat(accuracy) > 70 ? "I knew I saw a light in you, Superstar" : ''}</div>
+						{/* <Leaderboard data={gameStats}/> */}
 						<div className='flex justify-center font-bold flex-row flex-wrap'>
 						<h1 className={`${albumMode != '' ? albumColorKey[albumKeyLkup[albumMode]] : 'era-midnights'} shadow-md pr-4 pl-4 pt-2 pb-2 m-2`}>{accuracy}%</h1>
 						<h1 className={`${albumMode != '' ? albumColorKey[albumKeyLkup[albumMode]] : 'era-midnights'} shadow-md pr-4 pl-4 pt-2 pb-2 m-2`}>{avgSpeed} sec/line</h1>
@@ -656,7 +666,7 @@ function App() {
 								onClick={() => setFilterLeaderboard('album')}>By Album</div>
 						</div>
 						<Leaderboard data={leaderboardData}/>
-						<h6 className='text-sm'>Minimum 8 correct and 50% accuracy.  No easy mode.  Filter subject to change.</h6>
+						<h6 className='text-sm'>Minimum 10 correct and 60% accuracy.  No easy mode.  Filter subject to change.</h6>
 					</div>}
 
 					{postGameDisplay == 'leaderboard' && isLoading && <div>

@@ -41,6 +41,7 @@ type Album = "Taylor Swift" | "Fearless" | "Speak Now" | 'Red' | '1989' | 'reput
 
 type postGameDisplay = "stats" | "leaderboard"
 type filterLeaderboard = 'all' | 'album'
+type game_mode = 'easy' | 'classics version' | "Taylor's Version" | 'cult version' | 'album' 
 
 interface SongList {
 	"song": string;
