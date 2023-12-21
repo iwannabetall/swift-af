@@ -403,6 +403,9 @@ function App() {
 						console.log(error);
 					});	
 
+			} else {
+				// if they didn't play well enough to show up in the leaderboard, display their game stats
+				setPostGameDisplay('stats')
 			}
 
 			setAccuracy(overall)
