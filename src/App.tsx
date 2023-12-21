@@ -38,7 +38,9 @@ function App() {
 
 	const albumKeyLkup = { "Taylor Swift" : "Taylor_Swift", "Fearless" : "Fearless", "Speak Now" : "Speak_Now", 'Red' : 'Red', '1989' : '1989', 'reputation' : 'reputation', 'Lover' : 'Lover', 'folklore' : 'folklore', 'evermore' : 'evermore', 'Midnights' : 'Midnights'} as const
 
-	const gameModes = [{'key' : 'easy', 'value' : 'this is me trying (easy)'}, {'key' : 'classics version', 'value' : "The Classics (rec'd)"}, {'key' : "Taylor's Version", 'value' : "Taylor's Version (hard)"}, {'key' : 'cult version', 'value' : 'my tears richochet (cult)'}, {'key' : 'album', 'value' : 'the 1 (album)'}] as const
+	const gameModes = [{'key' : 'easy', 'value' : 'this is me trying (easy)'}, {'key' : 'classics version', 'value' : "The Classics (rec'd)"}, {'key' : "Taylor's Version", 'value' : "Taylor's Version (hard)"}, {'key' : 'cult version', 'value' : 'my tears richochet (cult)'}] as const
+
+	// {'key' : 'album', 'value' : 'the 1 (album)'}
 
 	const albums = ["Taylor Swift", "Fearless", "Speak Now", "Red", "1989", "reputation", "Lover", "folklore", "evermore", "Midnights"] as const
 
@@ -494,7 +496,7 @@ function App() {
 
 						</div>
 							{/* the old {playerName} is dead */}
-							<h2>Pick a mode</h2>
+							<h2>Pick an Eras mode</h2>
 
 						<div className="cursor-pointer rounded-t-xl rounded-b-xl text-center mt-4" onClick={() => setShowGameModeQ(!showGameModeQ)}>
 							<div className='text-md font-bold'>Question...?</div>
@@ -517,6 +519,15 @@ function App() {
 								}}>{x.value}
 							</button>)}
 
+							<h2>or pick an album</h2>
+							{<button 
+								className={`block min-w-full cursor-pointer rounded-t-xl rounded-b-xl p-2 text-center text-md font-bold ${ltErasColors[0]} ${gameMode == 'album' ? '' : 'faded'}`} id={'album'} 
+								onClick={() => {
+									setAlbumMode(''); 
+									setGameMode('album');
+								}}>the 1 (album)
+							</button>}
+							
 							{gameMode == 'album' && <div className='p-4 grid grid-cols-1'>
 								{albums.map((x,i)=> <button className={`block min-w-full cursor-pointer rounded-t-xl rounded-b-xl text-center p-2 text-[#68416d] ${albumMode == x ? '' : 'faded'} ${albumColorKey[albumKeyLkup[x] as keyof typeof albumColorKey]}`}
 								onClick={() => {
