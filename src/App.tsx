@@ -31,6 +31,7 @@ function App() {
 	// const location = useLocation()
 	
 	const gameDate = new Date()
+
 	const ltErasColors = ['eras_green', 'eras_gold', 'eras_purple', 'eras_lblue', 'eras_pink', 'eras_maroon', 'eras_indigo', 'eras_tan', 'eras_grey', 'eras_black'];
 
 	const albumColorKey = {'Taylor_Swift': 'era-taylor-swift', 'Fearless': 'era-fearless', 'Speak_Now': 'era-speak-now', 'Red': 'era-red', '1989': 'era-1989', 'reputation': 'era-reputation', 'Lover': 'era-lover', 'folklore': 'era-folklore', 'evermore': 'era-evermore', 'Midnights': 'era-midnights'} as const
@@ -292,7 +293,7 @@ function App() {
 			time: secondsElapsed, 
 			lyric: displayLyric,
 			correct: correct, 
-			date: `${gameDate.getFullYear()}-${gameDate.getMonth()+1}-${gameDate.getDate()}`,
+			date: `${gameDate.toISOString().slice(0, 10)}`,
 			gameId: gameId,
 			song: song,
 			lyric_id: displayLyricId,
@@ -442,7 +443,7 @@ function App() {
   return (
     <>
 			{!gameStarted && <Nav location={location}></Nav>}
-			<div className='grid grid-cols-1 p-4 items-center mt-20 lg:ml-8 lg:mr-8 sm:ml-2 sm:mr-2'>
+			<div className={`grid grid-cols-1 p-4 items-center ${gameStarted ? '' : 'mt-20'} lg:ml-8 lg:mr-8 sm:ml-2 sm:mr-2`}>
 				<div className=''>
 					<img src={title} className={`mx-auto logo p-4 ${(gameStarted || displayStats) ? 'max-h-32' : ''}`} alt="Swift AF" />				
 				</div>
