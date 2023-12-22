@@ -30,8 +30,8 @@ let leaderboardFullDB: Leaderboard[] = []
 function App() {	
 	// const location = useLocation()
 	
-	const min_accuracy = 60;
-	const min_correct = 10;
+	const min_accuracy = 92;
+	const min_correct = 50;
 
 	const ltErasColors = ['eras_green', 'eras_gold', 'eras_purple', 'eras_lblue', 'eras_pink', 'eras_maroon', 'eras_indigo', 'eras_tan', 'eras_grey', 'eras_black'];
 
