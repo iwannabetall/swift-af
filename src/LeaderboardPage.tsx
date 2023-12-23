@@ -8,7 +8,7 @@ let leaderboardFullDB: Leaderboard[] = []
 
 function LeaderboardPage() {
 	
-	const min_accuracy = 92;
+	const min_accuracy = 95;
 	const min_correct = 50;
 	
 	const albumColorKey = {'Taylor_Swift': 'era-taylor-swift', 'Fearless': 'era-fearless', 'Speak_Now': 'era-speak-now', 'Red': 'era-red', '1989': 'era-1989', 'reputation': 'era-reputation', 'Lover': 'era-lover', 'folklore': 'era-folklore', 'evermore': 'era-evermore', 'Midnights': 'era-midnights'} as const
@@ -72,7 +72,7 @@ function LeaderboardPage() {
 					</div>
 					<h6 className='text-sm'>{`Minimum ${min_correct} correct and ${min_accuracy}% accuracy.  No easy mode.  Filter subject to change.`}</h6>
 					{leaderboardData && <div className='flex flex-row flex-wrap items-center justify-center'>
-						{leaderboardData.map(x=> <div key={x.game_id} className={`leaderboardContainer ${x.game_mode == 'album' ? albumColorKey[albumKeyLkup[x.album_mode as keyof typeof albumKeyLkup]] : 'era-reputation '} text-center m-4 p-2 shadow-md rounded`}>
+						{leaderboardData.map(x=> <div key={x.game_id} className={`leaderboardContainer ${x.game_mode == 'album' ? albumColorKey[albumKeyLkup[x.album_mode as keyof typeof albumKeyLkup]] : x.game_mode == "Taylor's Version" ? 'era-midnights' : x.game_mode == 'classics version' ? 'era-reputation' : 'era-red'} text-center m-4 p-2 shadow-md rounded`}>
 							<img className='albums' src={`/icons/${x.fighter}.jpg`}></img>
 							<div className='m-2 text-xl font-bold'>{x.speed_rk == 1 ? '🏆' : x.speed_rk == 2 ? '🥈' : x.speed_rk == 3 ? '🥉' : '⭐'} {x.player_name} {x.speed_rk == 1 ? '🏆' : x.speed_rk == 2 ? '🥈' : x.speed_rk == 3 ? '🥉' : '⭐'} </div>
 							<span className='italic text-sm'>{moment(x.game_date).format('MMM D, YYYY')}</span>

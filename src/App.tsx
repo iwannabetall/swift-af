@@ -30,7 +30,7 @@ let leaderboardFullDB: Leaderboard[] = []
 function App() {	
 	// const location = useLocation()
 	
-	const min_accuracy = 92;
+	const min_accuracy = 95;
 	const min_correct = 50;
 
 	const ltErasColors = ['eras_green', 'eras_gold', 'eras_purple', 'eras_lblue', 'eras_pink', 'eras_maroon', 'eras_indigo', 'eras_tan', 'eras_grey', 'eras_black'];
@@ -92,7 +92,7 @@ function App() {
 	const [gameRank, setGameRank] = useState<Leaderboard[]>([])
 
 
-	const wrongAnswersOnly = ["This is why we can't have nice things", "Would you like closure and know the song", "Is this you trying", "It's you, you're the problem", "Not sure how long we're gonna tolerate this for", "I wish you would get the right answer", "That was not the 1", "you'll have an ephiphany on it later", "Made my tears richochet with that one","You forgot that song existed", "Death by a thousand wrongs", "False Swiftie", "You're on your own, kid", "Answer...?", "brain Glitch", "I bet you'll think about that", "You did something bad", "Exhiling you", "tis not the damn song", "Shake it off", "That was sweet nothing"]
+	const wrongAnswersOnly = ["This is why we can't have nice things", "Would you like closure and know the song", "Is this you trying", "It's you, you're the problem", "Can we tolerate this", "I wish you would get the right answer", "That was not the 1", "you'll have an ephiphany on it later", "Made my tears richochet with that one","You forgot that song existed", "You're losing it", "Death by a thousand wrongs", "False Swiftie", "You're on your own, kid", "Answer...?", "brain Glitch", "I bet you'll think about that", "You did something bad", "Exhiling you", "tis not the damn song", "Shake it off", "That was sweet nothing"]
 
 	useEffect(() => {
 		delayedDataFetch()					
@@ -128,7 +128,7 @@ function App() {
 		// axios.get(`http://localhost:3000/getLeaderboard`)
 			.then(function (response) {								
 				leaderboardFullDB = response.data.leaderBoard
-				console.log(leaderboardFullDB)
+				// console.log(leaderboardFullDB)
 				setLeaderboardData(leaderboardFullDB.filter(x=> x.game_mode != 'album'))
 			})
 			.catch(function (error) {				
@@ -403,7 +403,7 @@ function App() {
 		// axios.get(`http://localhost:3000/getLeaderboard`)
 			.then(function (response) {								
 				leaderboardFullDB = response.data.leaderBoard
-				console.log('new leaderboard', leaderboardFullDB)
+				// console.log('new leaderboard', leaderboardFullDB)
 				let gameRk = leaderboardFullDB.filter(x=> x.game_id == gameId)
 				setLeaderboardData(leaderboardFullDB.filter(x=> x.game_mode != 'album'))
 
