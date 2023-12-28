@@ -8,7 +8,7 @@ let leaderboardFullDB: Leaderboard[] = []
 
 function LeaderboardPage() {
 	
-	const min_accuracy = 95;
+	const min_accuracy = 97.5;
 	const min_correct = 50;
 	
 	const albumColorKey = {'Taylor_Swift': 'era-taylor-swift', 'Fearless': 'era-fearless', 'Speak_Now': 'era-speak-now', 'Red': 'era-red', '1989': 'era-1989', 'reputation': 'era-reputation', 'Lover': 'era-lover', 'folklore': 'era-folklore', 'evermore': 'era-evermore', 'Midnights': 'era-midnights'} as const

@@ -213,7 +213,11 @@ button:focus-visible {
 
 .selected{
 	border: black solid 2px;
-	text-decoration: underline;
+}
+
+.tv {
+	border: var(--era-fearless) solid 3px;
+	z-index: 2;
 }
 
 
