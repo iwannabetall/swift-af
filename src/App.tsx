@@ -128,7 +128,7 @@ function App() {
 		// axios.get(`http://localhost:3000/getLeaderboard`)
 			.then(function (response) {								
 				leaderboardFullDB = response.data.leaderBoard
-				// console.log(leaderboardFullDB)
+				// console.log('init', leaderboardFullDB)
 				setLeaderboardData(leaderboardFullDB.filter(x=> x.game_mode != 'album'))
 			})
 			.catch(function (error) {				
@@ -181,7 +181,7 @@ function App() {
 	}, [isLoading])
 
 	useEffect(()=> {
-		if (filterLeaderboard == 'all') {
+		if (filterLeaderboard == 'all') {			
 			setLeaderboardData(leaderboardFullDB.filter(x=> x.game_mode != 'album'))
 		} else {
 			setLeaderboardData(leaderboardFullDB.filter(x=> x.game_mode == 'album'))
@@ -394,78 +394,94 @@ function App() {
 		// runs only if they played at least one round 
 
 		// calc stats by album and other various stats
+		// overall accuracy
 		let overall = (100*gameStats.filter(x=> x.correct == 1).length/gameStats.length).toFixed(0)
 
-		setIsLoading(true)
-		// console.log('gameid', gameId)		
+		// can only make the leaderboard if answered 50 correct, accuracy > 97.5% and under 3.5s average 
 
-		axios.get(`https://swift-api.fly.dev/getLeaderboard`)
-		// axios.get(`http://localhost:3000/getLeaderboard`)
-			.then(function (response) {								
-				leaderboardFullDB = response.data.leaderBoard
-				// console.log('new leaderboard', leaderboardFullDB)
-				let gameRk = leaderboardFullDB.filter(x=> x.game_id == gameId)
-				setLeaderboardData(leaderboardFullDB.filter(x=> x.game_mode != 'album'))
+		let avg_time = parseFloat((gameStats.map(x=> x.time).reduce((total, current) => total + current, 0)/gameStats.length).toFixed(2))
+		let total_correct = gameStats.filter(x=> x.correct == 1).length
+		console.log(leaderboardFullDB, gameMode)
 
-				// console.log('gameRk', gameRk)
-				// if didnt make leaderboard, need to calc data 
-				if (gameRk.length == 0) {
-					gameRk.push({ 'player_name' : playerName,
-					'game_id' : gameId, 
-					'accuracy' : parseInt(overall), 
-					'accuracy_rk' : 100, 
-					'accuracy_pctl' : 20, 
-					'time' : parseFloat((gameStats.map(x=> x.time).reduce((total, current) => total + current, 0)/gameStats.length).toFixed(2)),
-					'speed_rk': parseInt(overall) < 30 ? 1000 : parseInt(overall) < 45 ? 500 : 100, 
-					'speed_pctl' : 20, 
-					'correct' : gameStats.filter(x=> x.correct == 1).length,
-					'total' : gameStats.length,
-					'album_mode' : albumMode, 
-					'game_mode' : gameMode, 
-					'fighter' : fighter, 
-					'game_date' : gameDate?.toString()
-					})				
+		let stats = { 'player_name' : playerName,
+		'accuracy' : parseInt(overall), 
+		'accuracy_rk' : 100, 		
+		'time' : parseFloat((gameStats.map(x=> x.time).reduce((total, current) => total + current, 0)/gameStats.length).toFixed(2)),
+		'speed_rk' : 100, 		
+		'game_id' : gameId,
+		'correct' : total_correct,
+		'total' : gameStats.length,
+		'album_mode' : albumMode, 
+		'game_mode' : gameMode, 
+		'fighter' : fighter, 
+		'game_date' : gameDate?.toString()
+		}
 
-					console.log('calculated gameRk', gameRk)
-				}
-				
-				setGameRank(gameRk)
+		// squeeze new player into leaderboard and update database if they met leaderboard reqs
+		if (parseFloat(overall) > min_accuracy && total_correct > min_correct && avg_time <= 3.5) {	
 
-				setIsLoading(false)
-			})
-			.catch(function (error) {				
-				console.log(error);
-			});	
-							
-			setAccuracy(overall)
+			let currentLeaders = leaderboardFullDB.filter(x=> x.game_mode == gameMode && x.album_mode == albumMode && x.time < avg_time)
+ 
+			let rank : number;
+			let id : string | undefined;
+			let id_index : number;
 
-			// setAvgSpeed((gameStats.map(x=> x.time).reduce((total, current) => total + current, 0)/gameStats.length).toFixed(2))
-		
-			let allStatsByAlbums: StatsByAlbum[] = []
-
-			// either create a function where it returns the type or create the type/obj at the beg
-			for (let i = 0; i < albums.length; i++) {
-				let albumStats = gameStats.filter(x=> x.album == albums[i])
-				let calcStats: StatsByAlbum = { album: albums[i], correct: 0, total: 0, avgTime: '', albumKey: albumKeyLkup[albums[i]]}
-			
-				// calcStats.album = albums[i]				
-
-				if (albumStats.length > 0) {
-					calcStats.correct = albumStats.filter(x=> x.correct).length
-					calcStats.total = albumStats.length
-					calcStats.avgTime = (albumStats.map(x=> x.time).reduce((acc,curr) => acc + curr, 0)/albumStats.length).toFixed(1)
-					calcStats.albumKey = albumStats[0].album_key
-
-					allStatsByAlbums.push(calcStats)
-
-				}
-				
+			// currentLeaders will be null if if you're the leader
+			if (currentLeaders.length == 0) {				
+				rank = 1	
+				id_index = 1			
+			} else {
+				// if not the leader, have to get game id of relevant game so we know what rank to give it for updating table			
+				id = currentLeaders.slice(-1)[0].game_id
+				rank = currentLeaders.slice(-1)[0].speed_rk + 1
+				id_index = currentLeaders.map(x=> x.game_id).indexOf(id)				
 			}
+			stats.speed_rk = rank
+			
+			// insert into leader board, subtract 1 bc zero indexed
+			leaderboardFullDB.splice(id_index - 1, 0, stats) // need to pass an obj not an array
+			// update local leader data
+			setLeaderboardData(leaderboardFullDB.filter(x=> x.game_mode != 'album'))
+			// update leaderboard/save to database 
+			axios.post('https://swift-api.fly.dev/updateLeaderboard', stats)
+			// axios.post(`http://localhost:3000/updateLeaderboard`, stats)
+			.then(function () {
+				// console.log(response)
+			})
+			.catch(function (error) {			
+				console.log(error);
+			});
 
-			console.log(allStatsByAlbums)
+		}
 
-			setStatsByAlbum(allStatsByAlbums)
+		setGameRank([stats])
+		setAccuracy(overall)
+	
+		let allStatsByAlbums: StatsByAlbum[] = []
+
+		// either create a function where it returns the type or create the type/obj at the beg
+		for (let i = 0; i < albums.length; i++) {
+			let albumStats = gameStats.filter(x=> x.album == albums[i])
+			let calcStats: StatsByAlbum = { album: albums[i], correct: 0, total: 0, avgTime: '', albumKey: albumKeyLkup[albums[i]]}
 		
+			// calcStats.album = albums[i]				
+
+			if (albumStats.length > 0) {
+				calcStats.correct = albumStats.filter(x=> x.correct).length
+				calcStats.total = albumStats.length
+				calcStats.avgTime = (albumStats.map(x=> x.time).reduce((acc,curr) => acc + curr, 0)/albumStats.length).toFixed(1)
+				calcStats.albumKey = albumStats[0].album_key
+
+				allStatsByAlbums.push(calcStats)
+
+			}
+			
+		}
+
+		console.log(allStatsByAlbums)
+
+		setStatsByAlbum(allStatsByAlbums)
+	
 		
 	}
 
@@ -520,7 +536,7 @@ function App() {
 						<div>
 							<h2>Choose your fighter</h2>							
 							<div className='flex flex-row flex-wrap justify-center'>
-							{albumCovers.map(x=> <img src={`/icons/${x}.jpg`}  className ={`albums ${(fighterChosen && fighter != x) ? 'faded' : fighterChosen && fighter == x ? 'selected' : ''}`} onClick={()=> {
+							{albumCovers.map(x=> <img src={`/icons/${x}.jpg`} key={x} className ={`albums ${(fighterChosen && fighter != x) ? 'faded' : fighterChosen && fighter == x ? 'selected' : ''}`} onClick={()=> {
 								setFighter(x);
 								setFighterChosen(true);
 								}}></img>)}	
@@ -544,7 +560,7 @@ function App() {
 						<div className='p-4 pt-0 grid grid-cols-1'>
 							<div className="text-center m-4 p-2 text-md">
 							{gameModes.map((x,i)=> 
-							<button 
+							<button key={x.key}
 								className={`block min-w-full cursor-pointer rounded-t-xl rounded-b-xl p-2 text-center text-md font-bold ${ltErasColors[i]} ${gameMode == x.key ? '' : 'faded'}`} id={x.key} 
 								onClick={() => {
 									setAlbumMode(''); 

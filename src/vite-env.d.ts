@@ -80,11 +80,9 @@ interface Leaderboard {
 	player_name: string; 
 	game_id: string;
 	accuracy: number;
-	accuracy_rk: number;
-	accuracy_pctl: number;
+	accuracy_rk: number;	
 	time: number;
-	speed_rk: number;
-	speed_pctl: number;
+	speed_rk: number;	
 	correct: number;
 	total: number;
 	album_mode: string;

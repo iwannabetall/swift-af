@@ -1,6 +1,6 @@
 import React from 'react'
 import ReactDOM from 'react-dom/client'
-import App from './App.tsx'
+import App from './App.1.tsx'
 import LeaderboardPage from './LeaderboardPage.tsx'
 import './index.css'
 import ErrorPage from "./error-page.tsx";

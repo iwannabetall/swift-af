@@ -40,7 +40,7 @@ function LeaderboardPage() {
 		axios.get(`https://swift-api.fly.dev/getLeaderboard`)
 		.then(function (response) {								
 			leaderboardFullDB = response.data.leaderBoard
-			// console.log(leaderboardFullDB)
+			console.log(leaderboardFullDB)
 			setLeaderboardData(leaderboardFullDB.filter(x=> x.game_mode != 'album'))
 			setIsLoading(false)
 		})
