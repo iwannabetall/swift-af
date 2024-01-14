@@ -128,7 +128,7 @@ function App() {
 		// axios.get(`http://localhost:3000/getLeaderboard`)
 			.then(function (response) {								
 				leaderboardFullDB = response.data.leaderBoard
-				// console.log('init', leaderboardFullDB)
+				// console.log('init', 'got leaderboard')
 				setLeaderboardData(leaderboardFullDB.filter(x=> x.game_mode != 'album'))
 			})
 			.catch(function (error) {				

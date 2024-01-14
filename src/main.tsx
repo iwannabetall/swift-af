@@ -4,7 +4,7 @@ import App from './App.tsx'
 import LeaderboardPage from './LeaderboardPage.tsx'
 import './index.css'
 import ErrorPage from "./error-page.tsx";
-import About from './About.tsx'
+// import About from './About.tsx'
 import {
   createBrowserRouter,
   RouterProvider,
@@ -21,11 +21,11 @@ const router = createBrowserRouter([
     element: <LeaderboardPage />,
     errorElement: <ErrorPage />,
   },
-	{
-    path: "/answers",
-    element: <About />,
-    errorElement: <ErrorPage />,
-  },
+	// {
+  //   path: "/answers",
+  //   element: <About />,
+  //   errorElement: <ErrorPage />,
+  // },
 	// {
   //   path: "/endgame",
   //   element: <Leaderboard />,

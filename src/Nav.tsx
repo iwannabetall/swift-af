@@ -19,7 +19,9 @@ export default function Nav({ location } : {location: {pathname: string}}){
 	// const title = "im swift af boi. are you??"
 	// const size = 24
 	
-	const paths = [{key: '/', value: 'Home'}, {key: '/answers', value: 'Question...?'}, {key: '/leaderboard', value: "This is why we can't have nice things"}] as const; 
+	// const paths = [{key: '/', value: 'Home'}, {key: '/answers', value: 'Question...?'}, {key: '/leaderboard', value: "This is why we can't have nice things"}] as const; 
+
+	const paths = [{key: '/', value: 'Home'}, {key: '/leaderboard', value: "This is why we can't have nice things"}] as const; 
 
 	return (
 		<div className="era-reputation left-0">

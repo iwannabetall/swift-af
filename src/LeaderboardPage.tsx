@@ -22,7 +22,9 @@ function LeaderboardPage() {
 	const [filterLeaderboard, setFilterLeaderboard] = useState<filterLeaderboard>('all')
 
 	useEffect(() => {
-		delayedDataFetch()					
+
+		delayedDataFetch()
+	
 	}, [])
 
 	useEffect(()=> {
@@ -34,7 +36,9 @@ function LeaderboardPage() {
 		
 	}, [filterLeaderboard])
 
+
 	async function delayedDataFetch() {
+		
 		setIsLoading(true)
 		// axios.get(`http://localhost:3000/getLeaderboard`)
 		axios.get(`https://swift-api.fly.dev/getLeaderboard`)
@@ -84,7 +88,7 @@ function LeaderboardPage() {
 							<div className='mt-1'>Can you beat me? swift-af.com</div>
 							</div>)}
 						</div>
-					}					
+					}	
 				</div>
 				
 			</div>}
