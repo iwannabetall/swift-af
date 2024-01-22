@@ -418,10 +418,12 @@ function App() {
 		}
 
 		// squeeze new player into leaderboard and update database if they met leaderboard reqs
-		if (parseFloat(overall) > min_accuracy && total_correct > min_correct && avg_time <= 3.5) {	
+		if (parseFloat(overall) > min_accuracy && total_correct > min_correct && avg_time <= 3) {	
 
+		// if (parseFloat(overall) > 3) {	// for testing
+	
 			let currentLeaders = leaderboardFullDB.filter(x=> x.game_mode == gameMode && x.album_mode == albumMode && x.time < avg_time)
- 
+			console.log(gameMode, albumMode, avg_time)
 			let rank : number;
 			let id : string | undefined;
 			let id_index : number;
@@ -580,6 +582,7 @@ function App() {
 							
 							{gameMode == 'album' && <div className='p-4 grid grid-cols-1'>
 								{albums.map((x,i)=> <button className={`block min-w-full cursor-pointer rounded-t-xl rounded-b-xl text-center p-2 text-[#68416d] ${albumMode == x ? '' : 'faded'} ${albumColorKey[albumKeyLkup[x] as keyof typeof albumColorKey]}`}
+								key={`${albumKeyLkup[x]}`}
 								onClick={() => {
 									setGameMode('album')
 									setAlbumMode(x)}}
@@ -600,6 +603,7 @@ function App() {
 						{displayLyric}</div>
 
 					{answerChoices.map((x,i) => <div className={`cursor-pointer rounded-t-xl rounded-b-xl text-center m-4 p-2 text-lg font-bold ${ltErasColors[i]}`}
+					key={`ans_${i}`}
 						onClick={() => checkAnswer(x)}> {x}</div>)}
 					<h3>seconds: {secondsElapsed.toFixed(0)}</h3>
 				
@@ -643,7 +647,9 @@ function App() {
 											</tr>
 										</thead>
 										<tbody>
-											{gameStats.filter(x=> x.correct == 1).map(x =><tr className={`text-center text-[#68416d] ${albumColorKey[x.album_key as keyof typeof albumColorKey]}`}>
+											{gameStats.filter(x=> x.correct == 1).map((x,i) =><tr className={`text-center text-[#68416d] ${albumColorKey[x.album_key as keyof typeof albumColorKey]}`}
+											key={`correct_${i}`}
+											>
 												<td className="border p-1">{x.lyric}</td>
 												<td className="border p-1">{x.song}</td>
 												<td className="border p-1">{x.time.toFixed(1)}s</td>
@@ -666,7 +672,8 @@ function App() {
 								</thead>
 								<tbody>
 								{/* ${albumColorKey[x.album_key: keyof albumColorKey]} */}
-									{gameStats.filter(x=> x.correct == 0).map((x) =><tr  className={`text-center text-[#513355] ${albumColorKey[x.album_key]}`}>
+									{gameStats.filter(x=> x.correct == 0).map((x,i) =><tr  className={`text-center text-[#513355] ${albumColorKey[x.album_key]}`}
+									key={`wrong_${i}`}>
 										<td className="border p-1">{x.lyric}</td>
 										<td className="border p-1">{x.song}</td>
 										<td className="border p-1">{x.userResponse}</td>
@@ -686,7 +693,9 @@ function App() {
 									</tr>
 								</thead>
 								<tbody>
-									{statsByAlbum.map(x =><tr className={`text-center text-[#68416d] ${albumColorKey[x.albumKey as keyof typeof albumColorKey]}`}>
+									{statsByAlbum.map(x =><tr className={`text-center text-[#68416d] ${albumColorKey[x.albumKey as keyof typeof albumColorKey]}`}
+									key={`${x.albumKey}`}
+									>
 										<td className="border p-1">{x.album}</td>
 										<td className="border p-1">{x.correct}/{x.total}</td>
 										<td className="border p-1">{x.avgTime}</td>
