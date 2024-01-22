@@ -363,7 +363,6 @@ function App() {
 		setGameStarted(false)
 		setResult('')
 
-		console.log('restartGame', lyricsDB)
 	}
 
 	function endGame(){
@@ -397,7 +396,7 @@ function App() {
 
 		let avg_time = parseFloat((gameStats.map(x=> x.time).reduce((total, current) => total + current, 0)/gameStats.length).toFixed(2))
 		let total_correct = gameStats.filter(x=> x.correct == 1).length
-		console.log(leaderboardFullDB, gameMode)
+		// console.log(leaderboardFullDB, gameMode)
 
 		let stats = { 'player_name' : playerName,
 		'accuracy' : parseInt(overall), 
@@ -476,7 +475,7 @@ function App() {
 			
 		}
 
-		console.log(allStatsByAlbums)
+		// console.log(allStatsByAlbums)
 
 		setStatsByAlbum(allStatsByAlbums)
 	
