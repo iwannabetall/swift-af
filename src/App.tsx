@@ -90,7 +90,7 @@ function App() {
 	const [gameStarted, setGameStarted] = useState<boolean>(false)
 	const [displayStats, setDisplayStats] = useState<boolean>(false);
 	const [gameRank, setGameRank] = useState<Leaderboard[]>([])
-
+	
 
 	const wrongAnswersOnly = ["This is why we can't have nice things", "Would you like closure and know the song", "Is this you trying", "It's you, you're the problem", "Can we tolerate this", "I wish you would get the right answer", "That was not the 1", "you'll have an ephiphany on it later", "Made my tears richochet with that one","You forgot that song existed", "You're losing it", "Death by a thousand wrongs", "False Swiftie", "You're on your own, kid", "Answer...?", "brain Glitch", "I bet you'll think about that", "You did something bad", "Exhiling you", "tis not the damn song", "Shake it off", "That was sweet nothing"]
 
@@ -249,8 +249,7 @@ function App() {
 								
 				setStartTime(Date.now())
 				setCurrentTime(Date.now())
-				setGameStats([])
-			
+				setGameStats([])				
 				setGameId(uuidv4())		
 	
 				const randInd = Math.floor(Math.random() * lyricsDB.length)
@@ -272,8 +271,6 @@ function App() {
 
 	function checkAnswer(clicked: string) {
 		// console.log(gameId)
-		// console.log('wtf2', lyricsDB, songList)
-		// console.log(clicked == song, song, clicked)
 		if (albumKey === '') {
 			return
 		}
@@ -293,7 +290,6 @@ function App() {
 			setResult(wrongAnswersOnly[Math.floor(Math.random() * wrongAnswersOnly.length)])
 			setGameStats([{'time': secondsElapsed, song: song, userResponse: clicked.trim(), correct: 0, album: album, lyric: displayLyric, album_key: albumKey, level: gameMode, lyric_id: displayLyricId, id: gameStats.length + 1}, ...gameStats])
 		}
-
 		
 		// save results before resetting
 		// axios.post('http://localhost:3000/saveGameData', {
@@ -309,7 +305,8 @@ function App() {
 			lyric_id: displayLyricId,
 			playerName: playerName,
 			albumMode: albumMode,
-			fighter: fighter
+			fighter: fighter,
+			id: gameStats.length
 		})
 		.then(function () {
 			// console.log(response)
@@ -321,8 +318,7 @@ function App() {
 		// console.log({'time': secondsElapsed, song: song, userResponse: clicked.trim(), correct: 0, album: album, lyric: displayLyric},gameStats)
 
 		let rand = Math.floor(Math.random() * lyricsDB.length)
-		// change song, clear input, reset timer
-		
+		// change song, clear input, reset timer		
 		setDisplayLyric(lyricsDB[rand].lyric)
 		setDisplayLyricId(lyricsDB[rand].id)
 		setSong(lyricsDB[rand].song.trim())
