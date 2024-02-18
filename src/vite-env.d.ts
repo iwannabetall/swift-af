@@ -18,6 +18,8 @@ interface Lyrics {
 	"vault": number;
 }
 
+
+
 // interface albumColorKey {
 // 	'Taylor_Swift': string;
 // 	'Fearless': string;
@@ -34,7 +36,8 @@ interface Lyrics {
 
 type AlbumKey = "Taylor_Swift" | "Fearless" | "Speak_Now" | 'Red' | '1989' | 'reputation' | 'Lover' | 'folklore' | 'evermore' | 'Midnights' 
 
-type AlbumArt = "Taylor_Swift" | "Fearless" | "Speak_Now" | 'Red' | 'TS1989' | 'reputation' | 'Lover' | 'folklore' | 'evermore' | 'Midnights' | 'imtheproblem'
+// name of the jpg files of covers
+type AlbumArt = "Taylor_Swift" | "Fearless" | "Speak_Now" | 'Red' | '1989' | 'reputation' | 'Lover' | 'folklore' | 'evermore' | 'Midnights' | 'imtheproblem'
 
 
 type Album = "Taylor Swift" | "Fearless" | "Speak Now" | 'Red' | '1989' | 'reputation' | 'Lover' | 'folklore' | 'evermore' | 'Midnights' 
@@ -44,9 +47,11 @@ type filterLeaderboard = 'all' | 'album'
 type game_mode = 'easy' | 'classics version' | "Taylor's Version" | 'cult version' | 'album' 
 
 interface SongList {
-	"song": string;
-	"album": string;
-	"vault": number;
+	song: string;
+	album: string;
+	vault: number;
+	track_n: number;
+	album_key: string;
 }
 
 declare global {
@@ -62,20 +67,6 @@ interface StatsByAlbum {
 	albumKey: AlbumKey;
 }
 
-interface GameStats {
-	time: number; 
-	song: string;
-	album_key: AlbumKey;
-	album: string;
-	userResponse: string;	
-	correct: number;
-	lyric: string;
-	lyric_id: number;
-	level: string;
-	id: number;
-}
- 
-
 interface Leaderboard {
 	player_name: string; 
 	game_id: string;
@@ -90,3 +81,35 @@ interface Leaderboard {
 	fighter: string;
 	game_date: string;
 }
+
+
+interface GameStats {
+	time: number; 
+	song: string;
+	album_key: AlbumKey;
+	album: string;
+	userResponse: string;	
+	correct: number;
+	lyric: string;
+	lyric_id: number;
+	level: string;
+	id: number;
+
+}
+ 
+interface LyricData {
+	album: string;
+	album_key: AlbumKey;
+	accuracy: number;
+	time: number;
+	filler: number;
+	total: number;
+	lyric: string;
+	lyric_id: number;
+	vault: number;
+	song: string;
+	track_n?: number;
+	orig_lyric_id?: number;
+}
+
+

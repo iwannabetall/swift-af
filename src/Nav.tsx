@@ -1,17 +1,4 @@
-// import {
-//   FacebookShareButton,  
-// 	FacebookIcon,
-//   FacebookMessengerIcon,
-//   FacebookMessengerShareButton,
-// 	TumblrIcon,
-//   TumblrShareButton,
-//   TwitterShareButton,
-// 	XIcon,
-// 	WhatsappIcon,
-//   WhatsappShareButton,
-// 	TelegramIcon,
-//   TelegramShareButton,
-// } from "react-share";
+
 
 export default function Nav({ location } : {location: {pathname: string}}){
 
@@ -21,7 +8,7 @@ export default function Nav({ location } : {location: {pathname: string}}){
 	
 	// const paths = [{key: '/', value: 'Home'}, {key: '/answers', value: 'Question...?'}, {key: '/leaderboard', value: "This is why we can't have nice things"}] as const; 
 
-	const paths = [{key: '/', value: 'Home'}, {key: '/leaderboard', value: "This is why we can't have nice things"}] as const; 
+	const paths = [{key: '/', value: 'Home'}, {key: '/leaderboard', value: "This is why we can't have nice things"}, {key: '/dataland', value: "Data, Speak Not"}] as const; 
 
 	return (
 		<div className="era-reputation left-0">
@@ -34,6 +21,7 @@ export default function Nav({ location } : {location: {pathname: string}}){
 
 			{/* <div className = 'fixed bottom-0 era-reputation left-0m in-w-full fixed p-2'>
 				Challenge your friends 
+				<br></br>
 				<FacebookShareButton
           url={shareUrl}
           className="inline mr-2"

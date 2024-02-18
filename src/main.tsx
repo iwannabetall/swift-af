@@ -4,7 +4,7 @@ import App from './App.tsx'
 import LeaderboardPage from './LeaderboardPage.tsx'
 import './index.css'
 import ErrorPage from "./error-page.tsx";
-// import About from './About.tsx'
+import Dataland from './Dataland.tsx'
 import {
   createBrowserRouter,
   RouterProvider,
@@ -20,12 +20,12 @@ const router = createBrowserRouter([
     path: "/leaderboard",
     element: <LeaderboardPage />,
     errorElement: <ErrorPage />,
+  },	
+	{
+    path: "/dataland",
+    element: <Dataland />,
+    errorElement: <ErrorPage />,
   },
-	// {
-  //   path: "/answers",
-  //   element: <About />,
-  //   errorElement: <ErrorPage />,
-  // },
 	// {
   //   path: "/endgame",
   //   element: <Leaderboard />,

@@ -45,7 +45,7 @@ function App() {
 
 	const albums = ["Taylor Swift", "Fearless", "Speak Now", "Red", "1989", "reputation", "Lover", "folklore", "evermore", "Midnights"] as const
 
-	const albumCovers = ["Taylor_Swift", "Fearless", "Speak_Now", "Red", "TS1989", "reputation", "Lover", "folklore", "evermore", "Midnights"] as const
+	const albumCovers = ["Taylor_Swift", "Fearless", "Speak_Now", "Red", "1989", "reputation", "Lover", "folklore", "evermore", "Midnights"] as const
 
 	const normal = "classics version" as const
 	const hard = "Taylor's Version" as const
@@ -538,7 +538,7 @@ function App() {
 								setFighterChosen(true);
 								}}></img>)}	
 							
-							</div>
+						</div>
 
 						</div>
 							{/* the old {playerName} is dead */}
