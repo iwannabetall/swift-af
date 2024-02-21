@@ -108,8 +108,11 @@ interface LyricData {
 	lyric_id: number;
 	vault: number;
 	song: string;
+	// last for are for full lyrics
 	track_n?: number;
 	orig_lyric_id?: number;
+	line_num?: number;
+	title_in_lyric_match?: number;
 }
 
 
