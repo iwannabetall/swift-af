@@ -56,14 +56,14 @@ function Dataland() {
 			if (fullLyricsNStats.filter(x=> x.album_key == fighter).length == 0){
 
 				setGettingLyrics(true);
-				// axios.get(`http://localhost:3000/getFullLyricsNStats`, { params:
-				axios.get(`https://swift-api.fly.dev/getFullLyricsNStats`, { params:
+				axios.get(`http://localhost:3000/getFullLyricsNStats`, { params:
+				// axios.get(`https://swift-api.fly.dev/getFullLyricsNStats`, { params:
 				{ 'album': fighter }
 				})
 				.then(function (response) {								
 					fullLyricsNStats = fullLyricsNStats.concat(response.data.fullLyricsNStats)
 					// setSongFilter('Anti-Hero')
-					console.log(fullLyricsNStats)
+					console.log('fullLyricsNStats', fullLyricsNStats)
 					if (songsFullDB.length > 0) {
 						let first_track = songsFullDB.filter(s=> s.album_key == albumFilter)[0].song
 						setSongFilter(first_track)
@@ -132,7 +132,7 @@ function Dataland() {
 		// lyrical data viz 
 		
 		if (displayLyrics.length > 0) {
-			console.log(displayLyrics)
+			console.log('displayLyrics', displayLyrics)
 
 			// const t = d3.transition()
 			// 	.duration(750)
@@ -216,17 +216,23 @@ function Dataland() {
 
 	}
 
-	}, [displayLyrics, albumFilter])
+	}, [displayLyrics, albumFilter, highlightGroup])
 
 	function highlightLines(lyricGroup: string){
 		setHighlightGroup(lyricGroup)
-
-		d3.selectAll('.lyrics').transition()
-			.style('opacity', 0.3)
+		if (lyricGroup == ''){
+			// reset and show full group
+			setDisplayLyrics(fullLyricsNStats.filter(s=> s.song == songFilter))
+		} else {
+			setDisplayLyrics(fullLyricsNStats.filter(s=> s.song == songFilter && s.accuracy_group == lyricGroup))
+		}
+		
+		// d3.selectAll('.lyrics').transition()
+		// 	.style('opacity', 0.3)
 
 		
-		d3.selectAll(`.lyrics.${lyricGroup}`).transition()
-			.style('opacity', 1)
+		// d3.selectAll(`.lyrics.${lyricGroup}`).transition()
+		// 	.style('opacity', 1)
 	}
 
 	async function delayedDataFetch() {
@@ -243,8 +249,8 @@ function Dataland() {
 			});	
 
 		setIsLoading(true)
-		// axios.get(`http://localhost:3000/getLyricStats`)
-		axios.get(`https://swift-api.fly.dev/getLyricStats`)
+		axios.get(`http://localhost:3000/getLyricStats`)
+		// axios.get(`https://swift-api.fly.dev/getLyricStats`)
 		.then(function (response) {								
 			lyricStats = response.data.lyricStats
 			setTop40(lyricStats.filter(x => x.total > 20 && x.accuracy > 95).slice(0, 40))
@@ -315,8 +321,7 @@ function Dataland() {
 					</div>}
 						
 				{/* legend for album */}
-				{!gettingLyrics && !showTop40 && displayLyrics && <div className='flex flex-row flex-wrap justify-center'>
-					
+				{!gettingLyrics && !showTop40 && displayLyrics && <div className='flex flex-row flex-wrap justify-center'>		
 					<div className={`legend a90-plus ${highlightGroup == 'a90-plus' ? 'underline selected' : '' } ${albumColorKey[fighter as keyof typeof albumColorKey]}`}
 						onClick={()=> highlightLines('a90-plus')}
 					>90+% Accuracy <span className='font-bold '>& sub-3.3s</span></div>
@@ -324,7 +329,9 @@ function Dataland() {
 						<div className={`legend ${x.key} ${highlightGroup == x.key ? 'underline selected' : '' } ${albumColorKey[fighter as keyof typeof albumColorKey]}`}
 							onClick={()=> highlightLines(x.key)}
 						>{x.text}</div>)}
-
+					<div className={`legend ${highlightGroup == '' ? 'underline selected' : '' } ${albumColorKey[fighter as keyof typeof albumColorKey]}`}
+						onClick={()=> highlightLines('')}
+					>Full Lyrics</div>
 				</div>}			
 
 				<div className='flex flex-row flex-wrap justify-center'>

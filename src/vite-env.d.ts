@@ -113,6 +113,7 @@ interface LyricData {
 	orig_lyric_id?: number;
 	line_num?: number;
 	title_in_lyric_match?: number;
+	accuracy_group?: string;
 }
 
 
