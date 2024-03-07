@@ -14,19 +14,19 @@ let songsFullDB: SongList[] = [] // all songs
 
 function Dataland() {	
 
-	const accuracy_filter = 95;  // for the initial view, have min 95 accuracy;
-	const ltErasColors = ['eras_green', 'eras_gold', 'eras_purple', 'eras_lblue', 'eras_pink', 'eras_maroon', 'eras_indigo', 'eras_tan', 'eras_grey', 'eras_black'];
+	// const accuracy_filter = 95;  // for the initial view, have min 95 accuracy;
+	// const ltErasColors = ['eras_green', 'eras_gold', 'eras_purple', 'eras_lblue', 'eras_pink', 'eras_maroon', 'eras_indigo', 'eras_tan', 'eras_grey', 'eras_black'];
 
 	const albumColorKey = {'Taylor_Swift': 'era-taylor-swift', 'Fearless': 'era-fearless', 'Speak_Now': 'era-speak-now', 'Red': 'era-red', '1989': 'era-1989', 'reputation': 'era-reputation', 'Lover': 'era-lover', 'folklore': 'era-folklore', 'evermore': 'era-evermore', 'Midnights': 'era-midnights'} as const
 
-	const albumKeyLkup = { "Taylor Swift" : "Taylor_Swift", "Fearless" : "Fearless", "Speak Now" : "Speak_Now", 'Red' : 'Red', '1989' : '1989', 'reputation' : 'reputation', 'Lover' : 'Lover', 'folklore' : 'folklore', 'evermore' : 'evermore', 'Midnights' : 'Midnights'} as const
+	// const albumKeyLkup = { "Taylor Swift" : "Taylor_Swift", "Fearless" : "Fearless", "Speak Now" : "Speak_Now", 'Red' : 'Red', '1989' : '1989', 'reputation' : 'reputation', 'Lover' : 'Lover', 'folklore' : 'folklore', 'evermore' : 'evermore', 'Midnights' : 'Midnights'} as const
 
 	const albumCovers = ["imtheproblem", "Taylor_Swift", "Fearless", "Speak_Now", "Red", "1989", "reputation", "Lover", "folklore", "evermore", "Midnights"] as const
 
 
 	const [fighter, setFighter] = useState<AlbumArt>('imtheproblem')
 	
-	const [albumFilter, setAlbumFilter] = useState<AlbumKey | ''>('')
+	const [albumFilter, setAlbumFilter] = useState<AlbumArt>('imtheproblem')
 	const [songFilter, setSongFilter] = useState<string>('')
 	const [displayLyrics, setDisplayLyrics] = useState<LyricData[]>([])
 	const [isLoading, setIsLoading] = useState<boolean>(false)
@@ -48,13 +48,14 @@ function Dataland() {
 		if (fighter == 'imtheproblem'){
 			setShowTop40(true)
 		} else {
+			// dont have data for particular album, pull from db
 			if (fullLyricsNStats.filter(x=> x.album_key == fighter).length == 0){
 
 				setGettingLyrics(true);
-				axios.get(`http://localhost:3000/getFullLyricsNStats`, { params:
+				// axios.get(`http://localhost:3000/getFullLyricsNStats`, { params:
+				axios.get(`https://swift-api.fly.dev/getFullLyricsNStats`, { params:
 				{ 'album': fighter }
 				})
-				// axios.get(`https://swift-api.fly.dev/getFullLyricsNStats`)
 				.then(function (response) {								
 					fullLyricsNStats = fullLyricsNStats.concat(response.data.fullLyricsNStats)
 					// setSongFilter('Anti-Hero')
@@ -72,6 +73,7 @@ function Dataland() {
 				});	
 			}
 			else {
+				// filter lyrics for album 
 				console.log('already have lyrics for ', fighter)
 				if (songsFullDB.length > 0) {
 					let first_track = songsFullDB.filter(s=> s.album_key == albumFilter)[0].song
@@ -89,19 +91,19 @@ function Dataland() {
 		let top40chart = d3.select('#top40Viz')
 
 		var top40lines = top40chart
-			.selectAll('rect').data(top40, function(d) {
+			.selectAll<SVGRectElement, LyricData>('rect').data(top40, function(d: LyricData) {
 			return d.lyric
 		})
 
 		top40lines.enter().append('rect')
-			.attr('class', function (d) { return `lyricBox ${albumColorKey[d.album_key as keyof typeof albumColorKey]}`})		
+			.attr('class', function (d: LyricData) { return `lyricBox ${albumColorKey[d.album_key as keyof typeof albumColorKey]}`})		
 			.attr('x', 20)
-			.attr('y', function(d, i) { 
+			.attr('y', function(_, i: number) { 
 				return i * 20 + 30})
 			.style('width', 300)
 			.style('height', '30px')
 			.style("overflow", "visible")
-			.text(function(d) { return d.lyric })
+			.text(function(d: LyricData) { return d.lyric })
 			// .attr("text-anchor", "middle")
 			// .attr("dominant-baseline", "middle")
 			
@@ -116,24 +118,25 @@ function Dataland() {
 			d3.selectAll('.lyrics').remove()
 
 			let lyric_accuracy = displayLyrics.map(x=> x.accuracy)
-			let high = d3.max(lyric_accuracy)
-			let low = d3.min(lyric_accuracy)
+			// let high = d3.max(lyric_accuracy)
+			let low = d3.min(lyric_accuracy) || 0
 		
-			const scaleFilter = d3.scaleLinear([low, high], [0.25, 1])
-			const scaleFontSize = d3.scaleLinear([low, 100], [10, 18])
+			// const scaleFilter = d3.scaleLinear([low, high], [0.25, 1])
+			const scaleFontSize = d3.scaleLinear([low, 100], [14, 20])
 
 			let lyrics_viz = d3.select('#lyricalViz').append('g.lyrics')
-			let lyrics = lyrics_viz.selectAll('svg').data(displayLyrics, function(d) { return d.line_num})
+			let lyrics = lyrics_viz.selectAll<SVGElement, LyricData>('svg').data(displayLyrics, function(d: LyricData) { return d.lyric})
 
 			lyrics.enter().append('text')
-				.attr('class', function (d) { return `lyrics ${albumColorKey[d.album_key as keyof typeof albumColorKey]} ${d.title_in_lyric_match >= 70 || !d.accuracy || d.total < 10 || d.accuracy < 60 ? 'fadeline' : ''}`})
+				.attr('class', function (d: LyricData) { return `lyrics ${albumColorKey[d.album_key as keyof typeof albumColorKey]} ${(d.title_in_lyric_match || 0) >= 70 || !d.accuracy || d.total < 10 || d.accuracy < 60 ? 'fadeline' : ''}`})
 				.attr('x', 20)
-				.attr('y', function(d, i) { 
+				.attr('y', function(_, i: number) { 
 					return i * 20 + 30})			
 				.attr("text-anchor", "start")
 				// .attr('dy', )
-				.style('font-size', function(d) { 
-					if (d.title_in_lyric_match >= 70 || !d.accuracy || d.total < 10) {
+				.style('font-size', function(d: LyricData) { 
+					// for optional params in interface, check to see if title_in_lyric_match exists first
+					if ((d.title_in_lyric_match || 0) >= 70 || !d.accuracy || d.total < 10) {
 						// console.log(scaleFontSize(d.accuracy))
 						return "10px"
 					} else {
@@ -141,31 +144,34 @@ function Dataland() {
 						return `${Math.round(scaleFontSize(d.accuracy))}px`
 					} 			
 				 })
-				.style('opacity', function(d) { 
-					if (d.accuracy > 90) {
+				.style('opacity', function(d: LyricData) { 
+					if (d.accuracy >= 90) {
 						return 1
-					} else if (d.accuracy > 80) {
+					} else if (d.accuracy > 75) {
 						return 0.85
-					} else if (d.accuracy > 70) {
+					} else if (d.accuracy > 55) {
 						return 0.65
-					} else if (d.accuracy > 60) {
-						return 0.5
+					// } else if (d.accuracy > 60) {
+						// return 0.5
 					} else {
 						return 0.35
 					} 
 				})
-				.style('font-weight', function (d) {
+				.style('font-weight', function (d: LyricData) {
 					// decide what the time/accuracy cutoffs are -- about 350 and 450 bolded respectively w/current 
-					if (d.time < 3 && d.accuracy > 90 && d.total > 10){
+					// went w/3 seconds bc thats what the fastest averages on the leaderboard were -- avg just under 3s 
+					if (d.time < 3 && d.accuracy >= 90 && d.total > 10 && (d.title_in_lyric_match || 0) < 70){
 						return 700
 					} else if (d.time < 3.5 && d.accuracy > 90 && d.total > 10) {
 						return 500
+					} else {
+						return 400
 					}
 					
 				})
 				.style("overflow-x", "visible") // Allow text overflow
-				.text(function(d) { return d.lyric })				
-				.on('mouseover', function (d) {
+				.text(function(d: LyricData) { return d.lyric })				
+				.on('mouseover', function (d: LyricData) {
 					console.log(d.accuracy, d.time, d.total)			
 				})
 							
@@ -179,8 +185,8 @@ function Dataland() {
 
 	async function delayedDataFetch() {
 		
-		// axios.get(`https://swift-api.fly.dev/getSongs`)
-		axios.get(`http://localhost:3000/getSongs`)
+		axios.get(`https://swift-api.fly.dev/getSongs`)
+		// axios.get(`http://localhost:3000/getSongs`)
 			.then(function (response) {					
 				// setSongList(response.data.songList.filter(x => x.album_key == albumFilter))
 				songsFullDB = response.data.songList
@@ -191,8 +197,8 @@ function Dataland() {
 			});	
 
 		setIsLoading(true)
-		axios.get(`http://localhost:3000/getLyricStats`)
-		// axios.get(`https://swift-api.fly.dev/getLyricStats`)
+		// axios.get(`http://localhost:3000/getLyricStats`)
+		axios.get(`https://swift-api.fly.dev/getLyricStats`)
 		.then(function (response) {								
 			lyricStats = response.data.lyricStats
 			setTop40(lyricStats.filter(x => x.total > 20 && x.accuracy > 95).slice(0, 40))
@@ -216,11 +222,11 @@ function Dataland() {
 
 	}
 
-	function changeViz(cover){
+	function changeViz(cover: AlbumArt){
 		setFighter(cover);	
 		setAlbumFilter(cover);							
 		setSongList(songsFullDB.filter(s=> s.album_key == cover))		
-		setDisplayLyrics('')
+		setDisplayLyrics([])
 		setShowTop40(false)
 	}
 
@@ -248,7 +254,7 @@ function Dataland() {
 
 				<div className='flex flex-row flex-wrap justify-center'>
 					{!gettingLyrics && !showTop40 && <div>
-						{songList.map((x,i)=> 
+						{songList.map((x)=> 
 						<div onClick={() => { setSongFilter(x.song);
 							setDisplayLyrics(fullLyricsNStats.filter(s=> s.song == x.song));
 						}}
