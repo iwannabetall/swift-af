@@ -230,8 +230,8 @@ function Dataland() {
 
 	async function delayedDataFetch() {
 		
-		// axios.get(`https://swift-api.fly.dev/getSongs`)
-		axios.get(`http://localhost:3000/getSongs`)
+		axios.get(`https://swift-api.fly.dev/getSongs`)
+		// axios.get(`http://localhost:3000/getSongs`)
 			.then(function (response) {					
 				// setSongList(response.data.songList.filter(x => x.album_key == albumFilter))
 				songsFullDB = response.data.songList
