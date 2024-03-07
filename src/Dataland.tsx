@@ -83,6 +83,7 @@ function Dataland() {
 				if (songsFullDB.length > 0) {
 					let first_track = songsFullDB.filter(s=> s.album_key == albumFilter)[0].song
 					setSongFilter(first_track)
+					setHighlightGroup('')
 					setDisplayLyrics(fullLyricsNStats.filter(s=> s.song == first_track))
 				}
 			}
@@ -329,7 +330,9 @@ function Dataland() {
 				<div className='flex flex-row flex-wrap justify-center'>
 					{!gettingLyrics && !showTop40 && displayLyrics && <div>
 						{songList.map((x)=> 
-						<div onClick={() => { setSongFilter(x.song);
+						<div onClick={() => { 
+							setSongFilter(x.song);
+							setHighlightGroup('')
 							setDisplayLyrics(fullLyricsNStats.filter(s=> s.song == x.song));
 						}}
 						className={`cursor-pointer rounded-t-xl rounded-b-xl text-center m-2 p-1 pl-3 pr-3 text-m font-bold ${albumColorKey[x.album_key as keyof typeof albumColorKey]} ${songFilter == x.song ? 'selected' : 'faded'}`}
