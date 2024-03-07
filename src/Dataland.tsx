@@ -1,3 +1,4 @@
+// import { useState, useEffect, MouseEvent } from 'react'
 import { useState, useEffect } from 'react'
 import title from '/title.svg'
 import axios from 'axios';
@@ -23,6 +24,7 @@ function Dataland() {
 
 	const albumCovers = ["imtheproblem", "Taylor_Swift", "Fearless", "Speak_Now", "Red", "1989", "reputation", "Lover", "folklore", "evermore", "Midnights"] as const
 
+	const accuracy_groups = [{key: 'a75-90', text: "75-90% Accuracy"}, {key: 'a55-75', text: "55-75% Accuracy"}, {key: 'u55', text: "Below 55% Accuracy"}] as const
 
 	const [fighter, setFighter] = useState<AlbumArt>('imtheproblem')
 	
@@ -35,6 +37,7 @@ function Dataland() {
 	const [gettingLyrics, setGettingLyrics] = useState<boolean>(false)
 	const [top40, setTop40] = useState<LyricData[]>([])
 	const [showTop40, setShowTop40] = useState<boolean>(true)
+	const [highlightGroup, setHighlightGroup] = useState<string>('')
 
 	useEffect(() => {
 
@@ -45,6 +48,7 @@ function Dataland() {
 
 	useEffect(()=> {
 
+		// get lyrical stats data either from db or from array we already have
 		if (fighter == 'imtheproblem'){
 			setShowTop40(true)
 		} else {
@@ -64,6 +68,7 @@ function Dataland() {
 						let first_track = songsFullDB.filter(s=> s.album_key == albumFilter)[0].song
 						setSongFilter(first_track)
 						setDisplayLyrics(fullLyricsNStats.filter(s=> s.song == first_track))
+						setHighlightGroup('')
 					}
 	
 					setGettingLyrics(false);
@@ -87,7 +92,11 @@ function Dataland() {
 	}, [fighter])
 
 	useEffect(() => {
-	
+
+		const t = d3.transition()
+		.duration(750)
+		.ease(d3.easeBounceOut);
+		
 		let top40chart = d3.select('#top40Viz')
 
 		var top40lines = top40chart
@@ -96,13 +105,22 @@ function Dataland() {
 		})
 
 		top40lines.enter().append('rect')
-			.attr('class', function (d: LyricData) { return `lyricBox ${albumColorKey[d.album_key as keyof typeof albumColorKey]}`})		
-			.attr('x', 20)
+			.attr('class', function (d: LyricData) { return `top40Lyrics ${albumColorKey[d.album_key as keyof typeof albumColorKey]}`})		
+			.transition(t)
+			.attr('x', 20)			
 			.attr('y', function(_, i: number) { 
 				return i * 20 + 30})
-			.style('width', 300)
-			.style('height', '30px')
-			.style("overflow", "visible")
+			.style('width', 400)
+			// .style('height', '100%')
+			.style('height', function(d: LyricData){
+				if (d.lyric.length > 53){
+					// need two rows for long lines, can't use height to 100% if want any transitions tho
+					return '54px'  
+				} else {
+					return '30px'
+				}
+			})
+			.style("overflow-x", "visible") // Allow text overflow
 			.text(function(d: LyricData) { return d.lyric })
 			// .attr("text-anchor", "middle")
 			// .attr("dominant-baseline", "middle")
@@ -115,20 +133,26 @@ function Dataland() {
 		if (displayLyrics.length > 0) {
 			console.log(displayLyrics)
 
+			// const t = d3.transition()
+			// 	.duration(750)
+			// 	.ease(d3.easeLinear);
+
 			d3.selectAll('.lyrics').remove()
 
-			let lyric_accuracy = displayLyrics.map(x=> x.accuracy)
+			// let lyric_accuracy = displayLyrics.map(x=> x.accuracy)
 			// let high = d3.max(lyric_accuracy)
-			let low = d3.min(lyric_accuracy) || 0
+			// let low = d3.min(lyric_accuracy) || 0
 		
 			// const scaleFilter = d3.scaleLinear([low, high], [0.25, 1])
-			const scaleFontSize = d3.scaleLinear([low, 100], [14, 20])
+			// const scaleFontSize = d3.scaleLinear([low, 100], [14, 18])
 
 			let lyrics_viz = d3.select('#lyricalViz').append('g.lyrics')
 			let lyrics = lyrics_viz.selectAll<SVGElement, LyricData>('svg').data(displayLyrics, function(d: LyricData) { return d.lyric})
 
 			lyrics.enter().append('text')
-				.attr('class', function (d: LyricData) { return `lyrics ${albumColorKey[d.album_key as keyof typeof albumColorKey]} ${(d.title_in_lyric_match || 0) >= 70 || !d.accuracy || d.total < 10 || d.accuracy < 60 ? 'fadeline' : ''}`})
+				.attr('class', function (d: LyricData) { 
+					return `lyrics ${albumColorKey[d.album_key as keyof typeof albumColorKey]} ${(d.title_in_lyric_match || 0) >= 70 || !d.accuracy || d.total < 10 ? 'fadeline' : d.accuracy >= 90 ? 'a90-plus' : d.accuracy > 75 ? 'a75-90' : d.accuracy > 55 ? 'a55-75' : 'u55'}`
+				})
 				.attr('x', 20)
 				.attr('y', function(_, i: number) { 
 					return i * 20 + 30})			
@@ -139,31 +163,40 @@ function Dataland() {
 					if ((d.title_in_lyric_match || 0) >= 70 || !d.accuracy || d.total < 10) {
 						// console.log(scaleFontSize(d.accuracy))
 						return "10px"
+					} else if (d.accuracy >= 90) {
+						return "20px"
+					} else if (d.accuracy > 75) {
+						return "17px"
+					} else if (d.accuracy > 55) {
+						return "14px"
+					// } else if (d.accuracy > 60) {
+						// return 0.5
 					} else {
-						// console.log(Math.round(scaleFontSize(d.accuracy)))
-						return `${Math.round(scaleFontSize(d.accuracy))}px`
-					} 			
+						return "12px"
+					}  
+					//  else {
+					// 	// console.log(Math.round(scaleFontSize(d.accuracy)))
+					// 	return `${Math.round(scaleFontSize(d.accuracy))}px`
+					// } 			
 				 })
 				.style('opacity', function(d: LyricData) { 
 					if (d.accuracy >= 90) {
 						return 1
 					} else if (d.accuracy > 75) {
-						return 0.85
+						return 0.8
 					} else if (d.accuracy > 55) {
-						return 0.65
+						return 0.6
 					// } else if (d.accuracy > 60) {
 						// return 0.5
 					} else {
-						return 0.35
+						return 0.45
 					} 
 				})
 				.style('font-weight', function (d: LyricData) {
 					// decide what the time/accuracy cutoffs are -- about 350 and 450 bolded respectively w/current 
 					// went w/3 seconds bc thats what the fastest averages on the leaderboard were -- avg just under 3s 
-					if (d.time < 3 && d.accuracy >= 90 && d.total > 10 && (d.title_in_lyric_match || 0) < 70){
+					if (d.time < 3.3 && d.accuracy >= 90 && d.total > 10 && (d.title_in_lyric_match || 0) < 70){
 						return 700
-					} else if (d.time < 3.5 && d.accuracy > 90 && d.total > 10) {
-						return 500
 					} else {
 						return 400
 					}
@@ -171,22 +204,34 @@ function Dataland() {
 				})
 				.style("overflow-x", "visible") // Allow text overflow
 				.text(function(d: LyricData) { return d.lyric })				
-				.on('mouseover', function (d: LyricData) {
-					console.log(d.accuracy, d.time, d.total)			
-				})
-							
+				// .on('mouseover', function (d: MouseEvent) {
+				// 	console.log(d.target.__data__)			
+				// })
+			
 	} else {
 		// remove data 
-		d3.selectAll('.lyricBox').remove()
+		d3.selectAll('.top40Lyrics').remove()
+		d3.selectAll('.lyrics').remove()
 
 	}
 
 	}, [displayLyrics, albumFilter])
 
+	function highlightLines(lyricGroup: string){
+		setHighlightGroup(lyricGroup)
+
+		d3.selectAll('.lyrics').transition()
+			.style('opacity', 0.3)
+
+		
+		d3.selectAll(`.lyrics.${lyricGroup}`).transition()
+			.style('opacity', 1)
+	}
+
 	async function delayedDataFetch() {
 		
-		axios.get(`https://swift-api.fly.dev/getSongs`)
-		// axios.get(`http://localhost:3000/getSongs`)
+		// axios.get(`https://swift-api.fly.dev/getSongs`)
+		axios.get(`http://localhost:3000/getSongs`)
 			.then(function (response) {					
 				// setSongList(response.data.songList.filter(x => x.album_key == albumFilter))
 				songsFullDB = response.data.songList
@@ -223,12 +268,19 @@ function Dataland() {
 	}
 
 	function changeViz(cover: AlbumArt){
-		setFighter(cover);	
-		setAlbumFilter(cover);							
-		setSongList(songsFullDB.filter(s=> s.album_key == cover))		
+		d3.selectAll('.lyrics').remove()
+
 		setDisplayLyrics([])
 		setShowTop40(false)
+		setFighter(cover);	 
+		setAlbumFilter(cover);							
+		setSongList(songsFullDB.filter(s=> s.album_key == cover))				
+		setHighlightGroup('')
+		
 	}
+
+
+
 
 	return (
 		<>
@@ -252,8 +304,30 @@ function Dataland() {
 					</div>	
 				</div>
 
+				{<div>					
+						{gettingLyrics && 
+						<div>
+							<h2>Grabbing the Data!</h2>
+							<iframe src="/icons/tswift running.gif" width="480" height="200" frameBorder="0" className="giphy-embed" allowFullScreen></iframe><p><a href="/icons/tswift running.gif"></a></p>
+						</div>}
+						
+					</div>}
+						
+				{/* legend for album */}
+				{!gettingLyrics && !showTop40 && displayLyrics && <div className='flex flex-row flex-wrap justify-center'>
+					
+					<div className={`legend a90-plus ${highlightGroup == 'a90-plus' ? 'underline selected' : '' } ${albumColorKey[fighter as keyof typeof albumColorKey]}`}
+						onClick={()=> highlightLines('a90-plus')}
+					>90+% Accuracy <span className='font-bold '>& sub-3.3s</span></div>
+					{accuracy_groups.map(x => 
+						<div className={`legend ${x.key} ${highlightGroup == x.key ? 'underline selected' : '' } ${albumColorKey[fighter as keyof typeof albumColorKey]}`}
+							onClick={()=> highlightLines(x.key)}
+						>{x.text}</div>)}
+
+				</div>}			
+
 				<div className='flex flex-row flex-wrap justify-center'>
-					{!gettingLyrics && !showTop40 && <div>
+					{!gettingLyrics && !showTop40 && displayLyrics && <div>
 						{songList.map((x)=> 
 						<div onClick={() => { setSongFilter(x.song);
 							setDisplayLyrics(fullLyricsNStats.filter(s=> s.song == x.song));
@@ -261,15 +335,7 @@ function Dataland() {
 						className={`cursor-pointer rounded-t-xl rounded-b-xl text-center m-2 p-1 pl-3 pr-3 text-m font-bold ${albumColorKey[x.album_key as keyof typeof albumColorKey]} ${songFilter == x.song ? 'selected' : 'faded'}`}
 						key={`${x.song}`}
 							>{x.song}</div>)}
-					</div>}
-					{<div>					
-						{gettingLyrics && 
-						<div>
-							<h2>Grabbing the Data!</h2>
-							<iframe src="https://giphy.com/embed/4hTWSvzwyse5hRrM57" width="480" height="200" frameBorder="0" className="giphy-embed" allowFullScreen></iframe><p><a href="https://giphy.com/gifs/taylorswift-speak-now-taylors-version-4hTWSvzwyse5hRrM57"></a></p>
-						</div>}
-						
-					</div>}
+					</div>}					
 					
 					{showTop40 && <div>
 						<h2>Swiftest Top 40</h2>
