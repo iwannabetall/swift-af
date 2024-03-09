@@ -328,7 +328,7 @@ function App() {
 		let playSmallSample = Math.random()
 		// console.log(playSmallSample)
 
-		if (playSmallSample < 0.4 && gameMode != 'album' && smallSample.length > 0){
+		if (playSmallSample < 0.3 && gameMode != 'album' && smallSample.length > 0){
 			
 			// console.log('small sample', smallSample, gameStats)
 
