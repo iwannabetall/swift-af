@@ -132,7 +132,7 @@ function Dataland() {
 		// lyrical data viz 
 		
 		if (displayLyrics.length > 0) {
-			console.log('displayLyrics', displayLyrics)
+			// console.log('displayLyrics', displayLyrics)
 
 			// const t = d3.transition()
 			// 	.duration(750)
@@ -242,7 +242,7 @@ function Dataland() {
 			.then(function (response) {					
 				// setSongList(response.data.songList.filter(x => x.album_key == albumFilter))
 				songsFullDB = response.data.songList
-				console.log(songsFullDB)
+				// console.log(songsFullDB)
 			})
 			.catch(function (error) {				
 				console.log(error);
@@ -254,7 +254,7 @@ function Dataland() {
 		.then(function (response) {								
 			lyricStats = response.data.lyricStats
 			setTop40(lyricStats.filter(x => x.total > 20 && x.accuracy > 95).slice(0, 40))
-			console.log(lyricStats)
+			// console.log(lyricStats)
 			setIsLoading(false)
 		})
 		.catch(function (error) {				

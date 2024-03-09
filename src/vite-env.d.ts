@@ -3,19 +3,21 @@
 declare module 'obscenity';
 
 interface Lyrics {
-	"id" : number;
-	"song_full_name": string;
-	"album":  string;
-	"album_key": AlbumKey;
-	"line_num": number;
-	"lyric":  string;
-	"track_n": number;
-	"title_in_lyric_match": number;
-	"line_word_count": number;
-	"unique_lyric": number;
-	"song": string;
-	"filler": number;
-	"vault": number;
+	id : number;
+	song_full_name: string;
+	album:  string;
+	album_key: AlbumKey;
+	line_num: number;
+	lyric:  string;
+	track_n: number;
+	title_in_lyric_match: number;
+	line_word_count: number;
+	unique_lyric: number;
+	song: string;
+	filler: number;
+	vault: number;
+	total?: number;
+	orig_lyric_id?: number;
 }
 
 

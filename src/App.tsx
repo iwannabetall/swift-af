@@ -317,14 +317,43 @@ function App() {
 		// log results 	
 		// console.log({'time': secondsElapsed, song: song, userResponse: clicked.trim(), correct: 0, album: album, lyric: displayLyric},gameStats)
 
-		let rand = Math.floor(Math.random() * lyricsDB.length)
-		// change song, clear input, reset timer		
-		setDisplayLyric(lyricsDB[rand].lyric)
-		setDisplayLyricId(lyricsDB[rand].id)
-		setSong(lyricsDB[rand].song.trim())
-		setAlbum(lyricsDB[rand].album.trim())
-		setAlbumKey(lyricsDB[rand].album_key)
-		setAnsChoices(pickRandomAns(lyricsDB[rand].song))
+		// deal with lyrics that dont have large sample size -- temporary!!!******
+		if (gameStats.length > 0){
+			// small sample is 287 lyrics
+			var smallSample = lyricsDB.filter(x=> ((x.total || 0) < 22 || x.total == null) && !gameStats.map(y=> y.lyric_id).includes(x.id)) 			
+		} else {
+			var smallSample = lyricsDB.filter(x=> (x.total || 0) < 22 || x.total == null ) 
+		}
+		
+		let playSmallSample = Math.random()
+		// console.log(playSmallSample)
+
+		if (playSmallSample < 0.4 && gameMode != 'album' && smallSample.length > 0){
+			
+			// console.log('small sample', smallSample, gameStats)
+
+			let rand = Math.floor(Math.random() * smallSample.length)
+			// change song, clear input, reset timer		
+			setDisplayLyric(smallSample[rand].lyric)
+			setDisplayLyricId(smallSample[rand].id)
+			setSong(smallSample[rand].song.trim())
+			setAlbum(smallSample[rand].album.trim())
+			setAlbumKey(smallSample[rand].album_key)
+			setAnsChoices(pickRandomAns(smallSample[rand].song))
+
+		} else {
+			let rand = Math.floor(Math.random() * lyricsDB.length)
+			// change song, clear input, reset timer		
+			setDisplayLyric(lyricsDB[rand].lyric)
+			setDisplayLyricId(lyricsDB[rand].id)
+			setSong(lyricsDB[rand].song.trim())
+			setAlbum(lyricsDB[rand].album.trim())
+			setAlbumKey(lyricsDB[rand].album_key)
+			setAnsChoices(pickRandomAns(lyricsDB[rand].song))
+
+		}
+		
+	
 		// setUserResponse('')
 		
 		setStartTime(Date.now())
