@@ -321,17 +321,22 @@ function Dataland() {
 					</div>}
 						
 				{/* legend for album */}
-				{!gettingLyrics && !showTop40 && displayLyrics && <div className='flex flex-row flex-wrap justify-center'>		
-					<div className={`legend a90-plus ${highlightGroup == 'a90-plus' ? 'underline selected' : '' } ${albumColorKey[fighter as keyof typeof albumColorKey]}`}
-						onClick={()=> highlightLines('a90-plus')}
-					>90+% Accuracy <span className='font-bold '>& sub-3.3s</span></div>
-					{accuracy_groups.map(x => 
-						<div className={`legend ${x.key} ${highlightGroup == x.key ? 'underline selected' : '' } ${albumColorKey[fighter as keyof typeof albumColorKey]}`}
-							onClick={()=> highlightLines(x.key)}
-						>{x.text}</div>)}
-					<div className={`legend ${highlightGroup == '' ? 'underline selected' : '' } ${albumColorKey[fighter as keyof typeof albumColorKey]}`}
-						onClick={()=> highlightLines('')}
-					>Full Lyrics</div>
+				{!gettingLyrics && !showTop40 && displayLyrics && 
+				<div>
+					<h6>Click the legend to filter the lyrics</h6>
+					<div className='flex flex-row flex-wrap justify-center'>		
+					
+						<div className={`legend a90-plus ${highlightGroup == 'a90-plus' ? 'underline selected' : '' } ${albumColorKey[fighter as keyof typeof albumColorKey]}`}
+							onClick={()=> highlightLines('a90-plus')}
+						>90+% Accuracy <span className='font-bold '>& sub-3.3s</span></div>
+						{accuracy_groups.map(x => 
+							<div className={`legend ${x.key} ${highlightGroup == x.key ? 'underline selected' : '' } ${albumColorKey[fighter as keyof typeof albumColorKey]}`}
+								onClick={()=> highlightLines(x.key)}
+							>{x.text}</div>)}
+						<div className={`legend ${highlightGroup == '' ? 'underline selected' : '' } ${albumColorKey[fighter as keyof typeof albumColorKey]}`}
+							onClick={()=> highlightLines('')}
+						>Full Lyrics</div>
+					</div>
 				</div>}			
 
 				<div className='flex flex-row flex-wrap justify-center'>
@@ -348,7 +353,8 @@ function Dataland() {
 					</div>}					
 					
 					{showTop40 && <div>
-						<h2>Swiftest Top 40</h2>
+						<h2>Long Live the Swiftest Top 40</h2>
+						<h6>Most quickly identified lyrics with 95+% accuracy–do you recognize all of them?</h6>
 						<div id='top40Viz'></div>
 					</div>}
 
