@@ -251,7 +251,7 @@ button:focus-visible {
 	max-width: 305px;
 }
 
-#lyricalViz, #top40Viz {
+#lyricalViz, #top40Viz, #bottom40Viz {
 	display: block;
 	margin: auto;
 	/* position: relative; */
@@ -265,7 +265,7 @@ button:focus-visible {
 	/* vertical-align: top; */
 	overflow: visible;
 }
-#top40VizAns {
+#top40VizAns, #bottom40VizAns {
 	display: block;
 	margin: auto;
 	padding-left: 5px;
@@ -275,13 +275,23 @@ button:focus-visible {
 	position:relative;
 	z-index: -1;
 }
+.wrapper{
+	margin-top: 30px;
+}
+/* #top40Viz, #top40VizAns, #bottom40Viz ,#bottom40VizAns{
+	margin-bottom: 30px;
+} */
 
 #top40Viz {
 	margin-top: -1224px;
-
 }
 
-.lyrics, .top40Lyrics{
+#bottom40Viz{
+	/* not sure why this is diff from the other one */
+	margin-top: -1200px;
+}
+
+.lyrics, .top40Lyrics, .bottom40Lyrics{
 	display: block;	
 	width: 100%;
 	text-align: center;
@@ -304,7 +314,7 @@ button:focus-visible {
 	animation-duration: 2s; */
 }
 
-.top40Lyrics:hover{
+.top40Lyrics:hover, .bottom40Lyrics:hover{
 	transform: translate(300px, 0px);
 }
 .fadeline{

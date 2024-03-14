@@ -24,7 +24,7 @@ function Dataland() {
 
 	const albumCovers = ["imtheproblem", "Taylor_Swift", "Fearless", "Speak_Now", "Red", "1989", "reputation", "Lover", "folklore", "evermore", "Midnights"] as const
 
-	const accuracy_groups = [{key: 'a75-90', text: "75-90% Accuracy"}, {key: 'a55-75', text: "55-75% Accuracy"}, {key: 'u55', text: "Below 55% Accuracy"}] as const
+	const accuracy_groups = [{key: 'a90-plus', text: "90%+ Accuracy"}, {key: 'a75-90', text: "75-90% Accuracy"}, {key: 'a55-75', text: "55-75% Accuracy"}, {key: 'u55', text: "Below 55% Accuracy"}] as const
 
 	// const top40ref = useRef()
 
@@ -99,12 +99,12 @@ function Dataland() {
 		// const t = d3.transition()
 		// .duration(750)
 		// .ease(d3.easeBounceOut);
-		
+		let bottom40 = lyricStats.filter(x=> x.total > 25 && x.accuracy < 25).slice(0,40)
 		let top40chartSongs = d3.select('#top40VizAns')
 		
 		var top40Songs = top40chartSongs
 			.selectAll<SVGRectElement, LyricData>('rect').data(top40, function(d: LyricData) {
-			return d.lyric
+			return d.lyric_id
 		})
 
 		top40Songs.join(enter=> (
@@ -131,12 +131,64 @@ function Dataland() {
 		
 		var top40lines = top40chart
 			.selectAll<SVGRectElement, LyricData>('rect').data(top40, function(d: LyricData) {
-			return d.lyric
+			return d.lyric_id
 		})
 
 		top40lines.join(enter=> (
 			enter.append('rect')
 			.attr('class', function (d: LyricData) { return `top40Lyrics ${albumColorKey[d.album_key as keyof typeof albumColorKey]}`})					
+			.attr('x', 20)			
+			.attr('y', function(_, i: number) { 
+				return (i * 20 + 30)})
+			.style('width', 400)
+			// .style('height', '100%')
+			.style('height', function(d: LyricData){
+				if (d.lyric.length > 53){
+					// need two rows for long lines, can't use height to 100% if want any transitions tho
+					return '54px'  
+				} else {
+					return '30px'
+				}
+			})
+			.style("overflow-x", "visible") // Allow text overflow			
+			.text(function(d: LyricData) { return d.lyric })
+		)) 
+
+		let bottom40ChartSongs = d3.select('#bottom40VizAns')
+		let bottom40Songs = bottom40ChartSongs.selectAll<SVGRectElement, LyricData>('rect').data(bottom40, function(d: LyricData){
+			return d.lyric_id
+		})
+		
+		bottom40Songs.join(enter => 
+				enter.append('rect')
+				.attr('class',function (d: LyricData) { return `ans ${albumColorKey[d.album_key as keyof typeof albumColorKey]}`})
+				.attr('x', 20)			
+				.attr('y', function(_, i: number) { 
+					return i * 20 + 30})
+				.style('width', 400)
+				// .style('height', '100%')
+				.style('height', function(d: LyricData){
+					if (d.lyric.length > 53){
+						// need two rows for long lines, can't use height to 100% if want any transitions tho
+						return '54px'  
+					} else {
+						return '30px'
+					}
+				})
+				.style("overflow-x", "visible") // Allow text overflow			
+				.text(function(d: LyricData) { return d.song })		
+		)
+
+		let bottom40chart = d3.select('#bottom40Viz')
+		
+		var bottom40lines = bottom40chart
+			.selectAll<SVGRectElement, LyricData>('rect').data(bottom40, function(d: LyricData) {
+			return d.lyric_id
+		})
+
+		bottom40lines.join(enter=> (
+			enter.append('rect')
+			.attr('class', function (d: LyricData) { return `bottom40Lyrics ${albumColorKey[d.album_key as keyof typeof albumColorKey]}`})					
 			.attr('x', 20)			
 			.attr('y', function(_, i: number) { 
 				return (i * 20 + 30)})
@@ -172,22 +224,6 @@ function Dataland() {
 		// 	.style("overflow-x", "visible") // Allow text overflow			
 		// 	.text(function(d: LyricData) { return d.lyric })
 		
-		// top40lines.on('click', clicked)
-			
-		// top40lines.on('click', function (d: MouseEvent) {
-		
-		// 	let move = d3.select(this)
-			
-		// 		// .transition(t)
-		// 	move
-		// 		.attr("transform", "translate(42, 42)");
-		// 	console.log(d.target)
-		// 	console.log('this', this)
-		// 	console.log(move)
-		// 	console.log(d.target.__data__)			
-		// })
-			// .attr("text-anchor", "middle")
-			// .attr("dominant-baseline", "middle")
 			
 	}, [top40, showTop40])
 
@@ -201,20 +237,12 @@ function Dataland() {
 		// lyrical data viz 
 		
 		if (displayLyrics.length > 0) {
-			// console.log('displayLyrics', displayLyrics)
 
 			// const t = d3.transition()
 			// 	.duration(750)
 			// 	.ease(d3.easeLinear);
 
 			d3.selectAll('.lyrics').remove()
-
-			// let lyric_accuracy = displayLyrics.map(x=> x.accuracy)
-			// let high = d3.max(lyric_accuracy)
-			// let low = d3.min(lyric_accuracy) || 0
-		
-			// const scaleFilter = d3.scaleLinear([low, high], [0.25, 1])
-			// const scaleFontSize = d3.scaleLinear([low, 100], [14, 18])
 
 			let lyrics_viz = d3.select('#lyricalViz').append('g.lyrics')
 			let lyrics = lyrics_viz.selectAll<SVGElement, LyricData>('svg').data(displayLyrics, function(d: LyricData) { return d.lyric})
@@ -322,6 +350,7 @@ function Dataland() {
 		axios.get(`https://swift-api.fly.dev/getLyricStats`)
 		.then(function (response) {								
 			lyricStats = response.data.lyricStats
+			console.log(lyricStats)
 			setTop40(lyricStats.filter(x => x.total > 20 && x.accuracy > 95).slice(0, 40))
 			// console.log(lyricStats)
 			setIsLoading(false)
@@ -392,19 +421,20 @@ function Dataland() {
 				{/* legend for album */}
 				{!gettingLyrics && !showTop40 && displayLyrics && 
 				<div>
-					<h6>Click the legend to filter the lyrics</h6>
+					<h6>Click the legend to filter the lyrics. Bolded lyrics were 90+% accuracy while also averaging under 3.3s</h6>
 					<div className='flex flex-row flex-wrap justify-center'>		
-					
-						<div className={`legend a90-plus ${highlightGroup == 'a90-plus' ? 'underline selected' : '' } ${albumColorKey[fighter as keyof typeof albumColorKey]}`}
+				
+						{/* <div className={`legend a90-plus ${highlightGroup == 'a90-plus' ? 'underline selected' : '' } ${albumColorKey[fighter as keyof typeof albumColorKey]}`}
 							onClick={()=> highlightLines('a90-plus')}
-						>90+% Accuracy <span className='font-bold '>& sub-3.3s</span></div>
+						>	<span className='font-bold '>90+% Accuracy & sub-3.3s</span>
+						</div> */}
 						{accuracy_groups.map(x => 
-							<div className={`legend ${x.key} ${highlightGroup == x.key ? 'underline selected' : '' } ${albumColorKey[fighter as keyof typeof albumColorKey]}`}
+							<div key={x.key} className={`legend ${x.key} ${highlightGroup == x.key ? 'underline selected' : '' } ${albumColorKey[fighter as keyof typeof albumColorKey]}`}
 								onClick={()=> highlightLines(x.key)}
 							>{x.text}</div>)}
 						<div className={`legend ${highlightGroup == '' ? 'underline selected' : '' } ${albumColorKey[fighter as keyof typeof albumColorKey]}`}
 							onClick={()=> highlightLines('')}
-						>Full Lyrics</div>
+						>Full Lyrics</div>					
 					</div>
 				</div>}			
 
@@ -422,7 +452,7 @@ function Dataland() {
 					</div>}					
 					
 					{showTop40 && <div>
-						<h2>Long Live the Swiftest Top 40</h2>
+						<h2>Long Live the Swiftest Top 40 and Humble Pie</h2>
 						<h5>Most quickly identified lyrics with 95+% accuracy–do you recognize all of them?</h5>
 						<h6>Hover over the lyric to reveal the song!</h6>
 						<div id='top40VizAns'>
@@ -432,6 +462,15 @@ function Dataland() {
 						</div>
 						<div id='top40Viz'>
 							</div>
+						
+						<div className='wrapper'>
+							<h2>All You Had To Do Was Guess Randomly</h2>
+							<h6>Bottom 40 Overall: 17% Accuracy</h6>
+							<div id='bottom40VizAns'>							
+							</div>
+							<div id='bottom40Viz'>
+							</div>
+							</div>	
 					</div>}
 
 					{!showTop40 && <div>
