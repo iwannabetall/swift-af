@@ -26,6 +26,8 @@ function Dataland() {
 
 	const accuracy_groups = [{key: 'a75-90', text: "75-90% Accuracy"}, {key: 'a55-75', text: "55-75% Accuracy"}, {key: 'u55', text: "Below 55% Accuracy"}] as const
 
+	// const top40ref = useRef()
+
 	const [fighter, setFighter] = useState<AlbumArt>('imtheproblem')
 	
 	const [albumFilter, setAlbumFilter] = useState<AlbumArt>('imtheproblem')
@@ -93,21 +95,21 @@ function Dataland() {
 	}, [fighter])
 
 	useEffect(() => {
-
-		const t = d3.transition()
-		.duration(750)
-		.ease(d3.easeBounceOut);
+		// console.log(top40)
+		// const t = d3.transition()
+		// .duration(750)
+		// .ease(d3.easeBounceOut);
 		
-		let top40chart = d3.select('#top40Viz')
-
-		var top40lines = top40chart
+		let top40chartSongs = d3.select('#top40VizAns')
+		
+		var top40Songs = top40chartSongs
 			.selectAll<SVGRectElement, LyricData>('rect').data(top40, function(d: LyricData) {
 			return d.lyric
 		})
 
-		top40lines.enter().append('rect')
-			.attr('class', function (d: LyricData) { return `top40Lyrics ${albumColorKey[d.album_key as keyof typeof albumColorKey]}`})		
-			.transition(t)
+		top40Songs.join(enter=> (
+			enter.append('rect')
+			.attr('class', function (d: LyricData) { return `ans ${albumColorKey[d.album_key as keyof typeof albumColorKey]}`})					
 			.attr('x', 20)			
 			.attr('y', function(_, i: number) { 
 				return i * 20 + 30})
@@ -121,12 +123,79 @@ function Dataland() {
 					return '30px'
 				}
 			})
-			.style("overflow-x", "visible") // Allow text overflow
+			.style("overflow-x", "visible") // Allow text overflow			
+			.text(function(d: LyricData) { return d.song })
+		)) 
+
+		let top40chart = d3.select('#top40Viz')
+		
+		var top40lines = top40chart
+			.selectAll<SVGRectElement, LyricData>('rect').data(top40, function(d: LyricData) {
+			return d.lyric
+		})
+
+		top40lines.join(enter=> (
+			enter.append('rect')
+			.attr('class', function (d: LyricData) { return `top40Lyrics ${albumColorKey[d.album_key as keyof typeof albumColorKey]}`})					
+			.attr('x', 20)			
+			.attr('y', function(_, i: number) { 
+				return (i * 20 + 30)})
+			.style('width', 400)
+			// .style('height', '100%')
+			.style('height', function(d: LyricData){
+				if (d.lyric.length > 53){
+					// need two rows for long lines, can't use height to 100% if want any transitions tho
+					return '54px'  
+				} else {
+					return '30px'
+				}
+			})
+			.style("overflow-x", "visible") // Allow text overflow			
 			.text(function(d: LyricData) { return d.lyric })
+		)) 
+		
+		// top40lines.append('rect')
+		// 	.attr('class', function (d: LyricData) { return `top40Lyrics ${albumColorKey[d.album_key as keyof typeof albumColorKey]}`})					
+		// 	.attr('x', 20)			
+		// 	.attr('y', function(_, i: number) { 
+		// 		return i * 20 + 30})
+		// 	.style('width', 400)
+		// 	// .style('height', '100%')
+		// 	.style('height', function(d: LyricData){
+		// 		if (d.lyric.length > 53){
+		// 			// need two rows for long lines, can't use height to 100% if want any transitions tho
+		// 			return '54px'  
+		// 		} else {
+		// 			return '30px'
+		// 		}
+		// 	})
+		// 	.style("overflow-x", "visible") // Allow text overflow			
+		// 	.text(function(d: LyricData) { return d.lyric })
+		
+		// top40lines.on('click', clicked)
+			
+		// top40lines.on('click', function (d: MouseEvent) {
+		
+		// 	let move = d3.select(this)
+			
+		// 		// .transition(t)
+		// 	move
+		// 		.attr("transform", "translate(42, 42)");
+		// 	console.log(d.target)
+		// 	console.log('this', this)
+		// 	console.log(move)
+		// 	console.log(d.target.__data__)			
+		// })
 			// .attr("text-anchor", "middle")
 			// .attr("dominant-baseline", "middle")
 			
 	}, [top40, showTop40])
+
+	// function clicked(e, d){
+	// 	console.log(this)
+	// 	d3.select(this).append('g')			
+	// 		.attr("transform", "translate(42, 42)");
+	// }
 
 	useEffect(() => {
 		// lyrical data viz 
@@ -354,8 +423,15 @@ function Dataland() {
 					
 					{showTop40 && <div>
 						<h2>Long Live the Swiftest Top 40</h2>
-						<h6>Most quickly identified lyrics with 95+% accuracy–do you recognize all of them?</h6>
-						<div id='top40Viz'></div>
+						<h5>Most quickly identified lyrics with 95+% accuracy–do you recognize all of them?</h5>
+						<h6>Hover over the lyric to reveal the song!</h6>
+						<div id='top40VizAns'>
+							{/* <svg id='top40Viz'></svg> */}
+							{/* <svg viewBox="0 0 100 200"
+							ref={top40ref}></svg> */}
+						</div>
+						<div id='top40Viz'>
+							</div>
 					</div>}
 
 					{!showTop40 && <div>

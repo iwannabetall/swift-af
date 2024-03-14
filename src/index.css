@@ -23,7 +23,7 @@
 	--eras-gold: rgb(244,203,141);
 	--eras-purple: rgb(209,178,210);
 	--eras-maroon: rgb(130,53,73);
-	--eras-lblue: rgb(181,233,246);
+	--eras-lblue: rgb(181,233,246);	
 	--eras-pink: rgb(249,178,208);
 	--eras-tan: rgb(200,174,149);
 	--eras-grey: rgb(207,202,198);
@@ -184,8 +184,11 @@ button:focus-visible {
 }
 .era-1989 {
 	background-color: var(--era-1989);
+	/* background-color: rgb(158,226,243); */
 	color: var(--era-1989-text);
 }
+
+
 .era-reputation {
 	background-color: var(--era-reputation);
 	color: var(--era-reputation-text);
@@ -262,6 +265,48 @@ button:focus-visible {
 	/* vertical-align: top; */
 	overflow: visible;
 }
+#top40VizAns {
+	display: block;
+	margin: auto;
+	padding-left: 5px;
+	padding-right: 5px;
+	width: 420px; 
+	margin-top: 8px;
+	position:relative;
+	z-index: -1;
+}
+
+#top40Viz {
+	margin-top: -1224px;
+
+}
+
+.lyrics, .top40Lyrics{
+	display: block;	
+	width: 100%;
+	text-align: center;
+	padding-bottom:3px;
+	padding-top: 3px;
+	transition: all 2s ease;
+	z-index: 1;
+	/* animation-name: billboard;
+	animation-duration: 2s; */
+}
+
+
+.ans {
+	display: block;	
+	width: 100%;
+	text-align: center;
+	padding-bottom:3px;
+	padding-top: 3px;
+	/* animation-name: billboard;
+	animation-duration: 2s; */
+}
+
+.top40Lyrics:hover{
+	transform: translate(300px, 0px);
+}
 .fadeline{
 	color: black;
 	background: rgba(179, 179, 179, 0.3);
@@ -279,15 +324,6 @@ button:focus-visible {
 	}
 } */
 
-.lyrics, .top40Lyrics{
-	display: block;	
-	width: 100%;
-	text-align: center;
-	padding-bottom:3px;
-	padding-top: 3px;
-	/* animation-name: billboard;
-	animation-duration: 2s; */
-}
 
 /* not sure why but the album lyrics display needs padding on L/R side to */
 .lyrics{
