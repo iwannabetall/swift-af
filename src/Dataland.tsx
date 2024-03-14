@@ -421,7 +421,7 @@ function Dataland() {
 				{/* legend for album */}
 				{!gettingLyrics && !showTop40 && displayLyrics && 
 				<div>
-					<h6>Click the legend to filter the lyrics. Bolded lyrics were 90+% accuracy while also averaging under 3.3s</h6>
+					<h6>Click the legend to filter the lyrics. <span  className='font-bold'>Bolded lyrics: 90+% accuracy + avg under 3.3s</span></h6>
 					<div className='flex flex-row flex-wrap justify-center'>		
 				
 						{/* <div className={`legend a90-plus ${highlightGroup == 'a90-plus' ? 'underline selected' : '' } ${albumColorKey[fighter as keyof typeof albumColorKey]}`}
