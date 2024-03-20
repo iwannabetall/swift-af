@@ -3,7 +3,9 @@
 
 @tailwind utilities;
 
-
+.nav {
+	z-index: 1;
+}
 
 :root {
   font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
@@ -166,23 +168,28 @@ button:focus-visible {
 }
 
 .era-taylor-swift {
+	fill: var(--era-taylor-swift);
 	background-color: var(--era-taylor-swift);
 	color: var(--era-taylor-swift-text);
 }
 
 .era-fearless {
+	fill: var(--era-fearless);
 	background-color: var(--era-fearless);
 	color: var(--era-fearless-text);
 }
 .era-speak-now {
+	fill: var(--era-speak-now);
 	background-color: var(--era-speak-now);
 	color: var(--era-speak-now-text);
 }
 .era-red {
+	fill: var(--era-red);
 	background-color: var(--era-red);
 	color: var(--era-red-text);
 }
 .era-1989 {
+	fill: var(--era-1989);
 	background-color: var(--era-1989);
 	/* background-color: rgb(158,226,243); */
 	color: var(--era-1989-text);
@@ -190,22 +197,27 @@ button:focus-visible {
 
 
 .era-reputation {
+	fill: var(--era-reputation);
 	background-color: var(--era-reputation);
 	color: var(--era-reputation-text);
 }
 .era-lover {
+	fill: var(--era-lover);
 	background-color: var(--era-lover);
 	color: var(--era-lover-text);
 }
 .era-folklore {
+	fill: var(--era-folklore);
 	background-color: var(--era-folklore);
 	color: var(--era-folklore-text);
 }
 .era-evermore {
+	fill: var(--era-evermore);
 	background-color: var(--era-evermore);
 	color: var(--era-evermore-text);
 }
 .era-midnights {
+	fill: var(--era-midnights);
 	background-color: var(--era-midnights);
 	color: var(--era-midnights-text);
 }
@@ -251,7 +263,7 @@ button:focus-visible {
 	max-width: 305px;
 }
 
-#lyricalViz, #top40Viz, #bottom40Viz {
+#lyricalViz, #top40Viz, #bottom40Viz, #spotifyscatter {
 	display: block;
 	margin: auto;
 	/* position: relative; */
@@ -264,6 +276,7 @@ button:focus-visible {
 	/*height: 100%;*/        
 	/* vertical-align: top; */
 	overflow: visible;
+	scroll-margin: 20px;
 }
 #top40VizAns, #bottom40VizAns {
 	display: block;
@@ -277,6 +290,7 @@ button:focus-visible {
 }
 .wrapper{
 	margin-top: 30px;
+	margin-bottom: 20px;
 }
 /* #top40Viz, #top40VizAns, #bottom40Viz ,#bottom40VizAns{
 	margin-bottom: 30px;
@@ -377,6 +391,11 @@ button:focus-visible {
 }
 /*iphone 6/7/8 Plus -- should be max-width of 420 but making it smaller for browser/player header*/
 @media (max-width:414px){
+	#lyricalViz, #top40Viz, #bottom40Viz, #top40VizAns, #bottom40VizAns, #spotifyscatter, .spotify{
+		width: 400px;
+	}
+
+	
 	.btn { 
 		min-width: 160px;
 		margin: 10px;
@@ -399,6 +418,10 @@ button:focus-visible {
 		font-size: 1em;
 	}
     
+	#lyricalViz, #top40Viz, #bottom40Viz, #top40VizAns, #bottom40VizAns, #spotifyscatter, .spotify{
+		width:370px
+	}
+	
 }
 /*iphone 5s*/
 @media (max-width:320px){
@@ -406,7 +429,12 @@ button:focus-visible {
 		min-width: 120px;
 		margin: px
 	}
-    
+  
+	#lyricalViz, #top40Viz, #bottom40Viz, #top40VizAns, #bottom40VizAns, #spotifyscatter, .spotify{
+		width: 316px;
+	}
+
+	
 }
 /*if screen > 992 px*/
 @media (min-width:768px){

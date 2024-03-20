@@ -118,4 +118,10 @@ interface LyricData {
 	accuracy_group?: string;
 }
 
-
+interface SpotifyData{
+	song: string;
+	accuracy: number;
+	daily_counts: number;
+	historical_counts: number;
+	album: string;
+}
