@@ -1362,7 +1362,8 @@ function Dataland() {
 				<div className=''>
 					<img src={title} className='mx-auto logo p-4 max-h-32' alt="Swift AF" />	
 				</div>
-				<h2>Wait, don't go. The story of us is coming! </h2></div>}
+				<h2>Grabbing the Data!</h2>
+					<iframe src="/icons/tswift running.gif" width="480" height="200" frameBorder="0" className="giphy-embed" allowFullScreen></iframe><p><a href="/icons/tswift running.gif"></a></p></div>}
 				{!isLoading && <div className='grid grid-cols-1 p-2 justify-items-center mt-20 lg:ml-8 lg:mr-8 sm:ml-2 sm:mr-2 justify-center'>
 				
 				<div className=''>
