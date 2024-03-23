@@ -31,26 +31,32 @@
 	--eras-grey: rgb(207,202,198);
 	--eras-indigo: rgb(67,73,97);
 	--eras-black:rgb(132,126,128);
-	--era-taylor-swift: #A5C9A5;
+	--era-taylor-swift: hsl(120,25%,71.8%);
 	--era-taylor-swift-text: #315231;
-	--era-fearless: #EFC180;
+	--era-fearless: hsl(35.1,77.6%,72%);
 	--era-fearless-text: black;
 	--era-speak-now: #C7A8CB;
 	--era-speak-now-text:#513355;
-	--era-red: #7A2E39;
+	--era-red: hsl(351.3,45.2%,32.9%);
 	--era-red-text: #e7c0c6;
 	--era-1989:#B5E5F8;
 	--era-1989-text:#0c5c7b;
-	--era-reputation:#222222;
+	--era-reputation:hsl(0,0%,13.3%);
 	--era-reputation-text: #dedddd;
 	--era-lover:#F7B0CC;
 	--era-lover-text:#750c35;
-	--era-folklore:#CDC9C1;
+	--era-folklore:#a3a3a3;	
+	/* old folklore CDC9C1 */
 	--era-evermore:#C5AC90;
 	--era-evermore-text:#382c1e;
-	--era-midnights:#242E47;
+	--era-midnights:hsla(222.9,32.7%,21%);
 	--era-midnights-text:#c4cce1;
-
+	--font-size-Aplus: 28px;
+	--font-size-A: 26px;
+	--font-size-B: 22px;
+	--font-size-C: 18px;
+	--font-size-D: 16px;
+	--font-size-F: 14px;
 }
 
 .albums {
@@ -125,6 +131,20 @@ button:focus-visible {
   outline: 4px auto -webkit-focus-ring-color;
 }
 
+
+div.tooltip {
+  position: absolute;
+  text-align: center;
+  width: 60px;
+  height: 28px;
+  padding: 2px;
+  font: 12px sans-serif;
+  background: lightsteelblue;
+  border: 0px;
+  border-radius: 8px;
+  pointer-events: none;
+}
+
 @media (prefers-color-scheme: light) {
   :root {
     color: #213547;
@@ -173,21 +193,132 @@ button:focus-visible {
 	color: var(--era-taylor-swift-text);
 }
 
+
+.era-taylor-swift-gradeA, .era-taylor-swift-gradeAplus {
+	fill: var(--era-taylor-swift);
+	background-color: hsl(120,25.4%,60.6%);
+	color: var(--era-taylor-swift-text);
+	font-size: var(--font-size-A);
+}
+
+.era-taylor-swift-gradeB {
+	font-size: var(--font-size-B);
+	background-color: hsl(120,25.3%,64.3%, 0.85);
+	color: var(--era-taylor-swift-text);
+}
+
+.era-taylor-swift-gradeC {
+	font-size: var(--font-size-C);
+	background-color: hsla(120,25%,71.8%, 0.8);
+	color: var(--era-taylor-swift-text);
+}
+
+.era-taylor-swift-gradeD, .era-taylor-swift-gradeF {
+	background-color: hsla(120,25%,71.8%, 0.6);
+	color: var(--era-taylor-swift-text);
+	font-size: var(--font-size-D);
+}
+
+
+
 .era-fearless {
 	fill: var(--era-fearless);
 	background-color: var(--era-fearless);
 	color: var(--era-fearless-text);
 }
+
+.era-fearless-gradeA, .era-fearless-gradeAplus {
+	fill: var(--era-fearless);
+	background-color: hsl(34.7,77.4%,56.7%);
+	color: var(--era-fearless-text);
+	font-size: var(--font-size-A);
+}
+
+.era-fearless-gradeB {
+	font-size: var(--font-size-B);
+	background-color: hsla(35,77.2%,60.4%, 0.9);
+	color: var(--era-fearless-text);
+}
+
+.era-fearless-gradeC {
+	font-size: var(--font-size-C);
+	background-color: hsla(35.1,77.6%,72%);
+	color: var(--era-fearless-text);
+}
+
+.era-fearless-gradeD, .era-fearless-gradeF {
+	background-color: hsla(35.1,77.6%,72%, 0.75);
+	color: var(--era-fearless-text);
+	font-size: var(--font-size-D);
+}
+
+
 .era-speak-now {
 	fill: var(--era-speak-now);
 	background-color: var(--era-speak-now);
 	color: var(--era-speak-now-text);
 }
+
+
+.era-speak-now-gradeA, .era-speak-now-gradeAplus {
+	fill: var(--era-speak-now);
+	background-color: hsla(293.9,25.4%,37.8%);
+	color: #decce1;
+	font-size: var(--font-size-A);
+}
+
+.era-speak-now-gradeB {
+	font-size: var(--font-size-B);
+	background-color: hsla(292.2,25.2%,42%, 0.8);
+	color: var(--era-speak-now-text);
+}
+
+.era-speak-now-gradeC {
+	font-size: var(--font-size-C);
+	background-color: hsla(293.1,25.2%,72.7%);
+	color: var(--era-speak-now-text);
+}
+
+
+
+.era-speak-now-gradeD, .era-speak-now-gradeF {
+	background-color: hsla(293.1,25.2%,72.7%, 0.8);
+	color: var(--era-speak-now-text);
+	font-size: var(--font-size-D);
+}
+
 .era-red {
 	fill: var(--era-red);
 	background-color: var(--era-red);
 	color: var(--era-red-text);
 }
+
+.era-red-gradeA, .era-red-gradeAplus {
+	fill: var(--era-red);
+	background-color: var(--era-red);
+	color: var(--era-red-text);
+	font-size: var(--font-size-A);
+}
+
+.era-red-gradeB {
+	font-size: var(--font-size-B);
+	background-color: hsl(351.3,45.2%,32.9%, 0.85);
+	color: var(--era-red-text);
+}
+
+.era-red-gradeC {
+	font-size: var(--font-size-C);
+	background-color: hsla(351.3,45.2%,32.9%, 0.7);
+	color: var(--era-red-text);
+}
+
+.era-red-gradeD, .era-red-gradeF {
+	background-color: hsla(351.3,45.2%,32.9%, 0.55);
+	color: var(--era-red);
+	font-size: var(--font-size-D);
+}
+
+
 .era-1989 {
 	fill: var(--era-1989);
 	background-color: var(--era-1989);
@@ -195,35 +326,245 @@ button:focus-visible {
 	color: var(--era-1989-text);
 }
 
+.era-taylor-swift-skip, .era-fearless-skip, .era-speak-now-skip, .era-red-skip, .era-1989-skip, .era-reputation-skip, .era-lover-skip, .era-folklore-skip, .era-evermore-skip, .era-midnights-skip {
+	font-size: 12px;
+	color: black;
+	background: rgba(179, 179, 179, 0.3);
+}
+
+.era-1989-gradeA, .era-1989-gradeAplus {
+	fill: var(--era-1989);
+	background-color: #8cd7f4;
+	/* background-color: rgb(158,226,243); */
+	color: var(--era-1989-text);
+	font-size: var(--font-size-A);
+
+}
+
+.era-1989-gradeB {
+	fill: var(--era-1989);
+	background-color: #91d9f4;
+	/* background-color: rgb(158,226,243); */
+	color: var(--era-1989-text);
+	font-size: var(--font-size-B);
+	opacity: 0.8;
+}
+
+.era-1989-gradeC {
+	fill: var(--era-1989);
+	background-color: #b5e5f8;
+	/* background-color: rgb(158,226,243); */
+	color: var(--era-1989-text);
+	font-size: var(--font-size-C);
+	opacity: 0.8;
+}
+
+.era-1989-gradeD, .era-1989-gradeF {
+	fill: var(--era-1989);
+	background-color: #d7f1fb;
+	/* background-color: rgb(158,226,243); */
+	color: var(--era-1989-text);
+	font-size: var(--font-size-D);
+}
+
+
 
 .era-reputation {
 	fill: var(--era-reputation);
 	background-color: var(--era-reputation);
 	color: var(--era-reputation-text);
 }
+
+.era-reputation-gradeA, .era-reputation-gradeAplus {
+	fill: var(--era-reputation);
+	background-color: hsl(0,0%,13.3%);
+	/* orig F7B0CC */
+	color: var(--era-reputation-text);
+	font-size: var(--font-size-A);
+}
+
+.era-reputation-gradeB {	
+	font-size: var(--font-size-B);
+	background-color: hsl(0,0%,13.3%, 0.85);
+	color: var(--era-reputation-text);
+}
+
+.era-reputation-gradeC {
+	font-size: var(--font-size-C);
+	background-color: hsl(0,0%,13.3%, 0.7);
+	color: var(--era-reputation-text);
+}
+
+.era-reputation-gradeD, .era-reputation-gradeF {
+	background-color: hsl(0,0%,13.3%, 0.55);
+	color: var(--era-reputation);
+	font-size: var(--font-size-D);
+}
+
+
 .era-lover {
 	fill: var(--era-lover);
 	background-color: var(--era-lover);
 	color: var(--era-lover-text);
 }
+
+.era-lover-gradeA, .era-lover-gradeAplus {
+	fill: var(--era-lover);
+	background-color: #f38cb5;
+	/* orig F7B0CC */
+	color: var(--era-lover-text);
+	font-size: var(--font-size-A);
+}
+
+.era-lover-gradeB {
+	opacity: 0.8;
+	font-size: var(--font-size-B);
+	background-color: #f59ec1;
+	color: var(--era-lover-text);
+}
+
+.era-lover-gradeC {
+	opacity: 0.8;
+	font-size: var(--font-size-C);
+	background-color: #f7b5d0;
+	color: var(--era-lover-text);
+}
+
+.era-lover-gradeD, .era-lover-gradeF {
+	background-color: #fad3e3;	
+	color: var(--era-lover-text);
+	font-size: var(--font-size-D);
+}
+
+
 .era-folklore {
 	fill: var(--era-folklore);
 	background-color: var(--era-folklore);
 	color: var(--era-folklore-text);
 }
+
+.era-folklore-gradeA, .era-folklore-gradeAplus {
+	fill: var(--era-folklore);
+	background-color: #a0a0a0;
+	/* orig  CDC9C1 */
+	color: var(--era-folklore-text);
+	font-size: var(--font-size-A);
+
+}
+
+
+.era-folklore-gradeB {
+	opacity: 0.8;
+	font-size: var(--font-size-B);
+	background-color: #a3a3a3;
+	color: var(--era-folklore-text);
+}
+
+.era-folklore-gradeC {
+	opacity: 0.8;
+	font-size: var(--font-size-C);
+	background-color: #bdbdbd;
+	color: var(--era-folklore-text);
+}
+
+.era-folklore-gradeD, .era-folklore-gradeF {
+	background-color: #dbdbdb;	
+	color: var(--era-folklore-text);
+	font-size: var(--font-size-D);
+}
+
+
 .era-evermore {
 	fill: var(--era-evermore);
 	background-color: var(--era-evermore);
 	color: var(--era-evermore-text);
 }
+
+.era-evermore-gradeA, .era-evermore-gradeAplus {
+	fill: var(--era-evermore);
+	background-color: #aa855c;
+	opacity: 0.9;
+	/*orig C5AC90 */
+	color: var(--era-evermore-text);
+	font-size: var(--font-size-A);
+}
+
+.era-evermore-gradeB {
+	opacity: 0.8;
+	font-size: var(--font-size-B);
+	background-color: #b79876;
+	color: var(--era-evermore-text);
+}
+
+.era-evermore-gradeC {
+	opacity: 0.8;
+	font-size: var(--font-size-C);
+	background-color: #C5AC90;
+	color: var(--era-evermore-text);
+}
+
+.era-evermore-gradeD, .era-evermore-gradeF {
+	background-color: #e0d2c3;	
+	color: var(--era-evermore-text);
+	font-size: var(--font-size-D);
+}
+
+
 .era-midnights {
 	fill: var(--era-midnights);
 	background-color: var(--era-midnights);
+	/* 242E47 */
 	color: var(--era-midnights-text);
 }
 
+
+.era-midnights-gradeA, .era-midnights-gradeAplus {
+	fill: var(--era-midnights);
+	background-color: var(--era-midnights);
+	color: var(--era-midnights-text);
+	font-size: var(--font-size-A);
+}
+
+.era-midnights-gradeB {
+	font-size: var(--font-size-B);
+	background-color: hsla(222.9,32.7%,21%, 0.85);
+	color: var(--era-midnights-text);
+}
+
+.era-midnights-gradeC {
+	font-size: var(--font-size-C);
+	background-color: hsla(222.9,32.7%,21%, 0.7);
+	color: var(--era-midnights-text);
+}
+
+.era-midnights-gradeD, .era-midnights-gradeF {
+	background-color: hsla(222.9,32.7%,21%, 0.55);	
+	color: var(--era-midnights);
+	font-size: var(--font-size-D);
+}
+
+
+/* split dark colors and light colors bc using HSL and opacity for one color */
+.era-taylor-swift-gradeF, .era-fearless-gradeF, .era-midnights-gradeF, .era-red-gradeF {
+	font-size: 12px;
+	opacity: 0.85;
+}
+
+.era-speak-now-gradeF, .era-1989-gradeF, .era-reputation-gradeF, .era-lover-gradeF, .era-folklore-gradeF, .era-evermore-gradeF {
+	font-size: 12px;
+	opacity: 0.7;
+}
+
+
+.era-taylor-swift-gradeAplus, .era-fearless-gradeAplus, .era-speak-now-gradeAplus, .era-red-gradeAplus, .era-1989-gradeAplus, .era-reputation-gradeAplus, .era-lover-gradeAplus, .era-folklore-gradeAplus, .era-evermore-gradeAplus, .era-midnights-gradeplus  {
+	font-weight: 700;
+	font-size: var(--font-size-Aplus);
+}
+
+
+
 .faded{
-	opacity: 0.3;
+	opacity: 0.4;
 }
 .not-selected {
 	color: rgb(133,133,133);
@@ -365,24 +706,10 @@ button:focus-visible {
 	margin-bottom: 5px;
 	vertical-align: middle;
 	cursor: pointer;
-}
-.a90-plus{
-	font-size: 20px;
-}
-.a75-90{
-	font-size: 17px;
-	opacity: 0.8;
+	min-width: 80px;
+	text-align: center;
 }
 
-.a55-75 {
-	font-size: 14px;
-	opacity: 0.6;
-}
-
-.u55{
-	font-size: 12px;
-	opacity: 0.45;
-}
 
 /* ipad */
 @media (max-width:768px){

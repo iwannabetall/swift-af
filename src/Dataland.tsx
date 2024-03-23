@@ -896,7 +896,7 @@ function Dataland() {
 
 	const albumCovers = ["imtheproblem", "Taylor_Swift", "Fearless", "Speak_Now", "Red", "1989", "reputation", "Lover", "folklore", "evermore", "Midnights"] as const
 
-	const accuracy_groups = [{key: 'a90-plus', text: "90%+ Accuracy"}, {key: 'a75-90', text: "75-90% Accuracy"}, {key: 'a55-75', text: "55-75% Accuracy"}, {key: 'u55', text: "Below 55% Accuracy"}] as const
+	const accuracy_groups = [{key: 'gradeAplus', text: "A+"}, {key: 'gradeA', text: "A"}, {key: 'gradeB', text: " B "}, {key: 'gradeC', text: "C"}, {key: 'gradeD', text: "D"}, {key: 'gradeF', text: "F"}] as const
 	
 	const scrollRef = useRef<HTMLInputElement | null>(null)
 
@@ -911,7 +911,6 @@ function Dataland() {
 	const [gettingLyrics, setGettingLyrics] = useState<boolean>(false)
 	const [top40, setTop40] = useState<LyricData[]>([])
 	const [showTop40, setShowTop40] = useState<boolean>(true)
-	const [highlightGroup, setHighlightGroup] = useState<string>('')
 	const [genViz, setGenViz] = useState<boolean>(false)
 
 	function formatBigNumber(num: number) {
@@ -1088,8 +1087,8 @@ function Dataland() {
 			if (fullLyricsNStats.filter(x=> x.album_key == fighter).length == 0){
 
 				setGettingLyrics(true);
-				// axios.get(`http://localhost:3000/getFullLyricsNStats`, { params:
-				axios.get(`https://swift-api.fly.dev/getFullLyricsNStats`, { params:
+				axios.get(`http://localhost:3000/getFullLyricsNStats`, { params:
+				// axios.get(`https://swift-api.fly.dev/getFullLyricsNStats`, { params:
 				{ 'album': fighter }
 				})
 				.then(function (response) {								
@@ -1100,7 +1099,6 @@ function Dataland() {
 						let first_track = songsFullDB.filter(s=> s.album_key == albumFilter)[0].song
 						setSongFilter(first_track)
 						setDisplayLyrics(fullLyricsNStats.filter(s=> s.song == first_track))
-						setHighlightGroup('')
 					}
 	
 					setGettingLyrics(false);
@@ -1115,7 +1113,6 @@ function Dataland() {
 				if (songsFullDB.length > 0) {
 					let first_track = songsFullDB.filter(s=> s.album_key == albumFilter)[0].song
 					setSongFilter(first_track)
-					setHighlightGroup('')
 					setDisplayLyrics(fullLyricsNStats.filter(s=> s.song == first_track))
 				}
 			}
@@ -1281,57 +1278,13 @@ function Dataland() {
 
 			lyrics.enter().append('text')
 				.attr('class', function (d: LyricData) { 
-					return `lyrics ${albumColorKey[d.album_key as keyof typeof albumColorKey]} ${(d.title_in_lyric_match || 0) >= 70 || !d.accuracy || d.total < 10 ? 'fadeline' : d.accuracy >= 90 ? 'a90-plus' : d.accuracy > 75 ? 'a75-90' : d.accuracy > 55 ? 'a55-75' : 'u55'}`
+					return `lyrics ${albumColorKey[d.album_key as keyof typeof albumColorKey]}-${d.accuracy_group}`
+					// ${(d.accuracy_group == 'gradeA' || d.accuracy_group == 'gradeAplus') ? `albumColorKey[d.album_key as keyof typeof albumColorKey]-${d.accuracy_group}` : d.accuracy_group == 'gradeB' ? `${albumColorKey[d.album_key as keyof typeof albumColorKey]}-B` : d.accuracy_group == 'gradeC' ? `${albumColorKey[d.album_key as keyof typeof albumColorKey]}-C` : (d.accuracy_group == 'gradeD' || d.accuracy_group == 'gradeF') ? `${albumColorKey[d.album_key as keyof typeof albumColorKey]}-fail` : ''} ${albumColorKey[d.album_key as keyof typeof albumColorKey]}		
 				})
 				.attr('x', 20)
 				.attr('y', function(_, i: number) { 
 					return i * 20 + 30})			
 				.attr("text-anchor", "start")
-				// .attr('dy', )
-				.style('font-size', function(d: LyricData) { 
-					// for optional params in interface, check to see if title_in_lyric_match exists first
-					if ((d.title_in_lyric_match || 0) >= 70 || !d.accuracy || d.total < 10) {
-						// console.log(scaleFontSize(d.accuracy))
-						return "10px"
-					} else if (d.accuracy >= 90) {
-						return "20px"
-					} else if (d.accuracy > 75) {
-						return "17px"
-					} else if (d.accuracy > 55) {
-						return "14px"
-					// } else if (d.accuracy > 60) {
-						// return 0.5
-					} else {
-						return "12px"
-					}  
-					//  else {
-					// 	// console.log(Math.round(scaleFontSize(d.accuracy)))
-					// 	return `${Math.round(scaleFontSize(d.accuracy))}px`
-					// } 			
-				 })
-				.style('opacity', function(d: LyricData) { 
-					if (d.accuracy >= 90) {
-						return 1
-					} else if (d.accuracy > 75) {
-						return 0.8
-					} else if (d.accuracy > 55) {
-						return 0.6
-					// } else if (d.accuracy > 60) {
-						// return 0.5
-					} else {
-						return 0.45
-					} 
-				})
-				.style('font-weight', function (d: LyricData) {
-					// decide what the time/accuracy cutoffs are -- about 350 and 450 bolded respectively w/current 
-					// went w/3 seconds bc thats what the fastest averages on the leaderboard were -- avg just under 3s 
-					if (d.time < 3.5 && d.accuracy >= 90 && d.total > 10 && (d.title_in_lyric_match || 0) < 70){
-						return 700
-					} else {
-						return 400
-					}
-					
-				})
 				.style("overflow-x", "visible") // Allow text overflow
 				.text(function(d: LyricData) { return d.lyric })				
 				// .on('mouseover', function (d: MouseEvent) {
@@ -1345,25 +1298,9 @@ function Dataland() {
 
 	}
 
-	}, [displayLyrics, albumFilter, highlightGroup])
+	}, [displayLyrics, albumFilter])
 
-	function highlightLines(lyricGroup: string){
-		setHighlightGroup(lyricGroup)
-		if (lyricGroup == ''){
-			// reset and show full group
-			setDisplayLyrics(fullLyricsNStats.filter(s=> s.song == songFilter))
-		} else {
-			setDisplayLyrics(fullLyricsNStats.filter(s=> s.song == songFilter && s.accuracy_group == lyricGroup))
-		}
-		
-		// d3.selectAll('.lyrics').transition()
-		// 	.style('opacity', 0.3)
-
-		
-		// d3.selectAll(`.lyrics.${lyricGroup}`).transition()
-		// 	.style('opacity', 1)
-	}
-
+	
 	async function delayedDataFetch() {
 		
 		axios.get(`https://swift-api.fly.dev/getSongs`)
@@ -1378,8 +1315,8 @@ function Dataland() {
 			});	
 
 		setIsLoading(true)
-		// axios.get(`http://localhost:3000/getLyricStats`)
-		axios.get(`https://swift-api.fly.dev/getLyricStats`)
+		axios.get(`http://localhost:3000/getLyricStats`)
+		// axios.get(`https://swift-api.fly.dev/getLyricStats`)
 		.then(function (response) {								
 			lyricStats = response.data.lyricStats
 			console.log(lyricStats)
@@ -1412,7 +1349,6 @@ function Dataland() {
 		setFighter(cover);	 
 		setAlbumFilter(cover);							
 		setSongList(songsFullDB.filter(s=> s.album_key == cover))				
-		setHighlightGroup('')
 		
 	}
 
@@ -1453,20 +1389,15 @@ function Dataland() {
 				{/* legend for album */}
 				{!gettingLyrics && !showTop40 && displayLyrics && 
 				<div>
-					<h6>Click the legend to filter the lyrics. <span  className='font-bold'>Bolded lyrics: 90+% accuracy + avg under 3.3s</span></h6>
+					<h6>Click the legend to filter the lyrics.</h6>
 					<div className='flex flex-row flex-wrap justify-center'>		
 				
-						{/* <div className={`legend a90-plus ${highlightGroup == 'a90-plus' ? 'underline selected' : '' } ${albumColorKey[fighter as keyof typeof albumColorKey]}`}
-							onClick={()=> highlightLines('a90-plus')}
-						>	<span className='font-bold '>90+% Accuracy & sub-3.3s</span>
-						</div> */}
 						{accuracy_groups.map(x => 
-							<div key={x.key} className={`legend ${x.key} ${highlightGroup == x.key ? 'underline selected' : '' } ${albumColorKey[fighter as keyof typeof albumColorKey]}`}
-								onClick={()=> highlightLines(x.key)}
+							<div key={x.key} className={`legend ${x.key} 							
+							${albumColorKey[fighter as keyof typeof albumColorKey]}-${x.key}`}
 							>{x.text}</div>)}
-						<div className={`legend ${highlightGroup == '' ? 'underline selected' : '' } ${albumColorKey[fighter as keyof typeof albumColorKey]}`}
-							onClick={()=> highlightLines('')}
-						>Full Lyrics</div>					
+							{/* ${highlightGroup == x.key ? 'underline selected' : 'faded' }  */}
+						
 					</div>
 				</div>}			
 
@@ -1476,7 +1407,6 @@ function Dataland() {
 						{songList.map((x)=> 
 						<div onClick={() => { 
 							setSongFilter(x.song);
-							setHighlightGroup('')
 							setDisplayLyrics(fullLyricsNStats.filter(s=> s.song == x.song));
 							// scroll to top of data viz, buffer for nav bar on mobile
 							window.scrollTo({top: scrollRef.current ? scrollRef.current?.offsetTop - 95 : 0, behavior: 'smooth'})							
