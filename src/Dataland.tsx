@@ -1087,8 +1087,8 @@ function Dataland() {
 			if (fullLyricsNStats.filter(x=> x.album_key == fighter).length == 0){
 
 				setGettingLyrics(true);
-				axios.get(`http://localhost:3000/getFullLyricsNStats`, { params:
-				// axios.get(`https://swift-api.fly.dev/getFullLyricsNStats`, { params:
+				// axios.get(`http://localhost:3000/getFullLyricsNStats`, { params:
+				axios.get(`https://swift-api.fly.dev/getFullLyricsNStats`, { params:
 				{ 'album': fighter }
 				})
 				.then(function (response) {								
@@ -1315,8 +1315,8 @@ function Dataland() {
 			});	
 
 		setIsLoading(true)
-		axios.get(`http://localhost:3000/getLyricStats`)
-		// axios.get(`https://swift-api.fly.dev/getLyricStats`)
+		// axios.get(`http://localhost:3000/getLyricStats`)
+		axios.get(`https://swift-api.fly.dev/getLyricStats`)
 		.then(function (response) {								
 			lyricStats = response.data.lyricStats
 			console.log(lyricStats)
