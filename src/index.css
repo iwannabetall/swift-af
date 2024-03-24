@@ -636,8 +636,8 @@ div.tooltip {
 	z-index: -1;
 }
 .wrapper{
-	margin-top: 50px;
-	margin-bottom: 60px;
+	margin-top: 80px;
+	margin-bottom: 80px;
 }
 
 
@@ -738,6 +738,11 @@ div.tooltip {
 		width: 400px;
 	}
 
+	.wrapper{
+		margin-top: 50px;
+		margin-bottom: 60px;
+	}
+	
 	.jumpbox{
 		margin-top:10px;
 	}

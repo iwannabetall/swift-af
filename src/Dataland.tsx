@@ -4,7 +4,6 @@ import title from '/title.svg'
 import axios from 'axios';
 import Nav from './Nav.tsx'
 import * as d3 from 'd3';
-import { InView } from "react-intersection-observer";
 import Loader from './Loader.tsx';
 import useScreenSize from './useScreenSize.tsx';
 import LyricalVizLegend from './LyricalVizLegend.tsx';
@@ -1847,7 +1846,6 @@ function Dataland() {
 	const [gettingLyrics, setGettingLyrics] = useState<boolean>(false)
 	const [top40, setTop40] = useState<LyricData[]>([])
 	const [showTop40, setShowTop40] = useState<boolean>(true)
-	const [genViz, setGenViz] = useState<boolean>(false)  // show spotify viz 
 	const [spotifyData, setSpotifyData] = useState<SpotifyData[]>(spotify_full_data)
 	const screenSize = useScreenSize()
 
@@ -1870,166 +1868,164 @@ function Dataland() {
 
 	// SPOTIFY VS ACCURACY SCATTERPLOT
 	useEffect(()=> {
-		if (genViz){
+		console.log('spotify')
+		d3.selectAll('.spotify').remove()
+		// spotify - accuracy scatter plot
+		const t = d3.transition()
+			.duration(1500)
+			.delay((_, i) => i * 500)
+			.ease(d3.easeBounceOut);		
 
-			d3.selectAll('.spotify').remove()
-			// spotify - accuracy scatter plot
-			const t = d3.transition()
-				.duration(1500)
-				.delay((_, i) => i * 500)
-				.ease(d3.easeBounceOut);		
-
-			const h = screenSize.width > 420 ? 680 : 460
-			const w = screenSize.width > 420 ? 600 : 420
-			const fontSize = screenSize.width > 420 ? '20px' : '18px'
-			const margin = 30
-			const marginBottom = 45
-			const marginTop = 36
-			const marginLeft = 60
-			const marginRight = 15
-			
-			let yScale = d3.scaleLinear().domain([Math.max(...spotifyData.map(x=> x.historical_counts)), Math.min(...spotifyData.map(x=> x.historical_counts))]).range([marginTop, h - marginBottom])
-
-			let xScale = d3.scaleLinear().domain([Math.min(...spotifyData.map(x=> x.accuracy)), Math.max(...spotifyData.map(x=> x.accuracy))]).range([marginLeft, w - marginRight])
-
-			let xInvScale = d3.scaleLinear().domain([marginLeft, w - marginRight]).range([Math.min(...spotifyData.map(x=> x.accuracy)), 100])					
-					
-			let yInvScale = d3.scaleLinear().domain([marginTop, h - marginBottom]).range([Math.max(...spotifyData.map(x=> x.historical_counts)), Math.min(...spotifyData.map(x=> x.historical_counts))])
+		const h = screenSize.width > 420 ? 680 : 460
+		const w = screenSize.width > 420 ? 600 : 420
+		const fontSize = screenSize.width > 420 ? '20px' : '18px'
+		const margin = 30
+		const marginBottom = 45
+		const marginTop = 36
+		const marginLeft = 60
+		const marginRight = 15
 		
-			// const extent = [[marginLeft, marginTop], [w - marginRight, h - marginTop]];
-			
-			// const zoom = d3.zoom()
-			// .scaleExtent([1, 8])
-			// .translateExtent(extent)
-			// .extent(extent)
-			// .on("zoom", zoomed);
-		
+		let yScale = d3.scaleLinear().domain([Math.max(...spotifyData.map(x=> x.historical_counts)), Math.min(...spotifyData.map(x=> x.historical_counts))]).range([marginTop, h - marginBottom])
 
-			let scatter = d3.select("#spotifyscatter").append('svg')
-				.attr('class', 'spotify')
-				.attr('height', h)
-				.attr('width', w)
-				.attr("viewBox", `0 0 ${h} ${w}`)
-				// .call(zoom)
-			
-			const brush = d3.brush().on("end", ({selection}) => {
-				if (selection) {
-					const [[x0, y0], [x1, y1]] = selection;			
-					// console.log(selection)					
+		let xScale = d3.scaleLinear().domain([Math.min(...spotifyData.map(x=> x.accuracy)), Math.max(...spotifyData.map(x=> x.accuracy))]).range([marginLeft, w - marginRight])
 
-					let selectedData = spotify_full_data.filter(x=> x.accuracy >= xInvScale(x0) && x.accuracy <= xInvScale(x1) && x.historical_counts <= yInvScale(y0) && x.historical_counts >= yInvScale(y1))
-
-					if (selectedData.length > 0) {
-						// // y1 is further up (larger than y0)
-						setSpotifyData(spotify_full_data.filter(x=> x.accuracy >= xInvScale(x0) && x.accuracy <= xInvScale(x1) && x.historical_counts <= yInvScale(y0) && x.historical_counts >= yInvScale(y1)))
-					}
-					
-					
-				}
-			})
-			.extent([[marginLeft-10,0], [w, h-marginBottom + 10]])  // overlay sizing
-
-			//!!!! must create brush before appending bc it overlays a rect that will block mouseover events
-			scatter.append('g').attr('class', 'brush')
-				.call(brush)
-				.on("dblclick", function() {
-					setSpotifyData(spotify_full_data)})		
-
-			let spotify = scatter.selectAll<SVGRectElement, SpotifyData>('circle').data(spotifyData, function(d: SpotifyData) {
-				return d.song
-			})
-
-			// let tooltip = scatter.append("div")	
-			// .attr("class", "tooltip")				
-			// .style("opacity", 0);
-			
-			// cant seem to get transitions to work with mouseover with joins...so using enter.append			
-			spotify.enter().append('circle')
-				.attr('class', function(d) { return `${albumColorKey[albumKeyLkup[d.album as keyof typeof albumKeyLkup] as keyof typeof albumColorKey]}`
-				})									
-				.on('mouseover', function(_, d) {
-					// console.log(d3.pointer(e))
-					// const startY = d3.pointer(e)[1] - 10//40
-					// const xPos = d3.pointer(e)[0] //60
-
-					const startY = -30
-					const xPos = screenSize.width < 420 ? 20 : 60		
-					
-					d3.select('.spotify').append('text')
-					.attr('class', 'hoverlabel')
-					.attr('x', xPos)
-					.attr('y', startY)
-					.attr('font-size', fontSize)
-					.html(`${d.song}: ${(d.accuracy).toFixed(1)}% | ${formatBigNumber(d.historical_counts)} Spotify Plays`)
-
-					d3.select('.spotify').append('text')
-					.attr('class', 'hoverlabel')
-					.attr('x', xPos)
-					.attr('y', startY + 25)
-					.attr('font-size', fontSize)
-					.text(`${d.top_lyric}`)
-
-					d3.select('.spotify').append('text')
-					.attr('class', 'hoverlabel')
-					.attr('x', xPos)
-					.attr('y', startY + 50)
-					.attr('font-size', fontSize)
-					.text(`Top Line Avg Stats: ${d.lyrical_accuracy}% | ${d.lyrical_speed}s`)
-
-				})
-				.on('mouseout', function(){
-					d3.selectAll('.hoverlabel').remove()
-				})				
-				.attr('cx', 0)  // make bounce look like spray bottle 
-				.attr('cy', h)
-				.transition(t)
-				.attr('r', '6')				
-				.attr('cy', function(d){					
-					return yScale(d.historical_counts)
-				})
-				.attr('cx', function(d){					
-					return xScale(d.accuracy)
-				})
-			
-			// const xAxisGen = (g, x) => g.call(d3.axisBottom(xScale))
-			// 	.call(g1 => g1.append('text')
-			// 		.attr('y', 27)
-			// 		.attr('x', w/2)
-			// 		.attr('font-size', '12px')
-			// 		.style('fill', 'black')  // fill defaults to none w/axis generator 
-			// 		.text('Accuracy'))
-
-			d3.select('.spotify').append('g')
-				.attr('class', 'spotify-xaxis')
-				.attr('transform', `translate(0, ${h - margin})`)
-				// .call(xAxisGen, xScale)				
-				.call(d3.axisBottom(xScale))
-				.call(g=> g.append('text')
-					.attr('y', 27)
-					.attr('x', w/2)
-					.attr('font-size', '12px')
-					.style('fill', 'black')  // fill defaults to none w/axis generator 
-					.text('Accuracy'))
+		let xInvScale = d3.scaleLinear().domain([marginLeft, w - marginRight]).range([Math.min(...spotifyData.map(x=> x.accuracy)), 100])					
 				
-			// const f = d3.format('.0M');
+		let yInvScale = d3.scaleLinear().domain([marginTop, h - marginBottom]).range([Math.max(...spotifyData.map(x=> x.historical_counts)), Math.min(...spotifyData.map(x=> x.historical_counts))])
+	
+		// const extent = [[marginLeft, marginTop], [w - marginRight, h - marginTop]];
+		
+		// const zoom = d3.zoom()
+		// .scaleExtent([1, 8])
+		// .translateExtent(extent)
+		// .extent(extent)
+		// .on("zoom", zoomed);
+	
 
-			//y axis 
-			d3.select('.spotify').append('g')
-				.attr('class', 'spotify-yaxis')
-				.attr('transform', `translate(${1.7*margin}, 0)`)			
-				.call(d3.axisLeft(yScale))
-				.call(g=> g.append('text')
-					.attr('y', h/2)
-					.attr('x', -37)
-					.attr("text-anchor", "middle")
-					.attr('font-size', '12px')
-					.style('fill', 'black')
-					.attr('transform-origin', `-37 ${h/2}`)
-					.attr('transform', 'rotate(-90)')
-					.text('Historical Spotify Plays (Millions)')
-				)				
+		let scatter = d3.select("#spotifyscatter").append('svg')
+			.attr('class', 'spotify')
+			.attr('height', h)
+			.attr('width', w)
+			.attr("viewBox", `0 0 ${h} ${w}`)
+			// .call(zoom)
 		
+		const brush = d3.brush().on("end", ({selection}) => {
+			if (selection) {
+				const [[x0, y0], [x1, y1]] = selection;			
+				// console.log(selection)					
+
+				let selectedData = spotify_full_data.filter(x=> x.accuracy >= xInvScale(x0) && x.accuracy <= xInvScale(x1) && x.historical_counts <= yInvScale(y0) && x.historical_counts >= yInvScale(y1))
+
+				if (selectedData.length > 0) {
+					// // y1 is further up (larger than y0)
+					setSpotifyData(spotify_full_data.filter(x=> x.accuracy >= xInvScale(x0) && x.accuracy <= xInvScale(x1) && x.historical_counts <= yInvScale(y0) && x.historical_counts >= yInvScale(y1)))
+				}
+				
+				
+			}
+		})
+		.extent([[marginLeft-10,0], [w, h-marginBottom + 10]])  // overlay sizing
+
+		//!!!! must create brush before appending bc it overlays a rect that will block mouseover events
+		scatter.append('g').attr('class', 'brush')
+			.call(brush)
+			.on("dblclick", function() {
+				setSpotifyData(spotify_full_data)})		
+
+		let spotify = scatter.selectAll<SVGRectElement, SpotifyData>('circle').data(spotifyData, function(d: SpotifyData) {
+			return d.song
+		})
+
+		// let tooltip = scatter.append("div")	
+		// .attr("class", "tooltip")				
+		// .style("opacity", 0);
 		
+		// cant seem to get transitions to work with mouseover with joins...so using enter.append			
+		spotify.enter().append('circle')
+			.attr('class', function(d) { return `${albumColorKey[albumKeyLkup[d.album as keyof typeof albumKeyLkup] as keyof typeof albumColorKey]}`
+			})									
+			.on('mouseover', function(_, d) {
+				// console.log(d3.pointer(e))
+				// const startY = d3.pointer(e)[1] - 10//40
+				// const xPos = d3.pointer(e)[0] //60
+
+				const startY = -30
+				const xPos = screenSize.width < 420 ? 20 : 60		
+				
+				d3.select('.spotify').append('text')
+				.attr('class', 'hoverlabel')
+				.attr('x', xPos)
+				.attr('y', startY)
+				.attr('font-size', fontSize)
+				.html(`${d.song}: ${(d.accuracy).toFixed(1)}% | ${formatBigNumber(d.historical_counts)} Spotify Plays`)
+
+				d3.select('.spotify').append('text')
+				.attr('class', 'hoverlabel')
+				.attr('x', xPos)
+				.attr('y', startY + 25)
+				.attr('font-size', fontSize)
+				.text(`${d.top_lyric}`)
+
+				d3.select('.spotify').append('text')
+				.attr('class', 'hoverlabel')
+				.attr('x', xPos)
+				.attr('y', startY + 50)
+				.attr('font-size', fontSize)
+				.text(`Top Line Avg Stats: ${d.lyrical_accuracy}% | ${d.lyrical_speed}s`)
+
+			})
+			.on('mouseout', function(){
+				d3.selectAll('.hoverlabel').remove()
+			})				
+			.attr('cx', 0)  // make bounce look like spray bottle 
+			.attr('cy', h)
+			.transition(t)
+			.attr('r', '6')				
+			.attr('cy', function(d){					
+				return yScale(d.historical_counts)
+			})
+			.attr('cx', function(d){					
+				return xScale(d.accuracy)
+			})
+		
+		// const xAxisGen = (g, x) => g.call(d3.axisBottom(xScale))
+		// 	.call(g1 => g1.append('text')
+		// 		.attr('y', 27)
+		// 		.attr('x', w/2)
+		// 		.attr('font-size', '12px')
+		// 		.style('fill', 'black')  // fill defaults to none w/axis generator 
+		// 		.text('Accuracy'))
+
+		d3.select('.spotify').append('g')
+			.attr('class', 'spotify-xaxis')
+			.attr('transform', `translate(0, ${h - margin})`)
+			// .call(xAxisGen, xScale)				
+			.call(d3.axisBottom(xScale))
+			.call(g=> g.append('text')
+				.attr('y', 27)
+				.attr('x', w/2)
+				.attr('font-size', '12px')
+				.style('fill', 'black')  // fill defaults to none w/axis generator 
+				.text('Accuracy'))
+			
+		// const f = d3.format('.0M');
+
+		//y axis 
+		d3.select('.spotify').append('g')
+			.attr('class', 'spotify-yaxis')
+			.attr('transform', `translate(${1.7*margin}, 0)`)			
+			.call(d3.axisLeft(yScale))
+			.call(g=> g.append('text')
+				.attr('y', h/2)
+				.attr('x', -37)
+				.attr("text-anchor", "middle")
+				.attr('font-size', '12px')
+				.style('fill', 'black')
+				.attr('transform-origin', `-37 ${h/2}`)
+				.attr('transform', 'rotate(-90)')
+				.text('Historical Spotify Plays (Millions)')
+			)				
+
 			// function zoomed(event) {
 			// 	console.log(event)
 			// 	const xz = event.transform.rescaleX(xScale);
@@ -2038,10 +2034,9 @@ function Dataland() {
 			// 	xAxis.call(xAxisGen, xz);
 			// }
 				
-			
-		}			
-	}, [spotifyData, genViz])  
-	// use effect doesnt run w/data viz if i put a state value that doesn't change in the dep array
+	})
+	// [showTop40, spotifyData]  
+	// use effect doesnt run w/data viz if i put a state value that doesn't change in the dep array--IS IT BC I HARD CODED THE DATA IN???
 
 // GET ALBUM DATA
 	useEffect(()=> {
@@ -2421,12 +2416,11 @@ function Dataland() {
 					
 					{showTop40 && <div>	
 						<div className='flex flex-row flex-wrap justify-center mx-auto m-2 text-center'><p>Jump to: <span className='font-bold cursor-pointer'
-							onClick={()=> window.scrollTo({top: cultSuccessRef.current ? cultSuccessRef.current?.offsetTop - 95 : 0, behavior: 'smooth'})}> mmm...yeah...You're on Your Own, Kid</span> | <span className='font-bold cursor-pointer'
-							onClick={()=> window.scrollTo({top: cultFailRef.current ? cultFailRef.current?.offsetTop - 95 : 0, behavior: 'smooth'})}> We Forgot That These Existed </span> | <span className='font-bold cursor-pointer'
 							onClick={()=> {
 								window.scrollTo({top: spotifyRef.current ? spotifyRef.current?.offsetTop - 95 : 0, behavior: 'smooth'})
-								setGenViz(true)
-								}}> The Story of Us </span> </p> </div>							
+								}}> The Story of Us </span> | <span className='font-bold cursor-pointer'
+							onClick={()=> window.scrollTo({top: cultSuccessRef.current ? cultSuccessRef.current?.offsetTop - 95 : 0, behavior: 'smooth'})}> mmm...yeah...You're on Your Own, Kid</span> | <span className='font-bold cursor-pointer'
+							onClick={()=> window.scrollTo({top: cultFailRef.current ? cultFailRef.current?.offsetTop - 95 : 0, behavior: 'smooth'})}> We Forgot That These Existed </span> </p> </div>							
 						<h2 ref={top40Ref}>Long Live the Swiftest Top 40</h2>
 						<h5>Most quickly identified lyrics with 96+% accuracy–do you recognize all of them? </h5>
 						<h6>Hover over the lyric to reveal the song! Scroll to the end to see the top songs. Lyrics with the title in it were excluded.</h6>						
@@ -2439,13 +2433,19 @@ function Dataland() {
 						</div>
 						<div className='flex flex-row flex-wrap justify-center mx-auto m-2 text-center'><p>Jump to: <span className='font-bold cursor-pointer'
 							onClick={()=> window.scrollTo({top: top40Ref.current ? top40Ref.current?.offsetTop - 95 : 0, behavior: 'smooth'})}> The Swiftest Top 40</span> | <span className='font-bold cursor-pointer'
-							onClick={()=> window.scrollTo({top: cultFailRef.current ? cultFailRef.current?.offsetTop - 95 : 0, behavior: 'smooth'})}> We Forgot That These Existed </span> | <span className='font-bold cursor-pointer'
-							onClick={()=> {
-								window.scrollTo({top: spotifyRef.current ? spotifyRef.current?.offsetTop - 95 : 0, behavior: 'smooth'})
-								setGenViz(true);
-							}
-							}> The Story of Us </span> </p> </div>			
+							onClick={()=> window.scrollTo({top: cultSuccessRef.current ? cultSuccessRef.current?.offsetTop - 95 : 0, behavior: 'smooth'})}> mmm...yeah...You're on Your Own, Kid</span> | <span className='font-bold cursor-pointer'
+							onClick={()=> window.scrollTo({top: cultFailRef.current ? cultFailRef.current?.offsetTop - 95 : 0, behavior: 'smooth'})}> We Forgot That These Existed </span> </p> </div>			
 						
+						<div className='wrapper'>					
+							<h2 id='spotifysection' ref={spotifyRef} >It is Over Now?/The Story of Us</h2>
+							<h6>Are the songs with the most recognized lyrics also the most popular songs? </h6>
+							<h6>Hover/click on a circle to see play counts vs accuracy and the top line. Drag and select a region to zoom. Double click on the chart to reset/zoom out.</h6>
+							<div id='spotifyscatter' ></div>
+							<div className='jumpbox flex flex-row flex-wrap justify-center mx-auto m-2 text-center'><p>Jump to: <span className='font-bold cursor-pointer'
+							onClick={()=> window.scrollTo({top: top40Ref.current ? top40Ref.current?.offsetTop - 95 : 0, behavior: 'smooth'})}> The Swiftest Top 40</span> | <span className='font-bold cursor-pointer'
+							onClick={()=> window.scrollTo({top: cultFailRef.current ? cultFailRef.current?.offsetTop - 95 : 0, behavior: 'smooth'})}> We Forgot That These Existed </span> </p> </div>	
+						</div>
+
 						<div className='wrapper'>
 							<h2 ref={cultSuccessRef}>mmm yeahhh…You're On Your Own, Kid</h2>
 							<h6>Cult mode was meant as a joke...and yet this cult top 25 had over 65% accuracy with the top 5 over 90%...</h6>		
@@ -2455,12 +2455,11 @@ function Dataland() {
 							</div>
 							<div className='flex flex-row flex-wrap justify-center mx-auto m-2 text-center'><p>Jump to: <span className='font-bold cursor-pointer'
 							onClick={()=> window.scrollTo({top: top40Ref.current ? top40Ref.current?.offsetTop - 95 : 0, behavior: 'smooth'})}> The Swiftest Top 40</span> | <span className='font-bold cursor-pointer'
-							onClick={()=> window.scrollTo({top: cultSuccessRef.current ? cultSuccessRef.current?.offsetTop - 95 : 0, behavior: 'smooth'})}> mmm...yeah...You're on Your Own, Kid</span> | <span className='font-bold cursor-pointer'
 							onClick={()=> {
 								window.scrollTo({top: spotifyRef.current ? spotifyRef.current?.offsetTop - 95 : 0, behavior: 'smooth'})
-								setGenViz(true);
 							}
-							}> The Story of Us </span> </p> </div>
+							}> The Story of Us </span> | <span className='font-bold cursor-pointer'
+							onClick={()=> window.scrollTo({top: cultSuccessRef.current ? cultSuccessRef.current?.offsetTop - 95 : 0, behavior: 'smooth'})}> mmm...yeah...You're on Your Own, Kid</span></p> </div>
 						</div>
 						
 						<div className='wrapper'>
@@ -2472,25 +2471,14 @@ function Dataland() {
 							</div>
 							<div className='flex flex-row flex-wrap justify-center mx-auto m-2 text-center'><p>Jump to: <span className='font-bold cursor-pointer'
 							onClick={()=> window.scrollTo({top: top40Ref.current ? top40Ref.current?.offsetTop - 95 : 0, behavior: 'smooth'})}> The Swiftest Top 40</span> | <span className='font-bold cursor-pointer'
-							onClick={()=> window.scrollTo({top: cultSuccessRef.current ? cultSuccessRef.current?.offsetTop - 95 : 0, behavior: 'smooth'})}> mmm...yeah...You're on Your Own, Kid</span> | <span className='font-bold cursor-pointer'
-							onClick={()=> window.scrollTo({top: cultFailRef.current ? cultFailRef.current?.offsetTop - 95 : 0, behavior: 'smooth'})}> We Forgot That These Existed </span> </p> </div>
+							onClick={()=> {
+								window.scrollTo({top: spotifyRef.current ? spotifyRef.current?.offsetTop - 95 : 0, behavior: 'smooth'})
+								}}> The Story of Us </span> | <span className='font-bold cursor-pointer'
+							onClick={()=> window.scrollTo({top: cultSuccessRef.current ? cultSuccessRef.current?.offsetTop - 95 : 0, behavior: 'smooth'})}> mmm...yeah...You're on Your Own, Kid</span> </p> </div>
 						</div>	
 						<div className='wrapper'>
-						{/* <h6>Are the most recognized songs also the most popular songs? </h6> */}
-						<InView as="div" 
-							threshold={0}
-							onChange={(inView) => {
-							if (inView) {
-								setGenViz(true)
-							}}}>
-								<h2 id='spotifysection' ref={spotifyRef} >It is Over Now?/The Story of Us</h2>
-								<h6>Are the songs with the most recognized lyrics also the most popular songs? </h6>
-							<h6>Hover/click on a circle to see play counts vs accuracy and the top line. Drag and select a region to zoom. Double click on the chart to reset/zoom out.</h6></InView> 
-						<div id='spotifyscatter' ></div>
-						<div className='jumpbox flex flex-row flex-wrap justify-center mx-auto m-2 text-center'><p>Jump to: <span className='font-bold cursor-pointer'
-							onClick={()=> window.scrollTo({top: top40Ref.current ? top40Ref.current?.offsetTop - 95 : 0, behavior: 'smooth'})}> The Swiftest Top 40</span> | <span className='font-bold cursor-pointer'
-							onClick={()=> window.scrollTo({top: cultSuccessRef.current ? cultSuccessRef.current?.offsetTop - 95 : 0, behavior: 'smooth'})}> mmm...yeah...You're on Your Own, Kid</span> | <span className='font-bold cursor-pointer'
-							onClick={()=> window.scrollTo({top: cultFailRef.current ? cultFailRef.current?.offsetTop - 95 : 0, behavior: 'smooth'})}> We Forgot That These Existed </span> </p> </div>	
+						
+							
 						</div>
 
 					</div>}
