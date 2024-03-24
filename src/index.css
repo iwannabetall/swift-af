@@ -604,7 +604,7 @@ div.tooltip {
 	max-width: 305px;
 }
 
-#lyricalViz, #top40Viz, #bottom40Viz, #spotifyscatter {
+#lyricalViz, #top40Viz, #bottom40Viz, #cultTop40Viz, #spotifyscatter {
 	display: block;
 	margin: auto;
 	/* position: relative; */
@@ -625,7 +625,7 @@ div.tooltip {
 	height: 600px;
 }
 
-#top40VizAns, #bottom40VizAns {
+#top40VizAns, #bottom40VizAns, #cultTop40VizAns{
 	display: block;
 	margin: auto;
 	padding-left: 5px;
@@ -639,9 +639,7 @@ div.tooltip {
 	margin-top: 50px;
 	margin-bottom: 60px;
 }
-/* #top40Viz, #top40VizAns, #bottom40Viz ,#bottom40VizAns{
-	margin-bottom: 30px;
-} */
+
 
 #top40Viz {
 	/* IF ONLY ONE LYRIC NEEDS TO BE IN 2 LINES? */
@@ -650,10 +648,15 @@ div.tooltip {
 
 #bottom40Viz{
 	/* not sure why this is diff from the other one */
-	margin-top: -1200px;
+	margin-top: -600px;
 }
 
-.lyrics, .top40Lyrics, .bottom40Lyrics{
+#cultTop40Viz{
+	/* margin-top: -1224px;  for 40 songs*/
+	margin-top: -774px;
+}
+
+.lyrics, .top40Lyrics, .bottom40Lyrics, .cultTop40Lyrics{
 	display: block;	
 	width: 100%;
 	text-align: center;
@@ -676,7 +679,7 @@ div.tooltip {
 	animation-duration: 2s; */
 }
 
-.top40Lyrics:hover, .bottom40Lyrics:hover{
+.top40Lyrics:hover, .bottom40Lyrics:hover, .cultTop40Lyrics:hover{
 	transform: translate(300px, 0px);
 }
 .fadeline{
@@ -718,7 +721,7 @@ div.tooltip {
 }
 
 .jumpbox{
-	margin-top:90px;
+	margin-top: 90px;
 }
 
 /* ipad */
@@ -727,11 +730,11 @@ div.tooltip {
 	.jumpbox{
 		margin-top:20px;
 	}
-    
+    	
 }
 /*iphone 6/7/8 Plus -- should be max-width of 420 but making it smaller for browser/player header*/
 @media (max-width:414px){
-	#lyricalViz, #top40Viz, #bottom40Viz, #top40VizAns, #bottom40VizAns, #spotifyscatter, .spotify{
+	#lyricalViz, #top40Viz, #bottom40Viz, #top40VizAns, #bottom40VizAns, #cultTop40VizAns, #cultTop40Viz, #spotifyscatter, .spotify{
 		width: 400px;
 	}
 
@@ -771,7 +774,7 @@ div.tooltip {
 		font-size: 1em;
 	}
     
-	#lyricalViz, #top40Viz, #bottom40Viz, #top40VizAns, #bottom40VizAns, #spotifyscatter, .spotify{
+	#lyricalViz, #top40Viz, #bottom40Viz, #top40VizAns, #bottom40VizAns, #cultTop40VizAns, #cultTop40Viz, #spotifyscatter, .spotify{
 		width:370px
 	}
 	
@@ -783,7 +786,7 @@ div.tooltip {
 		margin: px
 	}
   
-	#lyricalViz, #top40Viz, #bottom40Viz, #top40VizAns, #bottom40VizAns, #spotifyscatter, .spotify{
+	#lyricalViz, #top40Viz, #bottom40Viz, #top40VizAns, #bottom40VizAns, #cultTop40VizAns, #cultTop40Viz, #spotifyscatter, .spotify{
 		width: 316px;
 	}
 

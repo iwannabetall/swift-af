@@ -1833,8 +1833,9 @@ function Dataland() {
 	const spotifyRef = useRef<HTMLInputElement | null>(null)
 	const top40Ref = useRef<HTMLInputElement | null>(null)
 	const cultFailRef = useRef<HTMLInputElement | null>(null)
+	const cultSuccessRef = useRef<HTMLInputElement | null>(null)
 	const newSongRef = useRef<HTMLInputElement | null>(null)
-
+	
 	const [fighter, setFighter] = useState<AlbumArt>('imtheproblem')
 	
 	const [albumFilter, setAlbumFilter] = useState<AlbumArt>('imtheproblem')
@@ -1866,13 +1867,8 @@ function Dataland() {
 	
 	}, [])
 
-	// useEffect(() => {
-	// 	window.addEventListener('scroll')
-	// 	if (!genViz){
 
-	// 	}
-	// }, [])
-
+	// SPOTIFY VS ACCURACY SCATTERPLOT
 	useEffect(()=> {
 		if (genViz){
 
@@ -2047,6 +2043,7 @@ function Dataland() {
 	}, [spotifyData, genViz])  
 	// use effect doesnt run w/data viz if i put a state value that doesn't change in the dep array
 
+// GET ALBUM DATA
 	useEffect(()=> {
 
 		// get lyrical stats data either from db or from array we already have
@@ -2091,13 +2088,14 @@ function Dataland() {
 		
 	}, [fighter])
 
+	// TOP/BOTTOM/CULT 40 VIZ
 	useEffect(() => {
 		// console.log(top40)
 		const bounce = d3.transition()
 		.duration(1500)
 		.ease(d3.easeBounce);
-
-		let bottom40 = lyricStats.filter(x=> x.total > 25 && x.accuracy < 25).sort((a, b) => b.accuracy - a.accuracy).slice(0,40)
+	
+		// TOP 40 VIZ
 		let top40chartSongs = d3.select('#top40VizAns')
 		
 		var top40Songs = top40chartSongs
@@ -2171,36 +2169,97 @@ function Dataland() {
 			.style("overflow-x", "visible") // Allow text overflow			
 			.text(function(d: LyricData) { return d.lyric })
 
+		
+		// CULT TOP 40 -- filter for highest accuracy 
+		let cultTop40Data = lyricStats.filter(x=> x.total > 20 && x.filler == 1).sort((a,b) => b.accuracy - a.accuracy).slice(0, 25)
+		
+		let cultTop40ChartSongs = d3.select('#cultTop40VizAns')
+		
+		let cultTop40Songs = cultTop40ChartSongs.selectAll<SVGRectElement, LyricData>('rect').data(cultTop40Data, function(d: LyricData){
+			return d.lyric_id
+		})
+		
+		cultTop40Songs.join(enter => 
+			enter.append('rect')
+			.attr('class',function (d: LyricData) { return `ans ${albumColorKey[d.album_key as keyof typeof albumColorKey]}`})
+			.attr('x', 20)			
+			.attr('y', function(_, i: number) { 
+				return i * 20 + 30})
+			.style('width', 400)
+			// .style('height', '100%')
+			.style('height', function(d: LyricData){
+				if (d.lyric.length > 53){
+					// need two rows for long lines, can't use height to 100% if want any transitions tho
+					return '54px'  
+				} else {
+					return '30px'
+				}
+			})
+			.style("overflow-x", "visible") // Allow text overflow			
+			.text(function(d: LyricData) { return d.song })		
+		)
+
+		let cultTop40chart = d3.select('#cultTop40Viz')
+		
+		var cultTop40lines = cultTop40chart
+			.selectAll<SVGRectElement, LyricData>('rect').data(cultTop40Data, function(d: LyricData) {
+			return d.lyric_id
+		})
+
+		cultTop40lines.join(enter=> (
+			enter.append('rect')
+			.attr('class', function (d: LyricData) { return `cultTop40Lyrics ${albumColorKey[d.album_key as keyof typeof albumColorKey]}`})					
+			.attr('x', 20)			
+			.attr('y', function(_, i: number) { 
+				return (i * 20 + 30)})
+			.style('width', 400)
+			// .style('height', '100%')
+			.style('height', function(d: LyricData){
+				if (d.lyric.length > 53){
+					// need two rows for long lines, can't use height to 100% if want any transitions tho
+					return '54px'  
+				} else {
+					return '30px'
+				}
+			})
+			.style("overflow-x", "visible") // Allow text overflow			
+			.text(function(d: LyricData) { return d.lyric })
+		)) 
+		
+		
+		// BOTTOM 40 DATA VIZ
+
+		let bottom40Data = lyricStats.filter(x=> x.total > 25 && x.accuracy < 25).sort((a, b) => b.accuracy - a.accuracy).slice(0,20)
 
 		let bottom40ChartSongs = d3.select('#bottom40VizAns')
-		let bottom40Songs = bottom40ChartSongs.selectAll<SVGRectElement, LyricData>('rect').data(bottom40, function(d: LyricData){
+		let bottom40Songs = bottom40ChartSongs.selectAll<SVGRectElement, LyricData>('rect').data(bottom40Data, function(d: LyricData){
 			return d.lyric_id
 		})
 		
 		bottom40Songs.join(enter => 
-				enter.append('rect')
-				.attr('class',function (d: LyricData) { return `ans ${albumColorKey[d.album_key as keyof typeof albumColorKey]}`})
-				.attr('x', 20)			
-				.attr('y', function(_, i: number) { 
-					return i * 20 + 30})
-				.style('width', 400)
-				// .style('height', '100%')
-				.style('height', function(d: LyricData){
-					if (d.lyric.length > 53){
-						// need two rows for long lines, can't use height to 100% if want any transitions tho
-						return '54px'  
-					} else {
-						return '30px'
-					}
-				})
-				.style("overflow-x", "visible") // Allow text overflow			
-				.text(function(d: LyricData) { return d.song })		
+			enter.append('rect')
+			.attr('class',function (d: LyricData) { return `ans ${albumColorKey[d.album_key as keyof typeof albumColorKey]}`})
+			.attr('x', 20)			
+			.attr('y', function(_, i: number) { 
+				return i * 20 + 30})
+			.style('width', 400)
+			// .style('height', '100%')
+			.style('height', function(d: LyricData){
+				if (d.lyric.length > 53){
+					// need two rows for long lines, can't use height to 100% if want any transitions tho
+					return '54px'  
+				} else {
+					return '30px'
+				}
+			})
+			.style("overflow-x", "visible") // Allow text overflow			
+			.text(function(d: LyricData) { return d.song })		
 		)
 
 		let bottom40chart = d3.select('#bottom40Viz')
 		
 		var bottom40lines = bottom40chart
-			.selectAll<SVGRectElement, LyricData>('rect').data(bottom40, function(d: LyricData) {
+			.selectAll<SVGRectElement, LyricData>('rect').data(bottom40Data, function(d: LyricData) {
 			return d.lyric_id
 		})
 
@@ -2224,41 +2283,14 @@ function Dataland() {
 			.text(function(d: LyricData) { return d.lyric })
 		)) 
 		
-		// top40lines.append('rect')
-		// 	.attr('class', function (d: LyricData) { return `top40Lyrics ${albumColorKey[d.album_key as keyof typeof albumColorKey]}`})					
-		// 	.attr('x', 20)			
-		// 	.attr('y', function(_, i: number) { 
-		// 		return i * 20 + 30})
-		// 	.style('width', 400)
-		// 	// .style('height', '100%')
-		// 	.style('height', function(d: LyricData){
-		// 		if (d.lyric.length > 53){
-		// 			// need two rows for long lines, can't use height to 100% if want any transitions tho
-		// 			return '54px'  
-		// 		} else {
-		// 			return '30px'
-		// 		}
-		// 	})
-		// 	.style("overflow-x", "visible") // Allow text overflow			
-		// 	.text(function(d: LyricData) { return d.lyric })
-		
 			
 	}, [top40, showTop40])
 
-	// function clicked(e, d){
-	// 	console.log(this)
-	// 	d3.select(this).append('g')			
-	// 		.attr("transform", "translate(42, 42)");
-	// }
-
+	// LYRICAL WORD CLOUD VIZ
 	useEffect(() => {
 		// lyrical data viz 
 		
-		if (displayLyrics.length > 0) {
-
-			// const t = d3.transition()
-			// 	.duration(750)
-			// 	.ease(d3.easeLinear);
+		if (displayLyrics.length > 0) {			
 
 			d3.selectAll('.lyrics').remove()
 
@@ -2274,10 +2306,7 @@ function Dataland() {
 					return i * 20 + 30})			
 				.attr("text-anchor", "start")
 				.style("overflow-x", "visible") // Allow text overflow
-				.text(function(d: LyricData) { return d.lyric })				
-				// .on('mouseover', function (d: MouseEvent) {
-				// 	console.log(d.target.__data__)			
-				// })
+				.text(function(d: LyricData) { return d.lyric })					
 			
 	} else {
 		// remove data 
@@ -2308,7 +2337,7 @@ function Dataland() {
 		.then(function (response) {								
 			lyricStats = response.data.lyricStats
 			console.log(lyricStats)
-			setTop40(lyricStats.filter(x => x.total > 20 && x.accuracy > 95).slice(0, 40))
+			setTop40(lyricStats.filter(x => x.total >= 25 && x.accuracy >= 96).slice(0, 40))
 			// console.log(lyricStats)
 			setIsLoading(false)
 		})
@@ -2392,13 +2421,14 @@ function Dataland() {
 					
 					{showTop40 && <div>	
 						<div className='flex flex-row flex-wrap justify-center mx-auto m-2 text-center'><p>Jump to: <span className='font-bold cursor-pointer'
-							onClick={()=> window.scrollTo({top: cultFailRef.current ? cultFailRef.current?.offsetTop - 95 : 0, behavior: 'smooth'})}> We Forgot These Existed </span> | <span className='font-bold cursor-pointer'
+							onClick={()=> window.scrollTo({top: cultSuccessRef.current ? cultSuccessRef.current?.offsetTop - 95 : 0, behavior: 'smooth'})}> mmm...yeah...You're on Your Own, Kid</span> | <span className='font-bold cursor-pointer'
+							onClick={()=> window.scrollTo({top: cultFailRef.current ? cultFailRef.current?.offsetTop - 95 : 0, behavior: 'smooth'})}> We Forgot That These Existed </span> | <span className='font-bold cursor-pointer'
 							onClick={()=> {
 								window.scrollTo({top: spotifyRef.current ? spotifyRef.current?.offsetTop - 95 : 0, behavior: 'smooth'})
 								setGenViz(true)
 								}}> The Story of Us </span> </p> </div>							
 						<h2 ref={top40Ref}>Long Live the Swiftest Top 40</h2>
-						<h5>Most quickly identified lyrics with 95+% accuracy–do you recognize all of them? </h5>
+						<h5>Most quickly identified lyrics with 96+% accuracy–do you recognize all of them? </h5>
 						<h6>Hover over the lyric to reveal the song! Scroll to the end to see the top songs. Lyrics with the title in it were excluded.</h6>						
 						<div id='top40VizAns'>
 							{/* <svg id='top40Viz'></svg> */}
@@ -2409,20 +2439,41 @@ function Dataland() {
 						</div>
 						<div className='flex flex-row flex-wrap justify-center mx-auto m-2 text-center'><p>Jump to: <span className='font-bold cursor-pointer'
 							onClick={()=> window.scrollTo({top: top40Ref.current ? top40Ref.current?.offsetTop - 95 : 0, behavior: 'smooth'})}> The Swiftest Top 40</span> | <span className='font-bold cursor-pointer'
+							onClick={()=> window.scrollTo({top: cultFailRef.current ? cultFailRef.current?.offsetTop - 95 : 0, behavior: 'smooth'})}> We Forgot That These Existed </span> | <span className='font-bold cursor-pointer'
 							onClick={()=> {
 								window.scrollTo({top: spotifyRef.current ? spotifyRef.current?.offsetTop - 95 : 0, behavior: 'smooth'})
 								setGenViz(true);
 							}
 							}> The Story of Us </span> </p> </div>			
+						
 						<div className='wrapper'>
-							<h2 ref={cultFailRef}>We Forgot These Existed</h2>
+							<h2 ref={cultSuccessRef}>mmm yeahhh…You're On Your Own, Kid</h2>
+							<h6>Cult mode was meant as a joke...and yet this cult top 25 had over 65% accuracy with the top 5 over 90%...</h6>		
+							<div id='cultTop40VizAns'>							
+							</div>
+							<div id='cultTop40Viz'>
+							</div>
+							<div className='flex flex-row flex-wrap justify-center mx-auto m-2 text-center'><p>Jump to: <span className='font-bold cursor-pointer'
+							onClick={()=> window.scrollTo({top: top40Ref.current ? top40Ref.current?.offsetTop - 95 : 0, behavior: 'smooth'})}> The Swiftest Top 40</span> | <span className='font-bold cursor-pointer'
+							onClick={()=> window.scrollTo({top: cultSuccessRef.current ? cultSuccessRef.current?.offsetTop - 95 : 0, behavior: 'smooth'})}> mmm...yeah...You're on Your Own, Kid</span> | <span className='font-bold cursor-pointer'
+							onClick={()=> {
+								window.scrollTo({top: spotifyRef.current ? spotifyRef.current?.offsetTop - 95 : 0, behavior: 'smooth'})
+								setGenViz(true);
+							}
+							}> The Story of Us </span> </p> </div>
+						</div>
+						
+						<div className='wrapper'>
+							<h2 ref={cultFailRef}>We Forgot That These Existed</h2>
+							<h6>The under 20 percent-ers</h6>
 							<div id='bottom40VizAns'>							
 							</div>
 							<div id='bottom40Viz'>
 							</div>
 							<div className='flex flex-row flex-wrap justify-center mx-auto m-2 text-center'><p>Jump to: <span className='font-bold cursor-pointer'
 							onClick={()=> window.scrollTo({top: top40Ref.current ? top40Ref.current?.offsetTop - 95 : 0, behavior: 'smooth'})}> The Swiftest Top 40</span> | <span className='font-bold cursor-pointer'
-							onClick={()=> window.scrollTo({top: cultFailRef.current ? cultFailRef.current?.offsetTop - 95 : 0, behavior: 'smooth'})}> We Forgot These Existed </span> </p> </div>
+							onClick={()=> window.scrollTo({top: cultSuccessRef.current ? cultSuccessRef.current?.offsetTop - 95 : 0, behavior: 'smooth'})}> mmm...yeah...You're on Your Own, Kid</span> | <span className='font-bold cursor-pointer'
+							onClick={()=> window.scrollTo({top: cultFailRef.current ? cultFailRef.current?.offsetTop - 95 : 0, behavior: 'smooth'})}> We Forgot That These Existed </span> </p> </div>
 						</div>	
 						<div className='wrapper'>
 						{/* <h6>Are the most recognized songs also the most popular songs? </h6> */}
@@ -2438,7 +2489,8 @@ function Dataland() {
 						<div id='spotifyscatter' ></div>
 						<div className='jumpbox flex flex-row flex-wrap justify-center mx-auto m-2 text-center'><p>Jump to: <span className='font-bold cursor-pointer'
 							onClick={()=> window.scrollTo({top: top40Ref.current ? top40Ref.current?.offsetTop - 95 : 0, behavior: 'smooth'})}> The Swiftest Top 40</span> | <span className='font-bold cursor-pointer'
-							onClick={()=> window.scrollTo({top: cultFailRef.current ? cultFailRef.current?.offsetTop - 95 : 0, behavior: 'smooth'})}> We Forgot These Existed </span> </p> </div>	
+							onClick={()=> window.scrollTo({top: cultSuccessRef.current ? cultSuccessRef.current?.offsetTop - 95 : 0, behavior: 'smooth'})}> mmm...yeah...You're on Your Own, Kid</span> | <span className='font-bold cursor-pointer'
+							onClick={()=> window.scrollTo({top: cultFailRef.current ? cultFailRef.current?.offsetTop - 95 : 0, behavior: 'smooth'})}> We Forgot That These Existed </span> </p> </div>	
 						</div>
 
 					</div>}
