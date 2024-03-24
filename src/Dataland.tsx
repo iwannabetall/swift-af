@@ -2437,7 +2437,7 @@ function Dataland() {
 							onClick={()=> window.scrollTo({top: cultFailRef.current ? cultFailRef.current?.offsetTop - 95 : 0, behavior: 'smooth'})}> We Forgot That These Existed </span> </p> </div>			
 						
 						<div className='wrapper'>					
-							<h2 id='spotifysection' ref={spotifyRef} >It is Over Now?/The Story of Us</h2>
+							<h2 id='spotifysection' ref={spotifyRef}>The Story of Us</h2>
 							<h6>Are the songs with the most recognized lyrics also the most popular songs? </h6>
 							<h6>Hover/click on a circle to see play counts vs accuracy and the top line. Drag and select a region to zoom. Double click on the chart to reset/zoom out.</h6>
 							<div id='spotifyscatter' ></div>
