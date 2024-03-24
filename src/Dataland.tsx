@@ -1833,6 +1833,7 @@ function Dataland() {
 	const spotifyRef = useRef<HTMLInputElement | null>(null)
 	const top40Ref = useRef<HTMLInputElement | null>(null)
 	const cultFailRef = useRef<HTMLInputElement | null>(null)
+	const newSongRef = useRef<HTMLInputElement | null>(null)
 
 	const [fighter, setFighter] = useState<AlbumArt>('imtheproblem')
 	
@@ -1930,7 +1931,7 @@ function Dataland() {
 					
 				}
 			})
-			.extent([[0,0], [w, h]])  // overlay sizing
+			.extent([[marginLeft-10,0], [w, h-marginBottom + 10]])  // overlay sizing
 
 			//!!!! must create brush before appending bc it overlays a rect that will block mouseover events
 			scatter.append('g').attr('class', 'brush')
@@ -2266,8 +2267,7 @@ function Dataland() {
 
 			lyrics.enter().append('text')
 				.attr('class', function (d: LyricData) { 
-					return `lyrics ${albumColorKey[d.album_key as keyof typeof albumColorKey]}-${d.accuracy_group}`
-					// ${(d.accuracy_group == 'gradeA' || d.accuracy_group == 'gradeAplus') ? `albumColorKey[d.album_key as keyof typeof albumColorKey]-${d.accuracy_group}` : d.accuracy_group == 'gradeB' ? `${albumColorKey[d.album_key as keyof typeof albumColorKey]}-B` : d.accuracy_group == 'gradeC' ? `${albumColorKey[d.album_key as keyof typeof albumColorKey]}-C` : (d.accuracy_group == 'gradeD' || d.accuracy_group == 'gradeF') ? `${albumColorKey[d.album_key as keyof typeof albumColorKey]}-fail` : ''} ${albumColorKey[d.album_key as keyof typeof albumColorKey]}		
+					return `lyrics ${albumColorKey[d.album_key as keyof typeof albumColorKey]}-${d.accuracy_group}`					
 				})
 				.attr('x', 20)
 				.attr('y', function(_, i: number) { 
@@ -2349,7 +2349,7 @@ function Dataland() {
 				</div>	
 				
 				<div>
-					<div className='flex flex-row flex-wrap justify-center'>					
+					<div className='flex flex-row flex-wrap justify-center' ref={newSongRef}>					
 					{albumCovers.map(x=> <img src={`/icons/${x}.jpg`} key={x} className ={`albums ${fighter != x ? 'faded' : fighter == x ? 'selected' : ''}`} onClick={()=> {
 						changeViz(x)						
 						}}></img>)}					
@@ -2445,6 +2445,8 @@ function Dataland() {
 
 					{!showTop40 && <div>
 						<div id='lyricalViz' ref={scrollRef}></div>
+						<div className='flex flex-row flex-wrap justify-center mx-auto m-2 text-center'><p><span className='font-bold cursor-pointer'
+							onClick={()=> window.scrollTo({top: newSongRef.current ? newSongRef.current?.offsetTop - 20: 0, behavior: 'smooth'})}> Jump to top for another song! </span> </p> </div>	
 					</div>}
 					
 				</div>

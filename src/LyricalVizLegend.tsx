@@ -7,7 +7,7 @@ function LyricalVizLegend(props: {fighter: AlbumArt}){
 
 	return (
 		<div>
-			<h6>Click the legend to filter the lyrics.</h6>
+			<h6>Lyrical Accuracy</h6>
 			<div className='flex flex-row flex-wrap justify-center'>		
 
 				{accuracy_groups.map(x => 
