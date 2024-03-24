@@ -124,4 +124,8 @@ interface SpotifyData{
 	daily_counts: number;
 	historical_counts: number;
 	album: string;
+	top_lyric: string;
+	lyrical_accuracy: number;
+	lyrical_speed: number;
+	lyrical_play_count:number;
 }

@@ -51,9 +51,9 @@
 	--era-evermore-text:#382c1e;
 	--era-midnights:hsla(222.9,32.7%,21%);
 	--era-midnights-text:#c4cce1;
-	--font-size-Aplus: 28px;
-	--font-size-A: 26px;
-	--font-size-B: 22px;
+	--font-size-Aplus: 26px;
+	--font-size-A: 24px;
+	--font-size-B: 20px;
 	--font-size-C: 18px;
 	--font-size-D: 16px;
 	--font-size-F: 14px;
@@ -619,6 +619,12 @@ div.tooltip {
 	overflow: visible;
 	scroll-margin: 20px;
 }
+
+#spotifyscatter{
+	width: 600px;
+	height: 600px;
+}
+
 #top40VizAns, #bottom40VizAns {
 	display: block;
 	margin: auto;
@@ -630,15 +636,16 @@ div.tooltip {
 	z-index: -1;
 }
 .wrapper{
-	margin-top: 30px;
-	margin-bottom: 20px;
+	margin-top: 50px;
+	margin-bottom: 60px;
 }
 /* #top40Viz, #top40VizAns, #bottom40Viz ,#bottom40VizAns{
 	margin-bottom: 30px;
 } */
 
 #top40Viz {
-	margin-top: -1224px;
+	/* IF ONLY ONE LYRIC NEEDS TO BE IN 2 LINES? */
+	margin-top: -1224px;	
 }
 
 #bottom40Viz{
@@ -710,10 +717,16 @@ div.tooltip {
 	text-align: center;
 }
 
+.jumpbox{
+	margin-top:90px;
+}
 
 /* ipad */
 @media (max-width:768px){
 	
+	.jumpbox{
+		margin-top:20px;
+	}
     
 }
 /*iphone 6/7/8 Plus -- should be max-width of 420 but making it smaller for browser/player header*/
@@ -722,7 +735,20 @@ div.tooltip {
 		width: 400px;
 	}
 
+	.jumpbox{
+		margin-top:10px;
+	}
+
+	#spotifyscatter{
+		height: 480px;
+	}
+
+	#top40Viz{
+		/* have multiple lines that need to be on two lines */
+		margin-top: -1272px;  
+	}
 	
+
 	.btn { 
 		min-width: 160px;
 		margin: 10px;
