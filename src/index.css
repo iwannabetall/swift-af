@@ -68,7 +68,8 @@
 }
 
 .link{
-	color: blue;
+	/* color: blue; */
+	font-weight: 400;
 	text-decoration: underline;
 }
 h1, h2, h3, h4, h5, h6{
@@ -738,6 +739,10 @@ div.tooltip {
 		width: 400px;
 	}
 
+	.gamestats{
+		max-width: 400px;
+	}
+
 	.wrapper{
 		margin-top: 50px;
 		margin-bottom: 60px;
@@ -778,7 +783,11 @@ div.tooltip {
 	.display{
 		font-size: 1em;
 	}
-    
+  
+	.gamestats{
+		max-width: 360px;
+	}
+
 	#lyricalViz, #top40Viz, #bottom40Viz, #top40VizAns, #bottom40VizAns, #cultTop40VizAns, #cultTop40Viz, #spotifyscatter, .spotify{
 		width:370px
 	}
@@ -791,6 +800,10 @@ div.tooltip {
 		margin: px
 	}
   
+	.gamestats{
+		max-width: 310px;
+	}
+
 	#lyricalViz, #top40Viz, #bottom40Viz, #top40VizAns, #bottom40VizAns, #cultTop40VizAns, #cultTop40Viz, #spotifyscatter, .spotify{
 		width: 316px;
 	}

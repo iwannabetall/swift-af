@@ -15,6 +15,7 @@ import {
 } from 'obscenity';
 import Nav from './Nav.tsx'
 import Leaderboard from './Leaderboard.tsx'
+import BuyMeACoffee from './BuyMeACoffee.tsx';
 
 // import {
 //   QueryClient,
@@ -550,6 +551,8 @@ function App() {
 							</label>
 							<button className='era-midnights mt-4 cursor-pointer'>Hi, it's me.</button>
 						</form>
+						<BuyMeACoffee/>
+						
 					</div>}
 					{userNameSet && <div>
 
@@ -660,7 +663,7 @@ function App() {
 						<div>{(gameStats.map(x=> x.time).reduce((total, current) => total + current, 0)/gameStats.length).toFixed(2)} seconds per lyric</div>					 */}
 												
 						{gameStats.filter(x=> x.correct == 1).length > 0 && 
-							<div>
+							<div className='gamestats'>
 								<h3 className='font-bold text-xl text-center'>happiness</h3> 
 									<table className='mb-4'>
 										<thead>
@@ -684,7 +687,7 @@ function App() {
 						}
 								
 						{gameStats.filter(x=> x.correct == 0).length > 0 &&
-						<div className=''>
+						<div className='gamestats'>
 							<h3 className='font-bold text-xl text-center'>Would've, Could've, Should've</h3>
 							<table className='mb-4'>
 								<thead>
@@ -746,6 +749,7 @@ function App() {
 							
 				
 				<button className='m-6 era-red p-3 min-w-[250px] text-xl font-bold' onClick={() => restartGame()}>Begin Again</button>	
+				<BuyMeACoffee/>
 				</div>}
 
 			

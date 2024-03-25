@@ -120,7 +120,7 @@ interface LyricData {
 
 interface SpotifyData{
 	song: string;
-	accuracy: number;
+	song_accuracy: number;
 	daily_counts: number;
 	historical_counts: number;
 	album: string;
