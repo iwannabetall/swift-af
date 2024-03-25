@@ -246,7 +246,7 @@ function Dataland() {
 					.text('(Millions)')
 			)
 				
-	}, [spotifyData])
+	}, [showTop40, spotifyData])
 	
 // GET ALBUM DATA
 	useEffect(()=> {
