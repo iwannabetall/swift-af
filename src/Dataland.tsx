@@ -65,6 +65,8 @@ function Dataland() {
 
 			// ['http://localhost:3000/getSongs', 'http://localhost:3000/getSpotifyPlays', 'http://localhost:3000/getLyricStats']
 
+		// bc one viz was nested in a setloading thing, having one loader for multiple async axios reqs was making messing up the useeffect dep array
+
 		setIsLoading(true)	
 
 		Promise.all([fetch('https://swift-api.fly.dev/getSongs'),
@@ -162,15 +164,15 @@ function Dataland() {
 				// const startY = d3.pointer(e)[1] - 10//40
 				// const xPos = d3.pointer(e)[0] //60
 
-				const startY = -30
-				const xPos = screenSize.width < 420 ? 20 : 60		
+				const startY = -40
+				const xPos = screenSize.width < 420 ? 10 : 60		
 				
 				d3.select('.spotify').append('text')
 				.attr('class', 'hoverlabel')
 				.attr('x', xPos)
 				.attr('y', startY)
 				.attr('font-size', fontSize)
-				.html(`${d.song}: ${(d.song_accuracy).toFixed(1)}% | ${formatBigNumber(d.historical_counts)} Spotify Plays`)
+				.html(`${d.song}: ${(d.song_accuracy).toFixed(1)}% | ${formatBigNumber(d.historical_counts)} Plays`)
 
 				d3.select('.spotify').append('text')
 				.attr('class', 'hoverlabel')
