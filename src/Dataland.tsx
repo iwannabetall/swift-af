@@ -602,7 +602,7 @@ function Dataland() {
 							onClick={()=> window.scrollTo({top: cultFailRef.current ? cultFailRef.current?.offsetTop - 95 : 0, behavior: 'smooth'})}>We Forgot That These Existed</span> </p> </div>							
 						<h2 ref={top40Ref}>Long Live the Swiftest Top 40</h2>
 						<h5>Most quickly identified lyrics with 96+% accuracy–do you recognize all of them? </h5>
-						<h6>Hover over the lyric to reveal the song! Scroll to the end to see the top songs. Lyrics with the title in it were excluded.</h6>						
+						<h6>Hover over the lyric to reveal the song! </h6>						
 
 						<div id='top40VizAns'></div>
 						<div id='top40Viz'></div>
@@ -614,7 +614,10 @@ function Dataland() {
 						<div className='wrapper'>					
 							<h2 id='spotifysection' ref={spotifyRef}>The Story of Us</h2>
 							<h6>Are the songs with the most recognized lyrics also the most popular songs? </h6>
-							<h6>Hover/click on a circle to see historical Spotify play counts vs accuracy and the top line. Drag and select a region to zoom. Double click on the chart to reset/zoom out.</h6>
+							<h6>Drag and select a region to zoom. Double click on the chart to reset/zoom out.</h6>
+							<h6>Hover/click on a circle to see historical Spotify play counts vs overall song accuracy and the top line. </h6>
+
+							<p className='text-center text-xs'>Filler lines and lines with the title in it excluded.</p>
 							
 							<div id='spotifyscatter' ref={spotifyViz}></div>
 
@@ -627,7 +630,8 @@ function Dataland() {
 
 						<div className='wrapper'>
 							<h2 ref={cultSuccessRef}>{cultTitle}</h2>
-							<h6>long story short, it was not a bad time. Cult mode was meant as a joke...and yet top 25 had 65%+ accuracy with the top 5 over 90%...</h6>		
+							<h6>long story short, it was not a bad time. Cult mode was meant as a joke...and yet top 25 had 65%+ accuracy with the top 5 over 90%...</h6>
+							<h5>Tap the line to see how many can you get right!</h5>
 							<div id='cultTop40VizAns'>							
 							</div>
 							<div id='cultTop40Viz'>
@@ -642,7 +646,7 @@ function Dataland() {
 						{/* CULT MODE DATA VIZ - FAILS */}
 						<div className='wrapper'>
 							<h2 ref={cultFailRef}>We Forgot That These Existed</h2>
-							<h6>The under 20 percent-ers</h6>
+							<h6>The under 20 percent-ers. Those cages were not mental, you should just reveal the answers for these cause it was a set up. 🙃 </h6>
 							<div id='bottom40VizAns'>							
 							</div>
 							<div id='bottom40Viz'>
@@ -653,11 +657,7 @@ function Dataland() {
 								window.scrollTo({top: spotifyRef.current ? spotifyRef.current?.offsetTop - 95 : 0, behavior: 'smooth'})
 								}}> The Story of Us </span> | <span className='font-bold cursor-pointer'
 							onClick={()=> window.scrollTo({top: cultSuccessRef.current ? cultSuccessRef.current?.offsetTop - 95 : 0, behavior: 'smooth'})}> {cultTitle}</span> </p> </div>
-						</div>	
-						<div className='wrapper'>
-						
-							
-						</div>
+						</div>							
 
 					</div>}
 
