@@ -79,7 +79,7 @@ function Dataland() {
 		})
 		.then(([r1, r2, r3])=> {
 			songsFullDB = r1.songList
-			
+			console.log(r2.spotify_plays, r3.lyricStats)
 			spotify_full_data = r2.spotify_plays
 			setSpotifyData(spotify_full_data)
 
@@ -151,7 +151,7 @@ function Dataland() {
 			.on("dblclick", function() {
 				setSpotifyData(spotify_full_data)})		
 
-		let spotify = scatter.selectAll<SVGRectElement, SpotifyData>('circle').data(spotifyData, function(d: SpotifyData) {
+		let spotify = scatter.selectAll<SVGCircleElement, SpotifyData>('circle').data(spotifyData, function(d: SpotifyData) {
 			return d.song
 		})
 
@@ -179,14 +179,15 @@ function Dataland() {
 				.attr('x', xPos)
 				.attr('y', startY + 25)
 				.attr('font-size', fontSize)
-				.text(`${d.top_lyric}`)
+				.text(`Most Recognized Lyric:`)
 
 				d3.select('.spotify').append('text')
 				.attr('class', 'hoverlabel')
 				.attr('x', xPos)
 				.attr('y', startY + 50)
 				.attr('font-size', fontSize)
-				.text(`Top Line Avg Stats: ${d.lyrical_accuracy}% | ${d.lyrical_speed}s`)
+				.text(`${d.top_lyric}`)
+
 
 			})
 			.on('mouseout', function(){
@@ -267,6 +268,10 @@ function Dataland() {
 					fullLyricsNStats = fullLyricsNStats.concat(response.data.fullLyricsNStats)
 					// setSongFilter('Anti-Hero')
 					console.log('fullLyricsNStats', fullLyricsNStats)
+					console.log('avg', d3.rollups(fullLyricsNStats, v => d3.mean(v, d => d.time), d=> d.album, d => d.song))
+
+
+
 					if (songsFullDB.length > 0) {
 						let first_track = songsFullDB.filter(s=> s.album_key == albumFilter)[0].song
 						setSongFilter(first_track)
@@ -600,7 +605,8 @@ function Dataland() {
 								}}>The Story of Us</span> | <span className='cursor-pointer font-bold '
 							onClick={()=> window.scrollTo({top: cultSuccessRef.current ? cultSuccessRef.current?.offsetTop - 95 : 0, behavior: 'smooth'})}> {cultTitle}</span> | <span className='cursor-pointer font-bold '
 							onClick={()=> window.scrollTo({top: cultFailRef.current ? cultFailRef.current?.offsetTop - 95 : 0, behavior: 'smooth'})}>We Forgot That These Existed</span> </p> </div>							
-						<h2 ref={top40Ref}>Long Live the Swiftest Top 40</h2>
+						{/* <h2 ref={top40Ref}>Long Live the Swiftest Top 40</h2> */}
+						<h2 ref={top40Ref}>Marry Me, Juliet, I made the Swiftest Top 40</h2>
 						<h5>Most quickly identified lyrics with 96+% accuracy–do you recognize all of them? </h5>
 						<h6>Hover over the lyric to reveal the song! </h6>						
 

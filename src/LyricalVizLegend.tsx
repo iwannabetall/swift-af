@@ -7,7 +7,7 @@ function LyricalVizLegend(props: {fighter: AlbumArt}){
 
 	return (
 		<div>
-			<h6>Lyrical Accuracy</h6>
+			<h2>Are your favorite lines also the most recognized?</h2>
 			<div className='flex flex-row flex-wrap justify-center'>		
 
 				{accuracy_groups.map(x => 

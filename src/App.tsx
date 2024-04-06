@@ -283,11 +283,14 @@ function App() {
 		let correct: number;
 		if (song.trim() == clicked.trim()){ 
 			setResult('Correct!')
+			
 			correct = 1
+
 			setGameStats([{'time': secondsElapsed, song: song, userResponse: clicked.trim(), correct: 1, album: album, lyric: displayLyric, album_key: albumKey, level: gameMode, lyric_id: displayLyricId, id: gameStats.length + 1}, ...gameStats])
 
 		} else {
 			correct = 0
+
 			setResult(wrongAnswersOnly[Math.floor(Math.random() * wrongAnswersOnly.length)])
 			setGameStats([{'time': secondsElapsed, song: song, userResponse: clicked.trim(), correct: 0, album: album, lyric: displayLyric, album_key: albumKey, level: gameMode, lyric_id: displayLyricId, id: gameStats.length + 1}, ...gameStats])
 		}
@@ -329,7 +332,8 @@ function App() {
 		let playSmallSample = Math.random()
 		// console.log(playSmallSample)
 
-		if (playSmallSample < 0.3 && gameMode != 'album' && smallSample.length > 0){
+		// weight towards giving lyrics with small samples 
+		if (playSmallSample < 0.05 && gameMode != 'album' && smallSample.length > 0){
 			
 			// console.log('small sample', smallSample, gameStats)
 
@@ -429,21 +433,21 @@ function App() {
 		// console.log(leaderboardFullDB, gameMode)
 
 		let stats = { 'player_name' : playerName,
-		'accuracy' : parseInt(overall), 
-		'accuracy_rk' : 100, 		
-		'time' : parseFloat((gameStats.map(x=> x.time).reduce((total, current) => total + current, 0)/gameStats.length).toFixed(2)),
-		'speed_rk' : 100, 		
-		'game_id' : gameId,
-		'correct' : total_correct,
-		'total' : gameStats.length,
-		'album_mode' : albumMode, 
-		'game_mode' : gameMode, 
-		'fighter' : fighter, 
-		'game_date' : gameDate?.toString()
+			'accuracy' : parseInt(overall), 
+			'accuracy_rk' : 100, 		
+			'time' : parseFloat((gameStats.map(x=> x.time).reduce((total, current) => total + current, 0)/gameStats.length).toFixed(2)),
+			'speed_rk' : 100, 		
+			'game_id' : gameId,
+			'correct' : total_correct,
+			'total' : gameStats.length,
+			'album_mode' : albumMode, 
+			'game_mode' : gameMode, 
+			'fighter' : fighter, 
+			'game_date' : gameDate?.toString()
 		}
 
 		// squeeze new player into leaderboard and update database if they met leaderboard reqs
-		if (parseFloat(overall) > min_accuracy && total_correct > min_correct && avg_time <= 3) {	
+		if (parseFloat(overall) > min_accuracy && total_correct > min_correct && avg_time <= 3 && gameMode != 'easy') {	
 
 		// if (parseFloat(overall) > 3) {	// for testing
 	
