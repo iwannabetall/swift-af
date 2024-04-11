@@ -557,7 +557,7 @@ div.tooltip {
 }
 
 
-.era-taylor-swift-gradeAplus, .era-fearless-gradeAplus, .era-speak-now-gradeAplus, .era-red-gradeAplus, .era-1989-gradeAplus, .era-reputation-gradeAplus, .era-lover-gradeAplus, .era-folklore-gradeAplus, .era-evermore-gradeAplus, .era-midnights-gradeplus  {
+.era-taylor-swift-gradeAplus, .era-fearless-gradeAplus, .era-speak-now-gradeAplus, .era-red-gradeAplus, .era-1989-gradeAplus, .era-reputation-gradeAplus, .era-lover-gradeAplus, .era-folklore-gradeAplus, .era-evermore-gradeAplus, .era-midnights-gradeAplus  {
 	font-weight: 700;
 	font-size: var(--font-size-Aplus);
 }
@@ -611,7 +611,7 @@ div.tooltip {
 	color: #fff;
 	padding: 10px;
 	border-radius: 4px;
-	
+
 }
 #lyricalViz, #top40Viz, #bottom40Viz, #cultTop40Viz, #spotifyscatter {
 	display: block;
