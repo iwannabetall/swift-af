@@ -605,6 +605,14 @@ div.tooltip {
 	max-width: 305px;
 }
 
+.tspan{
+	z-index: 10;
+	background-color: rgba(0,0,0,0.6);
+	color: #fff;
+	padding: 10px;
+	border-radius: 4px;
+	
+}
 #lyricalViz, #top40Viz, #bottom40Viz, #cultTop40Viz, #spotifyscatter {
 	display: block;
 	margin: auto;

@@ -49,6 +49,7 @@ function Dataland() {
 	const [top40, setTop40] = useState<LyricData[]>([])
 	const [showTop40, setShowTop40] = useState<boolean>(true)
 	const [spotifyData, setSpotifyData] = useState<SpotifyData[]>([])
+	// const [scatterHighlight, setScatterHighlight] = useState<string>('')
 	const screenSize = useScreenSize()
 
 
@@ -65,7 +66,7 @@ function Dataland() {
 
 			// ['http://localhost:3000/getSongs', 'http://localhost:3000/getSpotifyPlays', 'http://localhost:3000/getLyricStats']
 
-		// bc one viz was nested in a setloading thing, having one loader for multiple async axios reqs was making messing up the useeffect dep array
+		// bc one viz was nested in a setisloading thing, having one loader for multiple async axios reqs was making messing up the useeffect dep array
 
 		setIsLoading(true)	
 
@@ -79,7 +80,7 @@ function Dataland() {
 		})
 		.then(([r1, r2, r3])=> {
 			songsFullDB = r1.songList
-			console.log(r2.spotify_plays, r3.lyricStats)
+			// console.log(r2.spotify_plays, r3.lyricStats)
 			spotify_full_data = r2.spotify_plays
 			setSpotifyData(spotify_full_data)
 
@@ -98,6 +99,7 @@ function Dataland() {
 	// SPOTIFY VIZ VS ACCURACY SCATTERPLOT
 	useEffect(()=> {
 		d3.selectAll('.spotify').remove()
+
 		// spotify - accuracy scatter plot
 		const t = d3.transition()
 			.duration(1500)
@@ -153,45 +155,81 @@ function Dataland() {
 
 		let spotify = scatter.selectAll<SVGCircleElement, SpotifyData>('circle').data(spotifyData, function(d: SpotifyData) {
 			return d.song
-		})
+		})		
+
+		// const tooltip = scatter.append('g').append("text")
+    // .attr("class", "tooltip")
+    // .attr("fill", "black");
 
 		// cant seem to get transitions to work with mouseover with joins...so using enter.append			
 		spotify.enter().append('circle')
-			.attr('class', function(d) { return `${albumColorKey[albumKeyLkup[d.album as keyof typeof albumKeyLkup] as keyof typeof albumColorKey]}`
+			.attr('class', function(d) { return `${albumColorKey[albumKeyLkup[d.album as keyof typeof albumKeyLkup] as keyof typeof albumColorKey]} `
+			// ${scatterHighlight == '' ? '' : scatterHighlight == d.album ? '' : 'faded'}
 			})									
-			.on('mouseover', function(_, d) {
-				// console.log(d3.pointer(e))
-				// const startY = d3.pointer(e)[1] - 10//40
-				// const xPos = d3.pointer(e)[0] //60
-
+			.on('mouseenter', function(event, d) {
+				// console.log(d.album)
+				// setScatterHighlight(d.album)
+				
 				const startY = -40
 				const xPos = screenSize.width < 420 ? 10 : 60		
 				
-				d3.select('.spotify').append('text')
-				.attr('class', 'hoverlabel')
-				.attr('x', xPos)
-				.attr('y', startY)
-				.attr('font-size', fontSize)
-				.html(`${d.song}: ${(d.song_accuracy).toFixed(1)}% | ${formatBigNumber(d.historical_counts)} Plays`)
+				if (screenSize.width < 600) {
+					// if mobile, tool tip goes off page
+					d3.select('.spotify').append('text')
+					.attr('class', 'hoverlabel')
+					.attr('x', xPos)
+					.attr('y', startY)
+					.attr('font-size', fontSize)
+					.html(`${d.song}: ${(d.song_accuracy).toFixed(1)}% | ${formatBigNumber(d.historical_counts)} Plays`)
+	
+					d3.select('.spotify').append('text')
+					.attr('class', 'hoverlabel')
+					.attr('x', xPos)
+					.attr('y', startY + 25)
+					.attr('font-size', fontSize)
+					.text(`Most Recognized Lyric:`)
+	
+					d3.select('.spotify').append('text')
+					.attr('class', 'hoverlabel')
+					.attr('x', xPos)
+					.attr('y', startY + 50)
+					.attr('font-size', fontSize)
+					.text(`${d.top_lyric}`)
 
-				d3.select('.spotify').append('text')
-				.attr('class', 'hoverlabel')
-				.attr('x', xPos)
-				.attr('y', startY + 25)
-				.attr('font-size', fontSize)
-				.text(`Most Recognized Lyric:`)
+				} else {
 
-				d3.select('.spotify').append('text')
-				.attr('class', 'hoverlabel')
-				.attr('x', xPos)
-				.attr('y', startY + 50)
-				.attr('font-size', fontSize)
-				.text(`${d.top_lyric}`)
+					d3.selectAll('.tooltip').remove()
+					
+					var	tooltip = d3
+						.select('body')
+						.append('g')
+							.attr('class', 'tooltip')
+						.append('div')
+						.style('width', '320px')
+						.attr('class', 'd3-tooltip')
+						.style('position', 'absolute')
+						.style('z-index', '10')
+						// .style('visibility', 'hidden')
+						.style('padding', '10px')
+						.style('background', 'rgba(0,0,0,0.6)')
+						.style('border-radius', '4px')
+						.style('color', '#fff')
 
+				tooltip
+					.style('top', `${event.pageY}px`)
+					.style('left', `${event.pageX}px`)
+					.html(
+						`<div>${d.song}: ${(d.song_accuracy).toFixed(1)}% | ${formatBigNumber(d.historical_counts)} Plays</div>
+						<div>Top Lyric: ${d.top_lyric}</div>`
+					)
+					// .style('visibility', 'visible');
 
-			})
+				}			
+		
+			})			
 			.on('mouseout', function(){
 				d3.selectAll('.hoverlabel').remove()
+				d3.selectAll('.tooltip').remove()
 			})				
 			.attr('cx', 0)  // make bounce look like spray bottle 
 			.attr('cy', h)
@@ -246,6 +284,7 @@ function Dataland() {
 					.style('fill', 'black')
 					.text('(Millions)')
 			)
+		
 				
 	}, [showTop40, spotifyData])
 	
@@ -269,8 +308,6 @@ function Dataland() {
 					// setSongFilter('Anti-Hero')
 					console.log('fullLyricsNStats', fullLyricsNStats)
 					console.log('avg', d3.rollups(fullLyricsNStats, v => d3.mean(v, d => d.time), d=> d.album, d => d.song))
-
-
 
 					if (songsFullDB.length > 0) {
 						let first_track = songsFullDB.filter(s=> s.album_key == albumFilter)[0].song
