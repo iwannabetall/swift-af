@@ -562,7 +562,9 @@ div.tooltip {
 	font-size: var(--font-size-Aplus);
 }
 
-
+.v-faded{
+	opacity: 0.1;
+}
 
 .faded{
 	opacity: 0.4;

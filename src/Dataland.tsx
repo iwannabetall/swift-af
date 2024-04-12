@@ -49,7 +49,7 @@ function Dataland() {
 	const [top40, setTop40] = useState<LyricData[]>([])
 	const [showTop40, setShowTop40] = useState<boolean>(true)
 	const [spotifyData, setSpotifyData] = useState<SpotifyData[]>([])
-	// const [scatterHighlight, setScatterHighlight] = useState<string>('')
+	const [scatterHighlight, setScatterHighlight] = useState<string>('')
 	const screenSize = useScreenSize()
 
 
@@ -101,10 +101,10 @@ function Dataland() {
 		d3.selectAll('.spotify').remove()
 
 		// spotify - accuracy scatter plot
-		const t = d3.transition()
-			.duration(1500)
-			.delay((_, i) => i * 500)
-			.ease(d3.easeBounceOut);		
+		// const t = d3.transition()
+		// 	.duration(1500)
+		// 	.delay((_, i) => i * 500)
+		// 	.ease(d3.easeBounceOut);		
 
 		const h = screenSize.width > 420 ? 680 : 460
 		const w = screenSize.width > 420 ? 600 : 420
@@ -156,20 +156,14 @@ function Dataland() {
 		let spotify = scatter.selectAll<SVGCircleElement, SpotifyData>('circle').data(spotifyData, function(d: SpotifyData) {
 			return d.song
 		})		
-
-		// const tooltip = scatter.append('g').append("text")
-    // .attr("class", "tooltip")
-    // .attr("fill", "black");
-
+		
 		// cant seem to get transitions to work with mouseover with joins...so using enter.append			
 		spotify.enter().append('circle')
-			.attr('class', function(d) { return `${albumColorKey[albumKeyLkup[d.album as keyof typeof albumKeyLkup] as keyof typeof albumColorKey]} `
-			// ${scatterHighlight == '' ? '' : scatterHighlight == d.album ? '' : 'faded'}
+			.attr('class', function(d) { return `${albumColorKey[albumKeyLkup[d.album as keyof typeof albumKeyLkup] as keyof typeof albumColorKey]} ${scatterHighlight == '' ? '' : scatterHighlight == d.album ? '' : 'v-faded'}`			
 			})									
-			.on('mouseenter', function(event, d) {
+			.on('mouseover', function(event, d) {
 				// console.log(d.album)
-				// setScatterHighlight(d.album)
-				
+				setScatterHighlight(d.album)				
 				const startY = -40
 				const xPos = screenSize.width < 420 ? 10 : 60		
 				
@@ -216,8 +210,8 @@ function Dataland() {
 						.style('color', '#fff')
 
 				tooltip
-					.style('top', `${event.pageY}px`)
-					.style('left', `${event.pageX}px`)
+					.style('top', `${event.pageY + 10}px`)
+					.style('left', `${event.pageX + 10}px`)
 					.html(
 						`<div>${d.song}: ${(d.song_accuracy).toFixed(1)}% | ${formatBigNumber(d.historical_counts)} Plays</div>
 						<div>Top Lyric: ${d.top_lyric}</div>`
@@ -226,14 +220,15 @@ function Dataland() {
 
 				}			
 		
-			})			
+			})		
 			.on('mouseout', function(){
 				d3.selectAll('.hoverlabel').remove()
 				d3.selectAll('.tooltip').remove()
+				setScatterHighlight('')
 			})				
-			.attr('cx', 0)  // make bounce look like spray bottle 
-			.attr('cy', h)
-			.transition(t)
+			// .attr('cx', 0)  // make bounce look like spray bottle 
+			// .attr('cy', h)
+			// .transition(t)
 			.attr('r', '6')				
 			.attr('cy', function(d){					
 				return yScale(d.historical_counts)
@@ -286,7 +281,7 @@ function Dataland() {
 			)
 		
 				
-	}, [showTop40, spotifyData])
+	}, [showTop40, spotifyData, scatterHighlight])
 	
 // GET ALBUM DATA
 	useEffect(()=> {
