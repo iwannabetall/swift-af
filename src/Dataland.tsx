@@ -49,7 +49,7 @@ function Dataland() {
 	const [top40, setTop40] = useState<LyricData[]>([])
 	const [showTop40, setShowTop40] = useState<boolean>(true)
 	const [spotifyData, setSpotifyData] = useState<SpotifyData[]>([])
-	const [scatterHighlight, setScatterHighlight] = useState<string>('')
+	const [scatterHighlight, setScatterHighlight] = useState<AlbumArt>('imtheproblem')	
 	const screenSize = useScreenSize()
 
 
@@ -106,7 +106,7 @@ function Dataland() {
 		// 	.delay((_, i) => i * 500)
 		// 	.ease(d3.easeBounceOut);		
 
-		const h = screenSize.width > 420 ? 680 : 460
+		const h = screenSize.width > 420 ? 600 : 460
 		const w = screenSize.width > 420 ? 600 : 420
 		const fontSize = screenSize.width > 420 ? '20px' : '18px'
 		const margin = 30
@@ -132,6 +132,11 @@ function Dataland() {
 			.attr("viewBox", `0 0 ${h} ${w}`)	
 		
 		const brush = d3.brush().on("end", ({selection}) => {
+
+			// setScatterHighlight('')
+			d3.selectAll('.hoverlabel').remove()
+			d3.selectAll('.tooltip').remove()
+			
 			if (selection) {
 				const [[x0, y0], [x1, y1]] = selection;			
 				// console.log(selection)					
@@ -144,7 +149,7 @@ function Dataland() {
 				}
 									
 			}
-		})
+		})		
 		.extent([[marginLeft-10,0], [w, h-marginBottom + 10]])  // overlay sizing
 
 		//!!!! must create brush before appending bc it overlays a rect that will block mouseover events
@@ -159,11 +164,13 @@ function Dataland() {
 		
 		// cant seem to get transitions to work with mouseover with joins...so using enter.append			
 		spotify.enter().append('circle')
-			.attr('class', function(d) { return `${albumColorKey[albumKeyLkup[d.album as keyof typeof albumKeyLkup] as keyof typeof albumColorKey]} ${scatterHighlight == '' ? '' : scatterHighlight == d.album ? '' : 'v-faded'}`			
+			.attr('class', function(d) { return `${albumColorKey[albumKeyLkup[d.album as keyof typeof albumKeyLkup] as keyof typeof albumColorKey]} ${scatterHighlight == 'imtheproblem' ? '' : scatterHighlight == albumKeyLkup[d.album as keyof typeof albumKeyLkup] ? '' : 'v-faded'}	`
+				
 			})									
 			.on('mouseover', function(event, d) {
+
 				// console.log(d.album)
-				setScatterHighlight(d.album)				
+				// setScatterHighlight(d.album)				
 				const startY = -40
 				const xPos = screenSize.width < 420 ? 10 : 60		
 				
@@ -217,14 +224,14 @@ function Dataland() {
 						<div>Top Lyric: ${d.top_lyric}</div>`
 					)
 					// .style('visibility', 'visible');
-
+ 
 				}			
-		
+							
 			})		
 			.on('mouseout', function(){
 				d3.selectAll('.hoverlabel').remove()
 				d3.selectAll('.tooltip').remove()
-				setScatterHighlight('')
+				// setScatterHighlight('')
 			})				
 			// .attr('cx', 0)  // make bounce look like spray bottle 
 			// .attr('cy', h)
@@ -653,12 +660,23 @@ function Dataland() {
 							<h2 id='spotifysection' ref={spotifyRef}>The Story of Us</h2>
 							<h6>Are the songs with the most recognized lyrics also the most popular songs? </h6>
 							<h6>Drag and select a region to zoom. Double click on the chart to reset/zoom out.</h6>
-							<h6>Hover/click on a circle to see historical Spotify play counts vs overall song accuracy and the top line. </h6>
-
-							<p className='text-center text-xs'>Filler lines and lines with the title in it excluded.</p>
+							<h6>Hover/click on a circle to see historical Spotify play counts vs overall song accuracy and the top line. {screenSize.width >= 600 && <span>Click an album to highlight its songs.</span>}</h6>
 							
-							<div id='spotifyscatter' ref={spotifyViz}></div>
 
+							<p className='text-center text-xs'>Filler lines and lines with the title in it excluded. Spotify data as of March 17, 2024. {screenSize.width < 600 && <span>More filters available on a desktop.</span>}</p>
+							
+							
+							<div className='spotifyscatter-wrapper' >
+
+								{screenSize.width >= 600 && <div className='flex flex-col flex-wrap justify-center' ref={newSongRef}>					
+								{albumCovers.map(x=> <img src={`/icons/${x}.jpg`} key={x} className ={`sm-albums ${scatterHighlight != x ? 'faded' : scatterHighlight == x ? 'selected' : ''}`} onClick={()=> {
+									setScatterHighlight(x)
+									}}></img>)}					
+								</div>	}
+								
+								<div id='spotifyscatter' ref={spotifyViz}></div>
+
+							</div>
 							<div className='jumpbox flex flex-row flex-wrap justify-center mx-auto m-2 text-center'><p className = 'text-xs'>Jump to: <span className='font-bold cursor-pointer'
 							onClick={()=> window.scrollTo({top: top40Ref.current ? top40Ref.current?.offsetTop - 95 : 0, behavior: 'smooth'})}> The Swiftest Top 40</span> | <span className='font-bold cursor-pointer'
 							onClick={()=> window.scrollTo({top: cultFailRef.current ? cultFailRef.current?.offsetTop - 95 : 0, behavior: 'smooth'})}> We Forgot That These Existed </span> </p> </div>	

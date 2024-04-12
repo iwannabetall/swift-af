@@ -59,6 +59,14 @@
 	--font-size-F: 14px;
 }
 
+.sm-albums {
+	max-height: 45px;
+	margin: 6px;
+	display: inline;
+	cursor: pointer;
+	border-radius: 50%;
+}
+
 .albums {
 	max-height: 60px;
 	margin: 6px;
@@ -636,6 +644,16 @@ div.tooltip {
 	height: 600px;
 }
 
+.spotifyscatter-wrapper{
+	margin: auto;
+	width: 700px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	flex-wrap: wrap;
+	flex-direction: row;
+}
+
 #top40VizAns, #bottom40VizAns, #cultTop40VizAns{
 	display: block;
 	margin: auto;
@@ -745,7 +763,7 @@ div.tooltip {
 }
 /*iphone 6/7/8 Plus -- should be max-width of 420 but making it smaller for browser/player header*/
 @media (max-width:414px){
-	#lyricalViz, #top40Viz, #bottom40Viz, #top40VizAns, #bottom40VizAns, #cultTop40VizAns, #cultTop40Viz, #spotifyscatter, .spotify{
+	#lyricalViz, #top40Viz, #bottom40Viz, #top40VizAns, #bottom40VizAns, #cultTop40VizAns, #cultTop40Viz, #spotifyscatter, .spotify, .spotifyscatter-wrapper{
 		width: 400px;
 	}
 
@@ -798,7 +816,7 @@ div.tooltip {
 		max-width: 360px;
 	}
 
-	#lyricalViz, #top40Viz, #bottom40Viz, #top40VizAns, #bottom40VizAns, #cultTop40VizAns, #cultTop40Viz, #spotifyscatter, .spotify{
+	#lyricalViz, #top40Viz, #bottom40Viz, #top40VizAns, #bottom40VizAns, #cultTop40VizAns, #cultTop40Viz, #spotifyscatter, .spotify, .spotifyscatter-wrapper{
 		width:370px
 	}
 	
@@ -814,7 +832,7 @@ div.tooltip {
 		max-width: 310px;
 	}
 
-	#lyricalViz, #top40Viz, #bottom40Viz, #top40VizAns, #bottom40VizAns, #cultTop40VizAns, #cultTop40Viz, #spotifyscatter, .spotify{
+	#lyricalViz, #top40Viz, #bottom40Viz, #top40VizAns, #bottom40VizAns, #cultTop40VizAns, #cultTop40Viz, #spotifyscatter, .spotify, .spotifyscatter-wrapper{
 		width: 316px;
 	}
 
