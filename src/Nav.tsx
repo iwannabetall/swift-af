@@ -1,6 +1,7 @@
+import { useCookies } from 'react-cookie';
 
 
-export default function Nav({ location } : {location: {pathname: string}}){
+function Nav({ location } : {location: {pathname: string}}){
 
 	// const shareUrl = 'https://swift-af.com/' as const
 	// const title = "im swift af boi. are you??"
@@ -10,11 +11,17 @@ export default function Nav({ location } : {location: {pathname: string}}){
 
 	const paths = [{key: '/', value: 'Home'}, {key: '/leaderboard', value: "Long Live"}, {key: '/dataland', value: "Data, Speak Now"}] as const; 
 
+	const loggedInPaths = [{key: '/', value: 'Home'}, {key: '/leaderboard', value: "Long Live"}, {key: '/me', value: "Me!"}, {key: '/dataland', value: "Data, Speak Now"}] as const;
+
+	const [cookies, setCookie, removeCookie] = useCookies(['sess']);
+
+
 	return (
 		<div className="era-reputation left-0">
 			<nav className="nav era-reputation min-w-full fixed p-2 top-0 block justify-between mx-auto">
 				<ul className='flex flex-row flex-wrap'>
-					{paths.map(x=> <li key={x.key} className={`era-reputation inline ml-1 mr-1 p-1 ${location.pathname == x.key ? 'underline' :'faded'}`}><a className="color-white" href={x.key}>{location.pathname == '/' && x.value == 'Home' ? 'Begin' : x.value == 'Home' ? 'Begin Again' : x.value}</a></li>)}					
+					{!cookies.sess && paths.map(x=> <li key={x.key} className={`era-reputation inline ml-1 mr-1 p-1 ${location.pathname == x.key ? 'underline' :'faded'}`}><a className="color-white" href={x.key}>{location.pathname == '/' && x.value == 'Home' ? 'Begin' : x.value == 'Home' ? 'Begin Again' : x.value}</a></li>)}					
+					{cookies.sess && loggedInPaths.map(x=> <li key={x.key} className={`era-reputation inline ml-1 mr-1 p-1 ${location.pathname == x.key ? 'underline' :'faded'}`}><a className="color-white" href={x.key}>{location.pathname == '/' && x.value == 'Home' ? 'Begin' : x.value == 'Home' ? 'Begin Again' : x.value}</a></li>)}					
 				</ul>
 				
 			</nav>
@@ -71,3 +78,5 @@ export default function Nav({ location } : {location: {pathname: string}}){
 	)
 	
 }
+
+export default Nav

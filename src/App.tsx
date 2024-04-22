@@ -3,7 +3,7 @@ import { useState, useRef, useEffect, FormEvent } from 'react'
 // import ReactDOM from 'react-dom';
 
 import title from '/title.svg'
-import leftarrow from '/left-arrow.svg'
+import leftarrow from '/icons/left-arrow.svg'
 
 import axios from 'axios';
 import { v4 as uuidv4 } from 'uuid';
@@ -15,7 +15,9 @@ import {
 } from 'obscenity';
 import Nav from './Nav.tsx'
 import Leaderboard from './Leaderboard.tsx'
-import BuyMeACoffee from './BuyMeACoffee.tsx';
+
+import { useCookies } from 'react-cookie';
+
 
 // import {
 //   QueryClient,
@@ -91,7 +93,7 @@ function App() {
 	const [gameStarted, setGameStarted] = useState<boolean>(false)
 	const [displayStats, setDisplayStats] = useState<boolean>(false);
 	const [gameRank, setGameRank] = useState<Leaderboard[]>([])
-	
+	const [cookies, setCookie, removeCookie] = useCookies(['sess']);
 
 	const wrongAnswersOnly = ["This is why we can't have nice things", "Would you like closure and know the song", "Is this you trying", "It's you, you're the problem", "Can we tolerate this", "I wish you would get the right answer", "That was not the 1", "you'll have an ephiphany on it later", "Made my tears richochet with that one","You forgot that song existed", "You're losing it", "Death by a thousand wrongs", "False Swiftie", "You're on your own, kid", "Answer...?", "brain Glitch", "I bet you'll think about that", "You did something bad", "Exhiling you", "tis not the damn song", "Shake it off", "That was sweet nothing"]
 
@@ -101,40 +103,24 @@ function App() {
 
 	async function delayedDataFetch() {
 		setIsLoading(true)
-		console.log('get data')
-		// get song list 
-		axios.get(`https://swift-api.fly.dev/getSongs`)
-		// axios.get(`http://localhost:3000/getSongs`)
-			.then(function (response) {	
-				setSongList(response.data.songList)
-				songsFullDB = response.data.songList
-				// console.log(songsFullDB)
-			})
-			.catch(function (error) {				
-				console.log(error);
-			});	
 		
-			axios.get(`https://swift-api.fly.dev/getLyrics`)
-		// axios.get(`http://localhost:3000/getLyrics`)
-			.then(function (response) {								
-				lyricsFullDB = response.data.lyrics	
-				setIsLoading(false)
-				console.log('got lyrics')	
-			})
-			.catch(function (error) {				
-				console.log(error);
-			});	
+		// Promise.all([axios.get(`http://localhost:3000/getSongs`), axios.get(`http://localhost:3000/getLyrics`), axios.get(`http://localhost:3000/getLeaderboard`)])
+		Promise.all([axios.get(`https://swift-api.fly.dev/getSongs`), axios.get(`https://swift-api.fly.dev/getLyrics`), axios.get(`https://swift-api.fly.dev/getLeaderboard`)])
+		.then(([r1, r2, r3]) => {
 
-		axios.get(`https://swift-api.fly.dev/getLeaderboard`)
-		// axios.get(`http://localhost:3000/getLeaderboard`)
-			.then(function (response) {								
-				leaderboardFullDB = response.data.leaderBoard
+			console.log('got data')
+			songsFullDB = r1.data.songList
+			setSongList(r1.data.songList)
+			lyricsFullDB = r2.data.lyrics	
+			
+			leaderboardFullDB = r3.data.leaderBoard
 				// console.log('init', 'got leaderboard')
-				setLeaderboardData(leaderboardFullDB.filter(x=> x.game_mode != 'album'))
-			})
-			.catch(function (error) {				
-				console.log(error);
-			});	
+			setLeaderboardData(leaderboardFullDB.filter(x=> x.game_mode != 'album'))
+			
+			setIsLoading(false)
+		}).catch(function (error) {				
+			console.log(error);
+		});	
 
 	}
 	
@@ -542,6 +528,7 @@ function App() {
 					{!userNameSet && <div>
 						<h2>So you think you're the 1? The Swiftest fan?</h2>
 					<h2>How quickly can you name the song given a line?</h2>
+				
 					</div>}
 					{!userNameSet && <div className='p-2 pt-0 grid grid-cols-1 text-center transition-all ease-in-out duration-300'>
 						<form className="era-1989 cursor-pointer shadow-md rounded px-8 pt-6 pb-6 mb-4" onSubmit={(e: FormEvent<HTMLFormElement>) => submitUserName(e)}>
@@ -555,7 +542,16 @@ function App() {
 							</label>
 							<button className='era-midnights mt-4 cursor-pointer'>Hi, it's me.</button>
 						</form>
-						<BuyMeACoffee/>
+
+						<p className='announcement'>NEW: TTPD in album mode!</p>
+
+						{!cookies.sess && <div className='announcement'> 
+						Want to see yourself trying? <a className='underline font-bold' href='/hi-its-me'>Login</a> or <a className='underline font-bold' href='/rememberme'>Create an account!</a>
+						</div>}
+						<div className='m-2 text-center text-xs underline'>
+						<p><a href="mailto:sayhello@swift-af.com">Want to Say Hello?</a></p>
+						</div>
+
 						
 					</div>}
 					{userNameSet && <div>
@@ -602,6 +598,7 @@ function App() {
 							</button>)}
 
 							<h2>or Pick an Album</h2>
+							<h2>Test yourself with TTPD!</h2>
 							<h6>Album dropdown will appear when you select "the 1"</h6>
 							{<button 
 								className={`block min-w-full cursor-pointer rounded-t-xl rounded-b-xl p-2 text-center text-md font-bold ${ltErasColors[0]} ${gameMode == 'album' ? '' : 'faded'}`} id={'album'} 
@@ -737,7 +734,7 @@ function App() {
 						</div>}
 					</div>}
 					{postGameDisplay == 'leaderboard' && !isLoading && <div>
-						<div className='flex flex-row m-2 p-2 bold text-center justify-center'>
+						<div className='flex flex-row m-2 p-2 font-bold text-center justify-center'>
 							<div className={`${filterLeaderboard == 'all' ? 'era-reputation' : 'faded'} inline p-2 min-w-[120px] inline-flex justify-center text-l font-bold shadow cursor-pointer border w-full leading-tight focus:outline-none focus:shadow-outline text-center`}
 								onClick={() => setFilterLeaderboard('all')}>The Eras</div>
 							<div className={`${filterLeaderboard == 'album' ? 'era-reputation' : 'faded'} inline p-2 min-w-[120px] inline-flex justify-center text-l font-bold shadow cursor-pointer border w-full leading-tight focus:outline-none focus:shadow-outline text-center`}
@@ -753,7 +750,6 @@ function App() {
 							
 				
 				<button className='m-6 era-red p-3 min-w-[250px] text-xl font-bold' onClick={() => restartGame()}>Begin Again</button>	
-				<BuyMeACoffee/>
 				</div>}
 
 			

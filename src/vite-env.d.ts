@@ -1,6 +1,7 @@
 /// <reference types="vite/client" />
 
 declare module 'obscenity';
+declare module 'bcrypt';
 
 interface Lyrics {
 	id : number;

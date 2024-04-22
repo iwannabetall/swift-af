@@ -1,12 +1,11 @@
 // import { useState, useEffect, MouseEvent } from 'react'
 import { useState, useEffect, useRef } from 'react'
-import title from '/title.svg'
 import axios from 'axios';
-import Nav from './Nav.tsx'
 import * as d3 from 'd3';
 import Loader from './Loader.tsx';
 import useScreenSize from './useScreenSize.tsx';
 import LyricalVizLegend from './LyricalVizLegend.tsx';
+import Layout from './Layout.tsx';
 
 // import moment from 'moment';
 
@@ -580,21 +579,9 @@ function Dataland() {
 
 
 	return (
-		<>
-			<Nav location={location}></Nav>
-			{isLoading && <div className='grid grid-cols-1 p-2 justify-items-center mt-20 lg:ml-8 lg:mr-8 sm:ml-2 sm:mr-2 justify-center'>
-				<div className=''>
-					<img src={title} className='mx-auto logo p-4 max-h-32' alt="Swift AF" />	
-				</div>
-				<Loader/>
-			
-				</div>}
-				{!isLoading && <div className='grid grid-cols-1 p-2 justify-items-center mt-20 lg:ml-8 lg:mr-8 sm:ml-2 sm:mr-2 justify-center'>
-				
-				<div className=''>
-					<img src={title} className='mx-auto logo p-4 max-h-32' alt="Swift AF" />				
-				</div>	
-				
+		<>			
+			<Layout isLoading={isLoading}>
+						
 				<div>
 					<div className='flex flex-row flex-wrap justify-center' ref={newSongRef}>					
 					{albumCovers.map(x=> <img src={`/icons/${x}.jpg`} key={x} className ={`albums ${fighter != x ? 'faded' : fighter == x ? 'selected' : ''}`} onClick={()=> {
@@ -717,7 +704,7 @@ function Dataland() {
 
 					</div>}
 
-					{!showTop40 && <div>
+					{!showTop40 && !gettingLyrics && <div>
 						<div id='lyricalViz' ref={scrollRef}></div>
 						<div className='flex flex-row flex-wrap justify-center mx-auto m-2 text-center'><p><span className='font-bold cursor-pointer'
 							onClick={()=> window.scrollTo({top: newSongRef.current ? newSongRef.current?.offsetTop - 20: 0, behavior: 'smooth'})}> Jump to top for another song! </span> </p> </div>	
@@ -726,8 +713,7 @@ function Dataland() {
 				</div>
 					
 				
-				
-			</div>}
+			</Layout>	
 		</>
 	)
 

@@ -1,8 +1,7 @@
 import { useState, useEffect } from 'react'
-import title from '/title.svg'
 import axios from 'axios';
-import Nav from './Nav.tsx'
 import moment from 'moment';
+import Layout from './Layout.tsx';
 
 let leaderboardFullDB: Leaderboard[] = []
 
@@ -54,19 +53,8 @@ function LeaderboardPage() {
 	}
 
 	return (
-		<>
-			<Nav location={location}></Nav>
-			{isLoading && <div>
-				<div className=''>
-					<img src={title} className='mx-auto logo p-4 max-h-32' alt="Swift AF" />	
-				</div>
-				<h2>Wait, don't go. Getting the swiftest swifties!</h2></div>}
-			{!isLoading && <div className='grid grid-cols-1 p-2 justify-items-center mt-20 lg:ml-8 lg:mr-8 sm:ml-2 sm:mr-2 justify-center'>
-				
-				<div className=''>
-					<img src={title} className='mx-auto logo p-4 max-h-32' alt="Swift AF" />				
-				</div>	
-				
+		<>			
+				<Layout isLoading={isLoading}>
 				<div className='flex flex-col container bold text-center justify-center items-center'>
 					<div className='flex flex-row container bold text-center justify-center'>
 						<div className={`${filterLeaderboard == 'all' ? 'era-reputation' : 'faded'} inline p-2 min-w-[120px] inline-flex justify-center text-l font-bold shadow cursor-pointer border w-full leading-tight focus:outline-none focus:shadow-outline text-center`}
@@ -90,8 +78,7 @@ function LeaderboardPage() {
 						</div>
 					}	
 				</div>
-				
-			</div>}
+				</Layout>
 		</>
 	)
 

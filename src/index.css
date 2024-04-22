@@ -140,6 +140,27 @@ button:focus-visible {
   outline: 4px auto -webkit-focus-ring-color;
 }
 
+.signup{
+	width: 380px;
+}
+
+
+.back-arrow{
+	display: inline-block;
+	max-width: 25px;
+	max-height: 25px;
+	margin-right: 3px;
+}
+
+
+.input-form {
+	width: 300px;
+	margin-left: 10px;
+	margin-right: 10px;
+	margin-bottom: 20px;
+	display: inline-block;
+}
+
 
 div.tooltip {
   position: absolute;
@@ -152,6 +173,18 @@ div.tooltip {
   border: 0px;
   border-radius: 8px;
   pointer-events: none;
+}
+
+.announcement {
+	color: var(--era-fearless-text);
+	background-color: var(--era-fearless);
+	text-align: center;
+	font-weight: bold;
+	width: 460px;
+	padding-top: 5px;
+	padding-bottom: 5px;
+	margin: auto;
+	margin-bottom: 20px;
 }
 
 @media (prefers-color-scheme: light) {
@@ -329,7 +362,7 @@ div.tooltip {
 
 
 .era-1989 {
-	fill: var(--era-1989);
+	fill: #8cd7f4;
 	background-color: var(--era-1989);
 	/* background-color: rgb(158,226,243); */
 	color: var(--era-1989-text);
@@ -763,10 +796,11 @@ div.tooltip {
 }
 /*iphone 6/7/8 Plus -- should be max-width of 420 but making it smaller for browser/player header*/
 @media (max-width:414px){
-	#lyricalViz, #top40Viz, #bottom40Viz, #top40VizAns, #bottom40VizAns, #cultTop40VizAns, #cultTop40Viz, #spotifyscatter, .spotify, .spotifyscatter-wrapper{
+	#lyricalViz, #top40Viz, #bottom40Viz, #top40VizAns, #bottom40VizAns, #cultTop40VizAns, #cultTop40Viz, #spotifyscatter, .spotify, .spotifyscatter-wrapper, .announcement {
 		width: 400px;
 	}
 
+	
 	.gamestats{
 		max-width: 400px;
 	}
@@ -808,6 +842,11 @@ div.tooltip {
 }
 /*iphone 6/7/8/X*/
 @media (max-width:375px){
+	
+	.signup{
+		width: 350px;
+	}
+
 	.display{
 		font-size: 1em;
 	}
@@ -816,13 +855,24 @@ div.tooltip {
 		max-width: 360px;
 	}
 
-	#lyricalViz, #top40Viz, #bottom40Viz, #top40VizAns, #bottom40VizAns, #cultTop40VizAns, #cultTop40Viz, #spotifyscatter, .spotify, .spotifyscatter-wrapper{
+	#lyricalViz, #top40Viz, #bottom40Viz, #top40VizAns, #bottom40VizAns, #cultTop40VizAns, #cultTop40Viz, #spotifyscatter, .spotify, .spotifyscatter-wrapper .announcement {
 		width:370px
 	}
 	
 }
 /*iphone 5s*/
 @media (max-width:320px){
+
+	.signup{
+		width: 300px;
+	}
+
+	.input-form{
+		width: 280px;
+	}
+
+
+
 	.btn {
 		min-width: 120px;
 		margin: px
@@ -832,7 +882,7 @@ div.tooltip {
 		max-width: 310px;
 	}
 
-	#lyricalViz, #top40Viz, #bottom40Viz, #top40VizAns, #bottom40VizAns, #cultTop40VizAns, #cultTop40Viz, #spotifyscatter, .spotify, .spotifyscatter-wrapper{
+	#lyricalViz, #top40Viz, #bottom40Viz, #top40VizAns, #bottom40VizAns, #cultTop40VizAns, #cultTop40Viz, #spotifyscatter, .spotify, .spotifyscatter-wrapper, .announcement {
 		width: 316px;
 	}
 
