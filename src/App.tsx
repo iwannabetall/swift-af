@@ -290,9 +290,9 @@ function App() {
 		}
 		
 		// save results before resetting
-		axios.post('http://localhost:3000/saveGameData', {
+		// axios.post('http://localhost:3000/saveGameData', {
 			// console.log(gameDate)
-		// axios.post('https://swift-api.fly.dev/saveGameData', {
+		axios.post('https://swift-api.fly.dev/saveGameData', {
 			level: gameMode,
 			time: secondsElapsed, 
 			lyric: displayLyric,

@@ -30,8 +30,8 @@ function SignUpPage() {
 		
 		if (userEmail.length > 0 && password.length >= 8 && passwordMatch == password) {
 	
-			axios.post('http://localhost:3000/addNewUser', {
-			// axios.post('https://swift-api.fly.dev/addNewUser', {			
+			// axios.post('http://localhost:3000/addNewUser', {
+			axios.post('https://swift-api.fly.dev/addNewUser', {			
 			email: userEmail.trim(),
 			password: password,
 			date: (new Date).toISOString(),
@@ -74,8 +74,8 @@ function SignUpPage() {
 		e.preventDefault()
 
 		if (userEmail.length > 0 && password.length > 7) {
-			axios.post('http://localhost:3000/login', {
-				// axios.post('https://swift-api.fly.dev/login', {			
+			// axios.post('http://localhost:3000/login', {
+				axios.post('https://swift-api.fly.dev/login', {			
 				email: userEmail.trim(),
 				password: password,
 			})
