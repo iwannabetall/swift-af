@@ -553,7 +553,7 @@ function App() {
 							<button className='era-midnights mt-4 cursor-pointer'>Hi, it's me.</button>
 						</form>
 
-						<p className='announcement'>Coming Soon: TTPD in album mode!</p>
+						<p className='announcement'>NEW: TTPD in album mode!</p>
 
 						{!cookies.sess && <div className='announcement'> 
 						Want to see yourself trying? <a className='underline font-bold' href='/hi-its-me'>Login</a> or <a className='underline font-bold' href='/rememberme'>Create an account!</a>
