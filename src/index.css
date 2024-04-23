@@ -7,6 +7,17 @@
 	z-index: 1;
 }
 
+.navlink{
+	margin-left: 5px;
+	margin-right: 5px;
+	padding: 5px;
+}
+
+.logout{
+	margin-left: auto;
+	order: 5;
+}
+
 :root {
   font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
   line-height: 1.5;
@@ -49,6 +60,8 @@
 	/* old folklore CDC9C1 */
 	--era-evermore:#C5AC90;
 	--era-evermore-text:#382c1e;
+	--era-ttpd:hsl(26.7,7.4%,23.7%);
+	--era-ttpd-text:hsl(28,7.8%,62.2%);
 	--era-midnights:hsla(222.9,32.7%,21%);
 	--era-midnights-text:#c4cce1;
 	--font-size-Aplus: 26px;
@@ -796,10 +809,15 @@ div.tooltip {
 }
 /*iphone 6/7/8 Plus -- should be max-width of 420 but making it smaller for browser/player header*/
 @media (max-width:414px){
-	#lyricalViz, #top40Viz, #bottom40Viz, #top40VizAns, #bottom40VizAns, #cultTop40VizAns, #cultTop40Viz, #spotifyscatter, .spotify, .spotifyscatter-wrapper, .announcement {
+	#lyricalViz, #top40Viz, #bottom40Viz, #top40VizAns, #bottom40VizAns, #cultTop40VizAns, #cultTop40Viz, #spotifyscatter, .spotify, .spotifyscatter-wrapper {
 		width: 400px;
 	}
-
+	
+	.announcement {
+		max-width: 340px;
+		padding-left: 3px;
+		padding-right: 3px;
+	}
 	
 	.gamestats{
 		max-width: 400px;
@@ -855,13 +873,36 @@ div.tooltip {
 		max-width: 360px;
 	}
 
-	#lyricalViz, #top40Viz, #bottom40Viz, #top40VizAns, #bottom40VizAns, #cultTop40VizAns, #cultTop40Viz, #spotifyscatter, .spotify, .spotifyscatter-wrapper .announcement {
+	#lyricalViz, #top40Viz, #bottom40Viz, #top40VizAns, #bottom40VizAns, #cultTop40VizAns, #cultTop40Viz, #spotifyscatter, .spotify, .spotifyscatter-wrapper {
 		width:370px
 	}
+
+	.announcement {
+		max-width: 310px;
+		padding-left: 3px;
+		padding-right: 3px;
+	}
+	
 	
 }
 /*iphone 5s*/
 @media (max-width:320px){
+
+	.navlink{
+		margin-left: 2px;
+		margin-right: 3px;
+		padding: 2px;
+	}
+
+	h2 {
+		font-size: 1.2em;
+	}
+	.announcement {
+		max-width: 260px;
+		padding-left: 3px;
+		padding-right: 3px;
+	}
+	
 
 	.signup{
 		width: 300px;
@@ -882,7 +923,7 @@ div.tooltip {
 		max-width: 310px;
 	}
 
-	#lyricalViz, #top40Viz, #bottom40Viz, #top40VizAns, #bottom40VizAns, #cultTop40VizAns, #cultTop40Viz, #spotifyscatter, .spotify, .spotifyscatter-wrapper, .announcement {
+	#lyricalViz, #top40Viz, #bottom40Viz, #top40VizAns, #bottom40VizAns, #cultTop40VizAns, #cultTop40Viz, #spotifyscatter, .spotify, .spotifyscatter-wrapper {
 		width: 316px;
 	}
 

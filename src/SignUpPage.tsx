@@ -1,21 +1,15 @@
-import { useState, useEffect, FormEvent } from 'react'
+import { useState, FormEvent } from 'react'
 import axios from 'axios'
 import goback from '/goback.svg'
 import { useNavigate } from 'react-router-dom';
 
-import {
-	RegExpMatcher,
-	TextCensor,
-	englishDataset,
-	englishRecommendedTransformers,
-} from 'obscenity';
 import Layout from './Layout.tsx';
 import { useCookies } from 'react-cookie';
 
 
 function SignUpPage() {
 
-	const [playerName, setPlayerName] = useState<string>('')
+	// const [playerName, setPlayerName] = useState<string>('')
 	const [userEmail, setUserEmail] = useState<string>('')
 	const [password, setPassword] = useState<string>('')
 	const [passwordMatch, setPasswordMatch] = useState<string>('')
@@ -24,11 +18,10 @@ function SignUpPage() {
 	const [alreadyExists, setAlreadyExists] = useState<boolean>(false)
 	const [forgotPassword, setForgotPassword] = useState<boolean>(false)
 	const [loginMessage, setLoginMessage] = useState<string>("\u00A0")
-	const [loggedIn, setLoggedIn] = useState<boolean>(false)
 
-	const [cookies, setCookie, removeCookie] = useCookies(['sess']);
+	const [cookies, setCookie] = useCookies(['sess']);
+	const [userCookie, setUserCookie] = useCookies(['user_id']);
 	
-
 	const navigate = useNavigate()
 
 
@@ -36,47 +29,31 @@ function SignUpPage() {
 		e.preventDefault()
 		
 		if (userEmail.length > 0 && password.length >= 8 && passwordMatch == password) {
-
-			if (playerName == ''){
-				setPlayerName('toolazytotype')
-			} else {
-				// censor for user names
-				const censor = new TextCensor()
-				const matcher = new RegExpMatcher({
-					...englishDataset.build(),
-					...englishRecommendedTransformers,
-				});
-				const matches = matcher.getAllMatches(playerName)
-				
-				const userName = censor.applyTo(playerName, matches)
-				
-				
-				axios.post('http://localhost:3000/addNewUser', {
-				// axios.post('https://swift-api.fly.dev/addNewUser', {			
-				email: userEmail.trim(),
-				password: password,
-				username: userName,
-				date: (new Date).toISOString(),
-				
-				})
-				.then(function (response) {
-					console.log('new user', response)
-					if (response.data == 'account exists') {
-						// show login 
-						setShowSignUp(false)
-						setAlreadyExists(true)
-					} else if (response.data == 'sent') {						
-						setLoginMessage('Please click the link in your email to confirm');
-						setPassword('')
-						setPasswordMatch('')						
-
-					}					
-				})
-				.catch(function (error) {			
-					console.log(error);
-				});
 	
-			}
+			axios.post('http://localhost:3000/addNewUser', {
+			// axios.post('https://swift-api.fly.dev/addNewUser', {			
+			email: userEmail.trim(),
+			password: password,
+			date: (new Date).toISOString(),
+			
+			})
+			.then(function (response) {
+				console.log('new user', response)
+				if (response.data == 'account exists') {
+					// show login 
+					setShowSignUp(false)
+					setAlreadyExists(true)
+				} else if (response.data == 'sent') {						
+					setLoginMessage('Please click the link in your email to confirm');
+					setPassword('')
+					setPasswordMatch('')						
+
+				}					
+			})
+			.catch(function (error) {			
+				console.log(error);
+			});
+				
 		} else {
 			if (password != passwordMatch) {
 				setLoginMessage('Passwords do not match.')
@@ -120,11 +97,19 @@ function SignUpPage() {
 
 				else if (response.data.sessId) {
 					console.log(response.data)
+					
 					setCookie('sess', response.data.sessId, {
 						path: '/',
 						expires: new Date(response.data.expiration),
 						// secure: true
 					})
+
+					setUserCookie('user_id', response.data.user_id, {
+						path: '/',
+						expires: new Date(response.data.expiration),
+						// secure: true
+					})
+
 					// redirect to home page + log in 
 					navigate('/')
 				}
@@ -165,7 +150,7 @@ function SignUpPage() {
 			</div>
 			}
 			{!showSignUp && <div>
-				<h2>Welcome Back!</h2>				
+				<h2>Welcome Back...Be Here</h2>
 				</div>
 			}
 			<div className='signup flex flex-col container bold text-center justify-center items-center'>
@@ -188,7 +173,7 @@ function SignUpPage() {
 				<p>{loginMessage}</p>
 				{showSignUp && <div>
 					<form className="signup era-1989 cursor-pointer shadow-md rounded px-8 pt-6 pb-6 mb-4 flex items-center justify-center flex-col text-center" onSubmit={(e: FormEvent<HTMLFormElement>) => submitUserName(e)}>
-						<label htmlFor='username'>Username			
+						{/* <label htmlFor='username'>Username			
 							<input className="input-form shadow cursor-pointer appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline text-center" type='text' 
 							id='username'
 							value={playerName} 
@@ -196,7 +181,7 @@ function SignUpPage() {
 							maxLength={20}
 							onChange={e => setPlayerName(e.target.value)}>
 							</input>				
-						</label>
+						</label> */}
 						<label htmlFor='email'>Email
 						<input className="input-form shadow cursor-pointer appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline text-center" type='email' 
 							id='email'
@@ -260,7 +245,7 @@ function SignUpPage() {
 						</input>
 					</label>					
 					{<button className={`${userEmail.length > 0 && password.length > 7 ? '' : 'faded'} era-midnights mt-4 cursor-pointer`}>I remember it all too well</button>}
-					<p className='underline mt-5 mb-0' onClick={()=> setForgotPassword(true)}>Forgot password?</p>
+					{/* <p className='underline mt-5 mb-0' onClick={()=> setForgotPassword(true)}>Forgot password?</p> */}
 				</form>}
 				{alreadyExists && !showSignUp && <div>
 					An account already exists for this email.  Please login. <p className='underline' onClick={()=> setForgotPassword(true)}>Forgot password?</p>

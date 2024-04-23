@@ -38,9 +38,9 @@ function App() {
 
 	const ltErasColors = ['eras_green', 'eras_gold', 'eras_purple', 'eras_lblue', 'eras_pink', 'eras_maroon', 'eras_indigo', 'eras_tan', 'eras_grey', 'eras_black'];
 
-	const albumColorKey = {'Taylor_Swift': 'era-taylor-swift', 'Fearless': 'era-fearless', 'Speak_Now': 'era-speak-now', 'Red': 'era-red', '1989': 'era-1989', 'reputation': 'era-reputation', 'Lover': 'era-lover', 'folklore': 'era-folklore', 'evermore': 'era-evermore', 'Midnights': 'era-midnights'} as const
+	const albumColorKey = {'Taylor_Swift': 'era-taylor-swift', 'Fearless': 'era-fearless', 'Speak_Now': 'era-speak-now', 'Red': 'era-red', '1989': 'era-1989', 'reputation': 'era-reputation', 'Lover': 'era-lover', 'folklore': 'era-folklore', 'evermore': 'era-evermore', 'Midnights': 'era-midnights', 'TTPD': 'era-ttpd'} as const
 
-	const albumKeyLkup = { "Taylor Swift" : "Taylor_Swift", "Fearless" : "Fearless", "Speak Now" : "Speak_Now", 'Red' : 'Red', '1989' : '1989', 'reputation' : 'reputation', 'Lover' : 'Lover', 'folklore' : 'folklore', 'evermore' : 'evermore', 'Midnights' : 'Midnights'} as const
+	const albumKeyLkup = { "Taylor Swift" : "Taylor_Swift", "Fearless" : "Fearless", "Speak Now" : "Speak_Now", 'Red' : 'Red', '1989' : '1989', 'reputation' : 'reputation', 'Lover' : 'Lover', 'folklore' : 'folklore', 'evermore' : 'evermore', 'Midnights' : 'Midnights', 'THE TORTURED POETS DEPARTMENT': 'TTPD'} as const
 
 	const gameModes = [{'key' : 'easy', 'value' : 'this is me trying (easy)'}, {'key' : 'classics version', 'value' : "The Classics (rec'd)"}, {'key' : "Taylor's Version", 'value' : "Taylor's Version (hard)"}, {'key' : 'cult version', 'value' : 'my tears richochet (cult)'}] as const
 
@@ -93,13 +93,21 @@ function App() {
 	const [gameStarted, setGameStarted] = useState<boolean>(false)
 	const [displayStats, setDisplayStats] = useState<boolean>(false);
 	const [gameRank, setGameRank] = useState<Leaderboard[]>([])
-	const [cookies, setCookie, removeCookie] = useCookies(['sess']);
+	const [cookies] = useCookies(['sess']);
+	const [userCookie] = useCookies(['user_id']);
 
-	const wrongAnswersOnly = ["This is why we can't have nice things", "Would you like closure and know the song", "Is this you trying", "It's you, you're the problem", "Can we tolerate this", "I wish you would get the right answer", "That was not the 1", "you'll have an ephiphany on it later", "Made my tears richochet with that one","You forgot that song existed", "You're losing it", "Death by a thousand wrongs", "False Swiftie", "You're on your own, kid", "Answer...?", "brain Glitch", "I bet you'll think about that", "You did something bad", "Exhiling you", "tis not the damn song", "Shake it off", "That was sweet nothing"]
+	// const [loggedInUser, setLoggedInUser] = useState<number | null>(null)  // user id if logged in 
+
+	const wrongAnswersOnly = ["This is why we can't have nice things", "Would you like closure and know the song", "Is this you trying", "It's you, you're the problem", "Can we tolerate this", "I wish you would get the right answer", "That was not the 1", "you'll have an ephiphany on it later", "Made my tears richochet with that one","You forgot that song existed", "You're losing it", "Death by a thousand wrongs", "False Swiftie", "You're on your own, kid", "Answer...?", "brain Glitch", "I bet you'll think about that", "You did something bad", "Exhiling you", "tis not the damn song", "Shake it off", "That was sweet nothing", "Your answers are ruining my life", "Do you hate it here?", "So long, Leaderboard", "You Can Fix This (No Really, You Can)"]
 
 	useEffect(() => {
+	
+
 		delayedDataFetch()					
+
+		
 	}, [])
+	
 
 	async function delayedDataFetch() {
 		setIsLoading(true)
@@ -272,19 +280,19 @@ function App() {
 			
 			correct = 1
 
-			setGameStats([{'time': secondsElapsed, song: song, userResponse: clicked.trim(), correct: 1, album: album, lyric: displayLyric, album_key: albumKey, level: gameMode, lyric_id: displayLyricId, id: gameStats.length + 1}, ...gameStats])
+			setGameStats([{'time': secondsElapsed, song: song, userResponse: clicked.trim(), correct: 1, album: album, lyric: displayLyric, album_key: albumKey, level: gameMode, lyric_id: displayLyricId, id: gameStats.length + 1, user_id: userCookie.user_id ? userCookie.user_id : null}, ...gameStats])
 
 		} else {
 			correct = 0
 
 			setResult(wrongAnswersOnly[Math.floor(Math.random() * wrongAnswersOnly.length)])
-			setGameStats([{'time': secondsElapsed, song: song, userResponse: clicked.trim(), correct: 0, album: album, lyric: displayLyric, album_key: albumKey, level: gameMode, lyric_id: displayLyricId, id: gameStats.length + 1}, ...gameStats])
+			setGameStats([{'time': secondsElapsed, song: song, userResponse: clicked.trim(), correct: 0, album: album, lyric: displayLyric, album_key: albumKey, level: gameMode, lyric_id: displayLyricId, id: gameStats.length + 1, user_id: userCookie.user_id ? userCookie.user_id : null}, ...gameStats])
 		}
 		
 		// save results before resetting
-		// axios.post('http://localhost:3000/saveGameData', {
+		axios.post('http://localhost:3000/saveGameData', {
 			// console.log(gameDate)
-		axios.post('https://swift-api.fly.dev/saveGameData', {
+		// axios.post('https://swift-api.fly.dev/saveGameData', {
 			level: gameMode,
 			time: secondsElapsed, 
 			lyric: displayLyric,
@@ -296,7 +304,8 @@ function App() {
 			playerName: playerName,
 			albumMode: albumMode,
 			fighter: fighter,
-			id: gameStats.length
+			id: gameStats.length,
+			user_id: userCookie.user_id ? userCookie.user_id : null
 		})
 		.then(function () {
 			// console.log(response)
@@ -530,7 +539,7 @@ function App() {
 					<h2>How quickly can you name the song given a line?</h2>
 				
 					</div>}
-					{!userNameSet && <div className='p-2 pt-0 grid grid-cols-1 text-center transition-all ease-in-out duration-300'>
+					{!userNameSet && <div className='p-2 pt-0 flex flex-col items-center justify-center text-center transition-all ease-in-out duration-300'>
 						<form className="era-1989 cursor-pointer shadow-md rounded px-8 pt-6 pb-6 mb-4" onSubmit={(e: FormEvent<HTMLFormElement>) => submitUserName(e)}>
 							<label className='block'> the leaderboard has a blank space
 								<input className="shadow cursor-pointer appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline text-center" type='text' 
@@ -543,7 +552,7 @@ function App() {
 							<button className='era-midnights mt-4 cursor-pointer'>Hi, it's me.</button>
 						</form>
 
-						<p className='announcement'>NEW: TTPD in album mode!</p>
+						<p className='announcement'>Coming Soon: TTPD in album mode!</p>
 
 						{!cookies.sess && <div className='announcement'> 
 						Want to see yourself trying? <a className='underline font-bold' href='/hi-its-me'>Login</a> or <a className='underline font-bold' href='/rememberme'>Create an account!</a>
@@ -598,7 +607,7 @@ function App() {
 							</button>)}
 
 							<h2>or Pick an Album</h2>
-							<h2>Test yourself with TTPD!</h2>
+							{/* <h2>Test yourself with TTPD!</h2> */}
 							<h6>Album dropdown will appear when you select "the 1"</h6>
 							{<button 
 								className={`block min-w-full cursor-pointer rounded-t-xl rounded-b-xl p-2 text-center text-md font-bold ${ltErasColors[0]} ${gameMode == 'album' ? '' : 'faded'}`} id={'album'} 

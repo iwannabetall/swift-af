@@ -14,8 +14,6 @@ import {
   createBrowserRouter,
   RouterProvider,
 } from "react-router-dom";
-// import { Route, Routes, Router } from "react-router-dom";
-// import OldSignUpPage from './SignUpPage.tsx'
 
 
 const router = createBrowserRouter([
@@ -35,7 +33,7 @@ const router = createBrowserRouter([
     errorElement: <ErrorPage />,
   },
 	{
-    path: "/me!",
+    path: "/me",
     element: <UserStats />,
     errorElement: <ErrorPage />,
   },
@@ -60,16 +58,7 @@ const router = createBrowserRouter([
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
-		<CookiesProvider>
-			{/* <Router>
-				<Routes>
-				<Route path='/' element={<App/>} errorElement={<ErrorPage/>}/>
-				<Route path='/leaderboard' element={<LeaderboardPage/>} errorElement={<ErrorPage/>}/>
-				<Route path='/dataland' element={<Dataland/>} errorElement={<ErrorPage/>}/>
-				<Route path='/rememberme' element={<OldSignUpPage signingUp={true}/>} errorElement={<ErrorPage/>}/>
-				<Route path='/hi-its-me' element={<OldSignUpPage signingUp={false}/>} errorElement={<ErrorPage/>}/>
-				</Routes>
-			</Router> */}
+		<CookiesProvider>			
 		 <RouterProvider router={router} />
 		</CookiesProvider>
     {/* <App /> */}

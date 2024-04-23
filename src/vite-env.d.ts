@@ -1,7 +1,6 @@
 /// <reference types="vite/client" />
 
 declare module 'obscenity';
-declare module 'bcrypt';
 
 interface Lyrics {
 	id : number;
@@ -37,13 +36,13 @@ interface Lyrics {
 		
 // }
 
-type AlbumKey = "Taylor_Swift" | "Fearless" | "Speak_Now" | 'Red' | '1989' | 'reputation' | 'Lover' | 'folklore' | 'evermore' | 'Midnights' 
+type AlbumKey = "Taylor_Swift" | "Fearless" | "Speak_Now" | 'Red' | '1989' | 'reputation' | 'Lover' | 'folklore' | 'evermore' | 'Midnights' | 'TTPD' 
 
 // name of the jpg files of covers
-type AlbumArt = "Taylor_Swift" | "Fearless" | "Speak_Now" | 'Red' | '1989' | 'reputation' | 'Lover' | 'folklore' | 'evermore' | 'Midnights' | 'imtheproblem'
+type AlbumArt = "Taylor_Swift" | "Fearless" | "Speak_Now" | 'Red' | '1989' | 'reputation' | 'Lover' | 'folklore' | 'evermore' | 'Midnights' | 'imtheproblem' | 'ttpd'
 
 
-type Album = "Taylor Swift" | "Fearless" | "Speak Now" | 'Red' | '1989' | 'reputation' | 'Lover' | 'folklore' | 'evermore' | 'Midnights' 
+type Album = "Taylor Swift" | "Fearless" | "Speak Now" | 'Red' | '1989' | 'reputation' | 'Lover' | 'folklore' | 'evermore' | 'Midnights' | 'The Tortured Poets Dept'
 
 type postGameDisplay = "stats" | "leaderboard"
 type filterLeaderboard = 'all' | 'album'
@@ -97,7 +96,7 @@ interface GameStats {
 	lyric_id: number;
 	level: string;
 	id: number;
-
+	user_id: number | null;
 }
  
 interface LyricData {

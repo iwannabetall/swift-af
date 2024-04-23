@@ -1,4 +1,6 @@
 import { useCookies } from 'react-cookie';
+import axios from 'axios'
+import { useNavigate } from 'react-router-dom';
 
 
 function Nav({ location } : {location: {pathname: string}}){
@@ -11,17 +13,46 @@ function Nav({ location } : {location: {pathname: string}}){
 
 	const paths = [{key: '/', value: 'Home'}, {key: '/leaderboard', value: "Long Live"}, {key: '/dataland', value: "Data, Speak Now"}] as const; 
 
-	const loggedInPaths = [{key: '/', value: 'Home'}, {key: '/leaderboard', value: "Long Live"}, {key: '/me', value: "Me!"}, {key: '/dataland', value: "Data, Speak Now"}] as const;
+	const loggedInPaths = [{key: '/', value: 'Home'}, {key: '/me', value: "Me!"}, {key: '/leaderboard', value: "Long Live"}, {key: '/dataland', value: "Dataland"}] as const;
 
 	const [cookies, setCookie, removeCookie] = useCookies(['sess']);
+	const [userCookie, setUserCookie, removeUserCookie] = useCookies(['user_id']);
 
+	const navigate = useNavigate()
+	
+	const sess_id = cookies.sess
+
+	async function logOut(){
+		axios.post(`http://localhost:3000/logout`, {
+			sess_id: sess_id
+		})
+			// axios.post(`https://swift-api.fly.dev/logout`, {
+				// sess_id: sess_id
+			// })
+			.then(function (response) {
+				console.log('new user', response)
+				
+			})
+			.catch(function (error) {			
+				console.log(error);
+			});				
+
+			removeCookie('sess')
+			removeUserCookie('user_id')
+
+			// console.log('removed', cookies.sess, userCookie.user_id)
+			navigate('/')	
+	}
 
 	return (
 		<div className="era-reputation left-0">
 			<nav className="nav era-reputation min-w-full fixed p-2 top-0 block justify-between mx-auto">
 				<ul className='flex flex-row flex-wrap'>
 					{!cookies.sess && paths.map(x=> <li key={x.key} className={`era-reputation inline ml-1 mr-1 p-1 ${location.pathname == x.key ? 'underline' :'faded'}`}><a className="color-white" href={x.key}>{location.pathname == '/' && x.value == 'Home' ? 'Begin' : x.value == 'Home' ? 'Begin Again' : x.value}</a></li>)}					
-					{cookies.sess && loggedInPaths.map(x=> <li key={x.key} className={`era-reputation inline ml-1 mr-1 p-1 ${location.pathname == x.key ? 'underline' :'faded'}`}><a className="color-white" href={x.key}>{location.pathname == '/' && x.value == 'Home' ? 'Begin' : x.value == 'Home' ? 'Begin Again' : x.value}</a></li>)}					
+					{cookies.sess && loggedInPaths.map(x=> <li key={x.key} className={`era-reputation inline navlink ${location.pathname == x.key ? 'underline' :'faded'}`}><a className="color-white" href={x.key}>{location.pathname == '/' && x.value == 'Home' ? 'Begin' : x.value == 'Home' ? 'Begin Again' : x.value}</a></li>)}	
+					{cookies.sess && <li className={`logout navlink era-reputation inline faded`}><a className="color-white" href="#" onClick={() => {
+						logOut()
+					}}>Logout</a></li>}						
 				</ul>
 				
 			</nav>
