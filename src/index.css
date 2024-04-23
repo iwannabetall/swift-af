@@ -248,6 +248,11 @@ div.tooltip {
 	color: var(--era-taylor-swift-text);
 }
 
+.era-ttpd{
+	fill: var(--era-ttpd);
+	background-color: var(--era-ttpd);
+	color: var(--era-ttpd-text);	
+}
 
 .era-taylor-swift-gradeA, .era-taylor-swift-gradeAplus {
 	fill: var(--era-taylor-swift);

@@ -46,9 +46,9 @@ function App() {
 
 	// {'key' : 'album', 'value' : 'the 1 (album)'}
 
-	const albums = ["Taylor Swift", "Fearless", "Speak Now", "Red", "1989", "reputation", "Lover", "folklore", "evermore", "Midnights"] as const
+	const albums = ["Taylor Swift", "Fearless", "Speak Now", "Red", "1989", "reputation", "Lover", "folklore", "evermore", "Midnights", "THE TORTURED POETS DEPARTMENT"] as const
 
-	const albumCovers = ["Taylor_Swift", "Fearless", "Speak_Now", "Red", "1989", "reputation", "Lover", "folklore", "evermore", "Midnights"] as const
+	const albumCovers = ["Taylor_Swift", "Fearless", "Speak_Now", "Red", "1989", "reputation", "Lover", "folklore", "evermore", "Midnights", 'ttpd'] as const
 
 	const normal = "classics version" as const
 	const hard = "Taylor's Version" as const
@@ -98,7 +98,7 @@ function App() {
 
 	// const [loggedInUser, setLoggedInUser] = useState<number | null>(null)  // user id if logged in 
 
-	const wrongAnswersOnly = ["This is why we can't have nice things", "Would you like closure and know the song", "Is this you trying", "It's you, you're the problem", "Can we tolerate this", "I wish you would get the right answer", "That was not the 1", "you'll have an ephiphany on it later", "Made my tears richochet with that one","You forgot that song existed", "You're losing it", "Death by a thousand wrongs", "False Swiftie", "You're on your own, kid", "Answer...?", "brain Glitch", "I bet you'll think about that", "You did something bad", "Exhiling you", "tis not the damn song", "Shake it off", "That was sweet nothing", "Your answers are ruining my life", "Do you hate it here?", "So long, Leaderboard", "You Can Fix This (No Really, You Can)"]
+	const wrongAnswersOnly = ["This is why we can't have nice things", "Would you like closure and know the song", "Is this you trying", "It's you, you're the problem", "Can we tolerate this", "I wish you would get the right answer", "That was not the 1", "you'll have an ephiphany on it later", "Made my tears richochet with that one","You forgot that song existed", "You're losing it", "Death by a thousand wrongs", "False Swiftie", "You're on your own, kid", "Answer...?", "brain Glitch", "I bet you'll think about that", "You did something bad", "Exhiling you", "tis not the damn song", "Shake it off", "That was sweet nothing", "Your answers are ruining my life", "Do you hate it here?", "So long, Leaderboard", "You Can Fix This (No Really, You Can)", "Move to Florida", "Are we at the gym? Why Am I crying?"]
 
 	useEffect(() => {
 	
@@ -191,15 +191,16 @@ function App() {
 		let lyricsBank: Lyrics[]
 
 		if (level == 'easy'){
-			lyricsBank = lyricsFullDB.filter(x=> x.filler == 0 && x.vault == 0)
-			songBank = songsFullDB.filter(x=> x.vault == 0)
+			lyricsBank = lyricsFullDB.filter(x=> x.filler == 0 && x.vault == 0 && x.album_key != 'TTPD')
+			songBank = songsFullDB.filter(x=> x.vault == 0 && x.album_key != 'TTPD')
 		} else if (level == normal) {
-			lyricsBank = lyricsFullDB.filter(x=> x.filler == 0 && x.vault == 0 && x.title_in_lyric_match < 70)
-			songBank = songsFullDB.filter(x=> x.vault == 0)
+			lyricsBank = lyricsFullDB.filter(x=> x.filler == 0 && x.vault == 0 && x.title_in_lyric_match < 70 && x.album_key != 'TTPD')
+
+			songBank = songsFullDB.filter(x=> x.vault == 0 && x.album_key != 'TTPD')
 		} else if (level == hard) {
 			// hard is all + more recent vault songs but no filler
-			lyricsBank = lyricsFullDB.filter(x=> x.filler == 0 && x.title_in_lyric_match < 70)
-			songBank = songsFullDB
+			lyricsBank = lyricsFullDB.filter(x=> x.filler == 0 && x.title_in_lyric_match < 70 && x.album_key != 'TTPD')
+			songBank = songsFullDB.filter(x=> x.album_key != 'TTPD')
 		} else if (level == expert) {
 			// expert level has vault songs and only filler words lmao
 			lyricsBank = lyricsFullDB.filter(x=> x.filler == 1)
@@ -590,8 +591,8 @@ function App() {
 							{showGameModeQ && <div>								
 								<div>Easy: song title might be in the lyric; no vault songs</div>
 								<div>Classics: lyrics with song title should be removed; no vault songs</div>
-								<div>Hard: vault songs included</div>
-								<div>Cult: vault + a surprise ooohhh good luck</div>
+								<div>Hard: vault songs included (no TTPD yet)</div>
+								<div>Cult: TTPD + vault + a surprise ooohhh good luck</div>
 								<div>the 1: focus on one album, deluxe + vault</div>
 								</div>}
 						</div>
@@ -607,7 +608,7 @@ function App() {
 							</button>)}
 
 							<h2>or Pick an Album</h2>
-							{/* <h2>Test yourself with TTPD!</h2> */}
+							<h2>Test yourself with TTPD!</h2>
 							<h6>Album dropdown will appear when you select "the 1"</h6>
 							{<button 
 								className={`block min-w-full cursor-pointer rounded-t-xl rounded-b-xl p-2 text-center text-md font-bold ${ltErasColors[0]} ${gameMode == 'album' ? '' : 'faded'}`} id={'album'} 

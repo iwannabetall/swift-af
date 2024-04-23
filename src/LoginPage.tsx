@@ -39,7 +39,7 @@ function LoginPage() {
 			
 			})
 			.then(function (response) {
-				console.log('new user', response)
+				// console.log('new user', response)
 				if (response.data == 'account exists') {
 					// show login 
 					setShowSignUp(false)
@@ -82,7 +82,7 @@ function LoginPage() {
 			})
 			.then(function(response) {
 
-				console.log(response)
+				// console.log(response)
 				// redirect back to home page if successfully login
 				if (response.data == 'account dne'){
 					// account does not exist 
@@ -97,7 +97,7 @@ function LoginPage() {
 				}
 
 				else if (response.data.sessId) {
-					console.log(response.data)
+					// console.log(response.data)
 					
 					setCookie('sess', response.data.sessId, {
 						path: '/',
