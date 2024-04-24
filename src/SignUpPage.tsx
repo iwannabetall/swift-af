@@ -25,7 +25,7 @@ function SignUpPage() {
 	const navigate = useNavigate()
 
 
-	function submitUserName(e: FormEvent<HTMLFormElement>){
+	function createAccount(e: FormEvent<HTMLFormElement>){
 		e.preventDefault()
 		
 		if (userEmail.length > 0 && password.length >= 8 && passwordMatch == password) {
@@ -75,7 +75,7 @@ function SignUpPage() {
 
 		if (userEmail.length > 0 && password.length > 7) {
 			// axios.post('http://localhost:3000/login', {
-				axios.post('https://swift-api.fly.dev/login', {			
+			axios.post('https://swift-api.fly.dev/login', {			
 				email: userEmail.trim(),
 				password: password,
 			})
@@ -137,7 +137,20 @@ function SignUpPage() {
 		e.preventDefault()
 
 		if (userEmail.length > 0) {
+			// axios.post('http://localhost:3000/forgotPassword', {
+				axios.post('https://swift-api.fly.dev/forgotPassword', {			
+					email: userEmail.trim(),
+				})
+				.then(function(response) {
 
+					if (response.data == 'sent') {						
+						setLoginMessage('Please click the link in your email to confirm');												
+	
+					}			
+				})
+				.catch(function(error) {
+					console.log(error)
+				})
 		}
 
 	}
@@ -172,7 +185,7 @@ function SignUpPage() {
 				</div>	
 				<p>{loginMessage}</p>
 				{showSignUp && <div>
-					<form className="signup era-1989 cursor-pointer shadow-md rounded px-8 pt-6 pb-6 mb-4 flex items-center justify-center flex-col text-center" onSubmit={(e: FormEvent<HTMLFormElement>) => submitUserName(e)}>
+					<form className="signup era-1989 cursor-pointer shadow-md rounded px-8 pt-6 pb-6 mb-4 flex items-center justify-center flex-col text-center" onSubmit={(e: FormEvent<HTMLFormElement>) => createAccount(e)}>
 						{/* <label htmlFor='username'>Username			
 							<input className="input-form shadow cursor-pointer appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline text-center" type='text' 
 							id='username'
@@ -245,7 +258,7 @@ function SignUpPage() {
 						</input>
 					</label>					
 					{<button className={`${userEmail.length > 0 && password.length > 7 ? '' : 'faded'} era-midnights mt-4 cursor-pointer`}>I remember it all too well</button>}
-					{/* <p className='underline mt-5 mb-0' onClick={()=> setForgotPassword(true)}>Forgot password?</p> */}
+					<p className='underline mt-5 mb-0' onClick={()=> setForgotPassword(true)}>Forgot password?</p>
 				</form>}
 				{alreadyExists && !showSignUp && <div>
 					An account already exists for this email.  Please login. <p className='underline' onClick={()=> setForgotPassword(true)}>Forgot password?</p>

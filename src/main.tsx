@@ -9,6 +9,7 @@ import SignUpPage from './SignUpPage.tsx'
 import UserStats from './UserStats.tsx'
 import LoginPage from './LoginPage.tsx'
 import { CookiesProvider } from 'react-cookie';
+import ResetPassword from './ResetPassword.tsx'
 
 import {
   createBrowserRouter,
@@ -45,6 +46,11 @@ const router = createBrowserRouter([
 	{
     path: "/hi-its-me",
     element: <LoginPage />,
+    errorElement: <ErrorPage />,
+  },
+	{
+    path: "/i-forgot-you-existed/:id",
+    element: <ResetPassword />,
     errorElement: <ErrorPage />,
   },
 
