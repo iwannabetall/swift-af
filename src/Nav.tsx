@@ -23,12 +23,12 @@ function Nav({ location } : {location: {pathname: string}}){
 	const sess_id = cookies.sess
 
 	async function logOut(){
-		axios.post(`http://localhost:3000/logout`, {
-			sess_id: sess_id
-		})
-			// axios.post(`https://swift-api.fly.dev/logout`, {
-				// sess_id: sess_id
-			// })
+		// axios.post(`http://localhost:3000/logout`, {
+		// 	sess_id: sess_id
+		// })
+			axios.post(`https://swift-api.fly.dev/logout`, {
+				sess_id: sess_id
+			})
 			.then(function (response) {
 				console.log('new user', response)
 				
