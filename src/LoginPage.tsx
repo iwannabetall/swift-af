@@ -5,9 +5,12 @@ import { useNavigate } from 'react-router-dom';
 
 import Layout from './Layout.tsx';
 import { useCookies } from 'react-cookie';
+import * as TS from './Constants.tsx'
 
 
 function LoginPage() {
+
+	const URL = TS.config.url
 
 	// const [playerName, setPlayerName] = useState<string>('')
 	const [userEmail, setUserEmail] = useState<string>('')
@@ -30,8 +33,7 @@ function LoginPage() {
 		
 		if (userEmail.length > 0 && password.length >= 8 && passwordMatch == password) {
 	
-			// axios.post('http://localhost:3000/addNewUser', {
-			axios.post('https://swift-api.fly.dev/addNewUser', {			
+			axios.post(`${URL}/addNewUser`, {			
 			email: userEmail.trim(),
 			password: password,
 			date: (new Date).toISOString(),
@@ -74,8 +76,8 @@ function LoginPage() {
 		e.preventDefault()
 
 		if (userEmail.length > 0 && password.length > 7) {
-			// axios.post('http://localhost:3000/login', {
-			axios.post('https://swift-api.fly.dev/login', {			
+
+			axios.post(`${URL}/login`, {			
 				email: userEmail.trim(),
 				password: password,
 			})
@@ -137,20 +139,20 @@ function LoginPage() {
 		e.preventDefault()
 
 		if (userEmail.length > 0) {
-			// axios.post('http://localhost:3000/forgotPassword', {
-				axios.post('https://swift-api.fly.dev/forgotPassword', {			
-					email: userEmail.trim(),
-				})
-				.then(function(response) {
+				
+			axios.post(`${URL}/forgotPassword`, {			
+				email: userEmail.trim(),
+			})
+			.then(function(response) {
 
-					if (response.data == 'sent') {						
-						setLoginMessage('Please click the link in your email to confirm');												
-	
-					}			
-				})
-				.catch(function(error) {
-					console.log(error)
-				})
+				if (response.data == 'sent') {						
+					setLoginMessage('Please click the link in your email to confirm');
+
+				}			
+			})
+			.catch(function(error) {
+				console.log(error)
+			})
 		}
 
 	}

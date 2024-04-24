@@ -5,9 +5,12 @@ import { useNavigate } from 'react-router-dom';
 
 import Layout from './Layout.tsx';
 import { useCookies } from 'react-cookie';
+import * as TS from './Constants.tsx'
 
 
 function SignUpPage() {
+
+	const URL = TS.config.url
 
 	// const [playerName, setPlayerName] = useState<string>('')
 	const [userEmail, setUserEmail] = useState<string>('')
@@ -30,12 +33,11 @@ function SignUpPage() {
 		
 		if (userEmail.length > 0 && password.length >= 8 && passwordMatch == password) {
 	
-			// axios.post('http://localhost:3000/addNewUser', {
-			axios.post('https://swift-api.fly.dev/addNewUser', {			
-			email: userEmail.trim(),
-			password: password,
-			date: (new Date).toISOString(),
-			
+			axios.post(`${URL}/addNewUser`, {				
+				email: userEmail.trim(),
+				password: password,
+				date: (new Date).toISOString(),
+				
 			})
 			.then(function (response) {
 				// console.log('new user', response)
@@ -74,8 +76,8 @@ function SignUpPage() {
 		e.preventDefault()
 
 		if (userEmail.length > 0 && password.length > 7) {
-			// axios.post('http://localhost:3000/login', {
-			axios.post('https://swift-api.fly.dev/login', {			
+			
+			axios.post(`${URL}/login`, {		
 				email: userEmail.trim(),
 				password: password,
 			})
@@ -137,20 +139,20 @@ function SignUpPage() {
 		e.preventDefault()
 
 		if (userEmail.length > 0) {
-			// axios.post('http://localhost:3000/forgotPassword', {
-				axios.post('https://swift-api.fly.dev/forgotPassword', {			
-					email: userEmail.trim(),
-				})
-				.then(function(response) {
+			
+			axios.post(`${URL}/forgotPassword`, {			
+				email: userEmail.trim(),
+			})
+			.then(function(response) {
 
-					if (response.data == 'sent') {						
-						setLoginMessage('Please click the link in your email to confirm');												
-	
-					}			
-				})
-				.catch(function(error) {
-					console.log(error)
-				})
+				if (response.data == 'sent') {						
+					setLoginMessage('Please click the link in your email to confirm');												
+
+				}			
+			})
+			.catch(function(error) {
+				console.log(error)
+			})
 		}
 
 	}
@@ -185,16 +187,7 @@ function SignUpPage() {
 				</div>	
 				<p>{loginMessage}</p>
 				{showSignUp && <div>
-					<form className="signup era-1989 cursor-pointer shadow-md rounded px-8 pt-6 pb-6 mb-4 flex items-center justify-center flex-col text-center" onSubmit={(e: FormEvent<HTMLFormElement>) => createAccount(e)}>
-						{/* <label htmlFor='username'>Username			
-							<input className="input-form shadow cursor-pointer appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline text-center" type='text' 
-							id='username'
-							value={playerName} 
-							placeholder='20 chars max'
-							maxLength={20}
-							onChange={e => setPlayerName(e.target.value)}>
-							</input>				
-						</label> */}
+					<form className="signup era-1989 cursor-pointer shadow-md rounded px-8 pt-6 pb-6 mb-4 flex items-center justify-center flex-col text-center" onSubmit={(e: FormEvent<HTMLFormElement>) => createAccount(e)}>						
 						<label htmlFor='email'>Email
 						<input className="input-form shadow cursor-pointer appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline text-center" type='email' 
 							id='email'

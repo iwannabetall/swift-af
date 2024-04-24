@@ -3,8 +3,11 @@ import axios from 'axios'
 import { useNavigate } from 'react-router-dom';
 
 import Layout from './Layout.tsx';
+import * as TS from './Constants.tsx'
 
 function ResetPassword() {
+
+	const URL = TS.config.url
 
 	// const [playerName, setPlayerName] = useState<string>('')
 	const [userEmail, setUserEmail] = useState<string>('')
@@ -23,8 +26,7 @@ function ResetPassword() {
 		
 		if (userEmail.length > 0 && password.length >= 8 && passwordMatch == password) {
 	
-			// axios.post(`http://localhost:3000/reset/${confirm_id}`, {
-			axios.post(`https://swift-api.fly.dev/reset/${confirm_id}`, {			
+			axios.post(`${URL}/reset/${confirm_id}`, {			
 			email: userEmail.trim(),
 			password: password,			
 			})

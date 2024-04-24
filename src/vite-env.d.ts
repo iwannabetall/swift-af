@@ -2,6 +2,7 @@
 
 declare module 'obscenity';
 
+
 interface Lyrics {
 	id : number;
 	song_full_name: string;

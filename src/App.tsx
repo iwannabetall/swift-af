@@ -17,7 +17,7 @@ import Nav from './Nav.tsx'
 import Leaderboard from './Leaderboard.tsx'
 
 import { useCookies } from 'react-cookie';
-
+import * as TS from './Constants.tsx'
 
 // import {
 //   QueryClient,
@@ -35,20 +35,21 @@ function App() {
 	
 	const min_accuracy = 97.5;
 	const min_correct = 50;
+	const URL = TS.config.url
 
 	const ltErasColors = ['eras_green', 'eras_gold', 'eras_purple', 'eras_lblue', 'eras_pink', 'eras_maroon', 'eras_indigo', 'eras_tan', 'eras_grey', 'eras_black'];
 
-	const albumColorKey = {'Taylor_Swift': 'era-taylor-swift', 'Fearless': 'era-fearless', 'Speak_Now': 'era-speak-now', 'Red': 'era-red', '1989': 'era-1989', 'reputation': 'era-reputation', 'Lover': 'era-lover', 'folklore': 'era-folklore', 'evermore': 'era-evermore', 'Midnights': 'era-midnights', 'TTPD': 'era-ttpd'} as const
+	const albumColorKey = TS.albumColorKey
 
-	const albumKeyLkup = { "Taylor Swift" : "Taylor_Swift", "Fearless" : "Fearless", "Speak Now" : "Speak_Now", 'Red' : 'Red', '1989' : '1989', 'reputation' : 'reputation', 'Lover' : 'Lover', 'folklore' : 'folklore', 'evermore' : 'evermore', 'Midnights' : 'Midnights', 'THE TORTURED POETS DEPARTMENT': 'TTPD'} as const
+	const albumKeyLkup = TS.albumKeyLkup
 
 	const gameModes = [{'key' : 'easy', 'value' : 'this is me trying (easy)'}, {'key' : 'classics version', 'value' : "The Classics (rec'd)"}, {'key' : "Taylor's Version", 'value' : "Taylor's Version (hard)"}, {'key' : 'cult version', 'value' : 'my tears richochet (cult)'}] as const
 
 	// {'key' : 'album', 'value' : 'the 1 (album)'}
 
-	const albums = ["Taylor Swift", "Fearless", "Speak Now", "Red", "1989", "reputation", "Lover", "folklore", "evermore", "Midnights", "THE TORTURED POETS DEPARTMENT"] as const
+	const albums = TS.albums
 
-	const albumCovers = ["Taylor_Swift", "Fearless", "Speak_Now", "Red", "1989", "reputation", "Lover", "folklore", "evermore", "Midnights", 'ttpd'] as const
+	const albumCovers = TS.albumCovers
 
 	const normal = "classics version" as const
 	const hard = "Taylor's Version" as const
@@ -112,8 +113,7 @@ function App() {
 	async function delayedDataFetch() {
 		setIsLoading(true)
 		
-		// Promise.all([axios.get(`http://localhost:3000/getSongs`), axios.get(`http://localhost:3000/getLyrics`), axios.get(`http://localhost:3000/getLeaderboard`)])
-		Promise.all([axios.get(`https://swift-api.fly.dev/getSongs`), axios.get(`https://swift-api.fly.dev/getLyrics`), axios.get(`https://swift-api.fly.dev/getLeaderboard`)])
+		Promise.all([axios.get(`${URL}/getSongs`), axios.get(`${URL}/getLyrics`), axios.get(`${URL}/getLeaderboard`)])
 		.then(([r1, r2, r3]) => {
 
 			console.log('got data')
@@ -290,10 +290,8 @@ function App() {
 			setGameStats([{'time': secondsElapsed, song: song, userResponse: clicked.trim(), correct: 0, album: album, lyric: displayLyric, album_key: albumKey, level: gameMode, lyric_id: displayLyricId, id: gameStats.length + 1, user_id: userCookie.user_id ? userCookie.user_id : null}, ...gameStats])
 		}
 		
-		// save results before resetting
-		// axios.post('http://localhost:3000/saveGameData', {
-			// console.log(gameDate)
-		axios.post('https://swift-api.fly.dev/saveGameData', {
+		// save results before resetting		
+		axios.post(`${URL}/saveGameData`, {
 			level: gameMode,
 			time: secondsElapsed, 
 			lyric: displayLyric,
@@ -470,8 +468,7 @@ function App() {
 			// update local leader data
 			setLeaderboardData(leaderboardFullDB.filter(x=> x.game_mode != 'album'))
 			// update leaderboard/save to database 
-			axios.post('https://swift-api.fly.dev/updateLeaderboard', stats)
-			// axios.post(`http://localhost:3000/updateLeaderboard`, stats)
+			axios.post(`${URL}/updateLeaderboard`, stats)
 			.then(function () {
 				// console.log(response)
 			})
@@ -608,7 +605,7 @@ function App() {
 							</button>)}
 
 							<h2>or Pick an Album</h2>
-							<h2>Test yourself with TTPD!</h2>
+							<h2>Test yourself on TTPD!</h2>
 							<h6>Album dropdown will appear when you select "the 1"</h6>
 							{<button 
 								className={`block min-w-full cursor-pointer rounded-t-xl rounded-b-xl p-2 text-center text-md font-bold ${ltErasColors[0]} ${gameMode == 'album' ? '' : 'faded'}`} id={'album'} 

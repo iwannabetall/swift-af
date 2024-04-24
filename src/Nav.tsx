@@ -1,6 +1,7 @@
 import { useCookies } from 'react-cookie';
 import axios from 'axios'
 import { useNavigate } from 'react-router-dom';
+import * as TS from './Constants.tsx'
 
 
 function Nav({ location } : {location: {pathname: string}}){
@@ -10,6 +11,7 @@ function Nav({ location } : {location: {pathname: string}}){
 	// const size = 24
 	
 	// const paths = [{key: '/', value: 'Home'}, {key: '/leaderboard', value: "This is why we can't have nice things"}] as const; 
+	const URL = TS.config.url
 
 	const paths = [{key: '/', value: 'Home'}, {key: '/leaderboard', value: "Long Live"}, {key: '/dataland', value: "Data, Speak Now"}] as const; 
 
@@ -23,10 +25,8 @@ function Nav({ location } : {location: {pathname: string}}){
 	const sess_id = cookies.sess
 
 	async function logOut(){
-		// axios.post(`http://localhost:3000/logout`, {
-		// 	sess_id: sess_id
-		// })
-			axios.post(`https://swift-api.fly.dev/logout`, {
+
+			axios.post(`${URL}/logout`, {
 				sess_id: sess_id
 			})
 			.then(function (response) {

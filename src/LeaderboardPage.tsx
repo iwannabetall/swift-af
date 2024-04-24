@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import axios from 'axios';
 import moment from 'moment';
 import Layout from './Layout.tsx';
+import * as TS from './Constants.tsx'
 
 let leaderboardFullDB: Leaderboard[] = []
 
@@ -9,10 +10,10 @@ function LeaderboardPage() {
 	
 	const min_accuracy = 97.5;
 	const min_correct = 50;
-	
-	const albumColorKey = {'Taylor_Swift': 'era-taylor-swift', 'Fearless': 'era-fearless', 'Speak_Now': 'era-speak-now', 'Red': 'era-red', '1989': 'era-1989', 'reputation': 'era-reputation', 'Lover': 'era-lover', 'folklore': 'era-folklore', 'evermore': 'era-evermore', 'Midnights': 'era-midnights'} as const
+	const URL = TS.config.url
 
-	const albumKeyLkup = { "Taylor Swift" : "Taylor_Swift", "Fearless" : "Fearless", "Speak Now" : "Speak_Now", 'Red' : 'Red', '1989' : '1989', 'reputation' : 'reputation', 'Lover' : 'Lover', 'folklore' : 'folklore', 'evermore' : 'evermore', 'Midnights' : 'Midnights'} as const
+	const albumColorKey = TS.albumColorKey
+	const albumKeyLkup = TS.albumKeyLkup
 
 	const [leaderboardData, setLeaderboardData] = useState<Leaderboard[]>([])
 
@@ -39,8 +40,8 @@ function LeaderboardPage() {
 	async function delayedDataFetch() {
 		
 		setIsLoading(true)
-		// axios.get(`http://localhost:3000/getLeaderboard`)
-		axios.get(`https://swift-api.fly.dev/getLeaderboard`)
+		
+		axios.get(`${URL}/getLeaderboard`)
 		.then(function (response) {								
 			leaderboardFullDB = response.data.leaderBoard
 			console.log(leaderboardFullDB)

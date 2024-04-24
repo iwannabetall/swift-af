@@ -6,6 +6,7 @@ import Loader from './Loader.tsx';
 import useScreenSize from './useScreenSize.tsx';
 import LyricalVizLegend from './LyricalVizLegend.tsx';
 import Layout from './Layout.tsx';
+import * as TS from './Constants.tsx'
 
 // import moment from 'moment';
 
@@ -17,12 +18,14 @@ var spotify_full_data: SpotifyData[] = []
 
 function Dataland() {	
 
+	const URL = TS.config.url
+
 	// const accuracy_filter = 95;  // for the initial view, have min 95 accuracy;
 	// const ltErasColors = ['eras_green', 'eras_gold', 'eras_purple', 'eras_lblue', 'eras_pink', 'eras_maroon', 'eras_indigo', 'eras_tan', 'eras_grey', 'eras_black'];
 
-	const albumColorKey = {'Taylor_Swift': 'era-taylor-swift', 'Fearless': 'era-fearless', 'Speak_Now': 'era-speak-now', 'Red': 'era-red', '1989': 'era-1989', 'reputation': 'era-reputation', 'Lover': 'era-lover', 'folklore': 'era-folklore', 'evermore': 'era-evermore', 'Midnights': 'era-midnights'} as const
+	const albumColorKey = TS.albumColorKey
 
-	const albumKeyLkup = { "Taylor Swift" : "Taylor_Swift", "Fearless" : "Fearless", "Speak Now" : "Speak_Now", 'Red' : 'Red', '1989' : '1989', 'reputation' : 'reputation', 'Lover' : 'Lover', 'folklore' : 'folklore', 'evermore' : 'evermore', 'Midnights' : 'Midnights'} as const
+	const albumKeyLkup = TS.albumKeyLkup
 
 	const albumCovers = ["imtheproblem", "Taylor_Swift", "Fearless", "Speak_Now", "Red", "1989", "reputation", "Lover", "folklore", "evermore", "Midnights"] as const
 	
@@ -63,15 +66,13 @@ function Dataland() {
 	
 	useEffect(() => {
 
-			// ['http://localhost:3000/getSongs', 'http://localhost:3000/getSpotifyPlays', 'http://localhost:3000/getLyricStats']
-
 		// bc one viz was nested in a setisloading thing, having one loader for multiple async axios reqs was making messing up the useeffect dep array
 
 		setIsLoading(true)	
 
-		Promise.all([fetch('https://swift-api.fly.dev/getSongs'),
-		fetch('https://swift-api.fly.dev/getSpotifyPlays'),
-		fetch(`https://swift-api.fly.dev/getLyricStats`)])
+		Promise.all([fetch(`${URL}/getSongs`),
+		fetch(`${URL}/getSpotifyPlays`),
+		fetch(`${URL}/getLyricStats`)])
 		.then(responses => {
 			// can return a promise from .json() (which takes a response stream and reads it to completion) and chain another then for that return value or await for it to return data
 			return Promise.all(responses.map(res=> res.json()))
@@ -300,8 +301,8 @@ function Dataland() {
 			if (fullLyricsNStats.filter(x=> x.album_key == fighter).length == 0){
 
 				setGettingLyrics(true);
-				// axios.get(`http://localhost:3000/getFullLyricsNStats`, { params:
-				axios.get(`https://swift-api.fly.dev/getFullLyricsNStats`, { params:
+
+				axios.get(`${URL}/getFullLyricsNStats`, { params:
 				{ 'album': fighter }
 				})
 				.then(function (response) {								
