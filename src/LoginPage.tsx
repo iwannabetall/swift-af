@@ -23,7 +23,6 @@ function LoginPage() {
 	const [loginMessage, setLoginMessage] = useState<string>("\u00A0")
 
 	const [cookies, setCookie] = useCookies(['sess']);
-	const [userCookie, setUserCookie] = useCookies(['user_id']);
 	
 	const navigate = useNavigate()
 
@@ -101,12 +100,6 @@ function LoginPage() {
 					// console.log(response.data)
 					
 					setCookie('sess', response.data.sessId, {
-						path: '/',
-						expires: new Date(response.data.expiration),
-						// secure: true
-					})
-
-					setUserCookie('user_id', response.data.user_id, {
 						path: '/',
 						expires: new Date(response.data.expiration),
 						// secure: true

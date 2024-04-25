@@ -18,7 +18,6 @@ function Nav({ location } : {location: {pathname: string}}){
 	const loggedInPaths = [{key: '/', value: 'Home'}, {key: '/me', value: "Me!"}, {key: '/leaderboard', value: "Long Live"}, {key: '/dataland', value: "Dataland"}] as const;
 
 	const [cookies, setCookie, removeCookie] = useCookies(['sess']);
-	const [userCookie, setUserCookie, removeUserCookie] = useCookies(['user_id']);
 
 	const navigate = useNavigate()
 	
@@ -38,9 +37,7 @@ function Nav({ location } : {location: {pathname: string}}){
 			});				
 
 			removeCookie('sess')
-			removeUserCookie('user_id')
 
-			// console.log('removed', cookies.sess, userCookie.user_id)
 			navigate('/')	
 	}
 

@@ -97,7 +97,6 @@ interface GameStats {
 	lyric_id: number;
 	level: string;
 	id: number;
-	user_id: number | null;
 }
  
 interface LyricData {

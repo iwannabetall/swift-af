@@ -95,7 +95,6 @@ function App() {
 	const [displayStats, setDisplayStats] = useState<boolean>(false);
 	const [gameRank, setGameRank] = useState<Leaderboard[]>([])
 	const [cookies] = useCookies(['sess']);
-	const [userCookie] = useCookies(['user_id']);
 
 	// const [loggedInUser, setLoggedInUser] = useState<number | null>(null)  // user id if logged in 
 
@@ -281,13 +280,13 @@ function App() {
 			
 			correct = 1
 
-			setGameStats([{'time': secondsElapsed, song: song, userResponse: clicked.trim(), correct: 1, album: album, lyric: displayLyric, album_key: albumKey, level: gameMode, lyric_id: displayLyricId, id: gameStats.length + 1, user_id: userCookie.user_id ? userCookie.user_id : null}, ...gameStats])
+			setGameStats([{'time': secondsElapsed, song: song, userResponse: clicked.trim(), correct: 1, album: album, lyric: displayLyric, album_key: albumKey, level: gameMode, lyric_id: displayLyricId, id: gameStats.length + 1}, ...gameStats])
 
 		} else {
 			correct = 0
 
 			setResult(wrongAnswersOnly[Math.floor(Math.random() * wrongAnswersOnly.length)])
-			setGameStats([{'time': secondsElapsed, song: song, userResponse: clicked.trim(), correct: 0, album: album, lyric: displayLyric, album_key: albumKey, level: gameMode, lyric_id: displayLyricId, id: gameStats.length + 1, user_id: userCookie.user_id ? userCookie.user_id : null}, ...gameStats])
+			setGameStats([{'time': secondsElapsed, song: song, userResponse: clicked.trim(), correct: 0, album: album, lyric: displayLyric, album_key: albumKey, level: gameMode, lyric_id: displayLyricId, id: gameStats.length + 1}, ...gameStats])
 		}
 		
 		// save results before resetting		
@@ -304,7 +303,7 @@ function App() {
 			albumMode: albumMode,
 			fighter: fighter,
 			id: gameStats.length,
-			user_id: userCookie.user_id ? userCookie.user_id : null
+			sess: cookies.sess ? cookies.sess : null
 		})
 		.then(function () {
 			// console.log(response)
