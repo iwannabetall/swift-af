@@ -74,7 +74,7 @@ function LeaderboardPage() {
 								<div className='text-xl mb-1'>accuracy: {x.correct}/{x.total} ({x.accuracy.toFixed(0)}%)</div>
 							</div>
 							<div className={`text-sm italic`}>{x.game_mode == 'album' ? x.album_mode : x.game_mode}</div>
-							<div className='mt-1'>Can you beat me? swift-af.com</div>
+							<div className='mt-1'>Try and come for my spot: swift-af.com</div>
 							</div>)}
 						</div>
 					}	

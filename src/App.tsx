@@ -39,11 +39,13 @@ function App() {
 
 	const ltErasColors = ['eras_green', 'eras_gold', 'eras_purple', 'eras_lblue', 'eras_pink', 'eras_maroon', 'eras_indigo', 'eras_tan', 'eras_grey', 'eras_black'];
 
+	const albumColorScheme = ['era-taylor-swift', 'era-fearless', 'era-speak-now', 'era-1989', 'era-lover', 'era-red', 'era-folklore', 'era-evermore', 'era-reputation', 'era-midnights']
+
 	const albumColorKey = TS.albumColorKey
 
 	const albumKeyLkup = TS.albumKeyLkup
 
-	const gameModes = [{'key' : 'easy', 'value' : 'this is me trying (easy)'}, {'key' : 'classics version', 'value' : "The Classics (rec'd)"}, {'key' : "Taylor's Version", 'value' : "Taylor's Version (hard)"}, {'key' : 'cult version', 'value' : 'my tears richochet (cult)'}] as const
+	const gameModes = [{'key' : 'easy', 'value' : 'this is me trying (easy)'}, {'key' : 'classics version', 'value' : "The Classics (rec'd)"}, {'key' : 'Tortured Classics', 'value' : "*NEW* The Tortured Classics (challenging)"}, {'key' : "Taylor's Version", 'value' : "Taylor's Version (hard)"}, {'key' : "The Eras", 'value' : "*NEW* The Eras (pro)"}, {'key' : 'cult version', 'value' : 'my tears richochet (cult)'}] as const
 
 	// {'key' : 'album', 'value' : 'the 1 (album)'}
 
@@ -52,7 +54,9 @@ function App() {
 	const albumCovers = TS.albumCovers
 
 	const normal = "classics version" as const
+ 	const challenging = 'Tortured Classics' as const
 	const hard = "Taylor's Version" as const
+	const pro = "The Eras" as const
 	const expert = 'cult version' as const
 
 	// const shareUrl = 'https://swift-af.com/' as const
@@ -102,10 +106,8 @@ function App() {
 
 	useEffect(() => {
 	
-
 		delayedDataFetch()					
-
-		
+	
 	}, [])
 	
 
@@ -162,6 +164,7 @@ function App() {
 
 	useEffect(() => {
 		// need use effect so that the song/lyric db for the diff game types update fast enough
+		// console.log(gameMode)
 		filterLyricsDB(gameMode)
 		// console.log(songList, lyricsDB, gameMode, albumMode)
 
@@ -196,10 +199,20 @@ function App() {
 			lyricsBank = lyricsFullDB.filter(x=> x.filler == 0 && x.vault == 0 && x.title_in_lyric_match < 70 && x.album_key != 'TTPD')
 
 			songBank = songsFullDB.filter(x=> x.vault == 0 && x.album_key != 'TTPD')
+		} else if (level == challenging) {
+			// normal + TTPD 
+			lyricsBank = lyricsFullDB.filter(x=> x.filler == 0 && x.vault == 0 && x.title_in_lyric_match < 70)
+
+			songBank = songsFullDB.filter(x=> x.vault == 0)
+
 		} else if (level == hard) {
 			// hard is all + more recent vault songs but no filler
 			lyricsBank = lyricsFullDB.filter(x=> x.filler == 0 && x.title_in_lyric_match < 70 && x.album_key != 'TTPD')
 			songBank = songsFullDB.filter(x=> x.album_key != 'TTPD')
+		} else if (level == pro) {
+			// pro level = TV + TTPD
+			lyricsBank = lyricsFullDB.filter(x=> x.filler == 0 && x.title_in_lyric_match < 70)
+			songBank = songsFullDB
 		} else if (level == expert) {
 			// expert level has vault songs and only filler words lmao
 			lyricsBank = lyricsFullDB.filter(x=> x.filler == 1)
@@ -445,7 +458,7 @@ function App() {
 		// if (parseFloat(overall) > 3) {	// for testing
 	
 			let currentLeaders = leaderboardFullDB.filter(x=> x.game_mode == gameMode && x.album_mode == albumMode && x.time < avg_time)
-			console.log(gameMode, albumMode, avg_time)
+			// console.log(gameMode, albumMode, avg_time)
 			let rank : number;
 			let id : string | undefined;
 			let id_index : number;
@@ -549,7 +562,7 @@ function App() {
 							<button className='era-midnights mt-4 cursor-pointer'>Hi, it's me.</button>
 						</form>
 
-						<p className='announcement'>NEW: TTPD in album mode!</p>
+						<p className='announcement'>NEW: TTPD in two new game modes + album mode!</p>
 
 						{!cookies.sess && <div className='announcement'> 
 						Want to see yourself trying? <a className='underline font-bold' href='/hi-its-me'>Login</a> or <a className='underline font-bold' href='/rememberme'>Create an account!</a>
@@ -587,7 +600,9 @@ function App() {
 							{showGameModeQ && <div>								
 								<div>Easy: song title might be in the lyric; no vault songs</div>
 								<div>Classics: lyrics with song title should be removed; no vault songs</div>
-								<div>Hard: vault songs included (no TTPD yet)</div>
+								<div>Tortured Classics: Classics + TTPD; no vault</div>
+								<div>TV (Hard): classics + vault songs (no TTPD)</div>
+								<div>Pro: Taylor's version + TTPD</div>
 								<div>Cult: TTPD + vault + a surprise ooohhh good luck</div>
 								<div>the 1: focus on one album, deluxe + vault</div>
 								</div>}
@@ -596,7 +611,7 @@ function App() {
 							<div className="text-center m-4 p-2 text-md">
 							{gameModes.map((x,i)=> 
 							<button key={x.key}
-								className={`block min-w-full cursor-pointer rounded-t-xl rounded-b-xl p-2 text-center text-md font-bold ${ltErasColors[i]} ${gameMode == x.key ? '' : 'faded'}`} id={x.key} 
+								className={`block min-w-full cursor-pointer rounded-t-xl rounded-b-xl p-2 text-center text-md font-bold ${albumColorScheme[i]} ${gameMode == x.key ? '' : 'faded'}`} id={x.key} 
 								onClick={() => {
 									setAlbumMode(''); 
 									setGameMode(x.key);

@@ -15,7 +15,10 @@ function Nav({ location } : {location: {pathname: string}}){
 
 	const paths = [{key: '/', value: 'Home'}, {key: '/leaderboard', value: "Long Live"}, {key: '/dataland', value: "Data, Speak Now"}] as const; 
 
-	const loggedInPaths = [{key: '/', value: 'Home'}, {key: '/me', value: "Me!"}, {key: '/leaderboard', value: "Long Live"}, {key: '/dataland', value: "Dataland"}] as const;
+	// const loggedInPaths = [{key: '/', value: 'Home'}, {key: '/me', value: "Me!"}, {key: '/leaderboard', value: "Long Live"}, {key: '/dataland', value: "Dataland"}] as const;
+
+	const loggedInPaths = [{key: '/', value: 'Home'}, {key: '/leaderboard', value: "Long Live"}, {key: '/dataland', value: "Dataland"}] as const;
+
 
 	const [cookies, setCookie, removeCookie] = useCookies(['sess']);
 

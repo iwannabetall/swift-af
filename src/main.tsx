@@ -6,7 +6,7 @@ import './index.css'
 import ErrorPage from "./error-page.tsx";
 import Dataland from './Dataland.tsx'
 import SignUpPage from './SignUpPage.tsx'
-import UserStats from './UserStats.tsx'
+// import MyStats from './MyStats.tsx'
 import LoginPage from './LoginPage.tsx'
 import { CookiesProvider } from 'react-cookie';
 import ResetPassword from './ResetPassword.tsx'
@@ -33,11 +33,11 @@ const router = createBrowserRouter([
     element: <Dataland />,
     errorElement: <ErrorPage />,
   },
-	{
-    path: "/me",
-    element: <UserStats />,
-    errorElement: <ErrorPage />,
-  },
+	// {
+  //   path: "/me",
+  //   element: <MyStats />,
+  //   errorElement: <ErrorPage />,
+  // },
 	{
     path: "/rememberme",
     element: <SignUpPage />,

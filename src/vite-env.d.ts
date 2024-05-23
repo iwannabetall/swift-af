@@ -47,7 +47,7 @@ type Album = "Taylor Swift" | "Fearless" | "Speak Now" | 'Red' | '1989' | 'reput
 
 type postGameDisplay = "stats" | "leaderboard"
 type filterLeaderboard = 'all' | 'album'
-type game_mode = 'easy' | 'classics version' | "Taylor's Version" | 'cult version' | 'album' 
+type game_mode = 'easy' | 'classics version' | 'Tortured Classics' | "Taylor's Version" | "The Eras" | 'cult version' | 'album' 
 
 interface SongList {
 	song: string;
@@ -97,8 +97,49 @@ interface GameStats {
 	lyric_id: number;
 	level: string;
 	id: number;
+
+	
 }
- 
+
+
+interface GameResults {
+	time: number; 
+	song: string;
+	album_key: AlbumKey;
+	album: string;
+	correct: number;
+	lyric: string;
+	lyric_id: number;
+	game_mode: string;
+	album_mode: string;
+	level: string;
+	game_date: string;
+	date: string;
+	game_id: string;	
+}
+
+interface AggGameStats {
+	time: number | string; 
+	song: string;
+	album_key: AlbumKey;
+	album: string;
+	correct: number;
+	accuracy: number;
+	lyric: string;
+	// lyric_id: number;
+	game_date: string;
+	date: string;
+	game_mode: string;
+	album_mode: string;
+	game_id?: string;
+	total?: number;
+	play_count?:number;
+	game_mode?: string;
+	correct_time? : number;
+	wrong_time? : number;
+}
+
+
 interface LyricData {
 	album: string;
 	album_key: AlbumKey;
