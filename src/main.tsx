@@ -6,7 +6,7 @@ import './index.css'
 import ErrorPage from "./error-page.tsx";
 import Dataland from './Dataland.tsx'
 import SignUpPage from './SignUpPage.tsx'
-// import MyStats from './MyStats.tsx'
+import MyStats from './MyStats.tsx'
 import LoginPage from './LoginPage.tsx'
 import { CookiesProvider } from 'react-cookie';
 import ResetPassword from './ResetPassword.tsx'
@@ -16,6 +16,9 @@ import {
   RouterProvider,
 } from "react-router-dom";
 
+import { QueryClient, QueryClientProvider, useQuery } from "@tanstack/react-query"
+
+const queryClient = new QueryClient()
 
 const router = createBrowserRouter([
 	{
@@ -33,11 +36,11 @@ const router = createBrowserRouter([
     element: <Dataland />,
     errorElement: <ErrorPage />,
   },
-	// {
-  //   path: "/me",
-  //   element: <MyStats />,
-  //   errorElement: <ErrorPage />,
-  // },
+	{
+    path: "/me",
+    element: <MyStats />,
+    errorElement: <ErrorPage />,
+  },
 	{
     path: "/rememberme",
     element: <SignUpPage />,
@@ -65,7 +68,9 @@ const router = createBrowserRouter([
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
 		<CookiesProvider>			
+			<QueryClientProvider client={queryClient}>
 		 <RouterProvider router={router} />
+		 </QueryClientProvider>
 		</CookiesProvider>
     {/* <App /> */}
   </React.StrictMode>,

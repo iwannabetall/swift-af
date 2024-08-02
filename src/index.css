@@ -569,6 +569,15 @@ div.tooltip {
 	font-size: var(--font-size-D);
 }
 
+.era-midnights-lighter{
+	fill: hsl(223,32.6%,36.1%);
+	background-color: hsl(223,32.6%,36.1%);
+}
+
+.era-ttpd-lighter {
+	fill: hsl(28,7.6%,38.6%);
+	background-color: hsl(28,7.6%,38.6%);
+}
 
 .era-midnights {
 	fill: var(--era-midnights);
@@ -881,7 +890,7 @@ div.tooltip {
 		max-width: 360px;
 	}
 
-	#lyricalViz, #top40Viz, #bottom40Viz, #top40VizAns, #bottom40VizAns, #cultTop40VizAns, #cultTop40Viz, #spotifyscatter, .spotify, .spotifyscatter-wrapper {
+	#lyricalViz, #top40Viz, #bottom40Viz, #top40VizAns, #bottom40VizAns, #cultTop40VizAns, #cultTop40Viz, #spotifyscatter, .spotify, .spotifyscatter-wrapper, .yourgames {
 		width:370px
 	}
 
@@ -931,7 +940,7 @@ div.tooltip {
 		max-width: 310px;
 	}
 
-	#lyricalViz, #top40Viz, #bottom40Viz, #top40VizAns, #bottom40VizAns, #cultTop40VizAns, #cultTop40Viz, #spotifyscatter, .spotify, .spotifyscatter-wrapper {
+	#lyricalViz, #top40Viz, #bottom40Viz, #top40VizAns, #bottom40VizAns, #cultTop40VizAns, #cultTop40Viz, #spotifyscatter, .spotify, .spotifyscatter-wrapper, .yourgames {
 		width: 316px;
 	}
 
