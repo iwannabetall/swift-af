@@ -19,3 +19,46 @@ export async function getLeaderboard() : Promise<Leaderboard[]> {
   return response.data.leaderBoard
 }
 
+export async function getLyricStats(): Promise<LyricData[]> {
+
+	const URL = `${BASE_URL}/getLyricStats`
+  const response = await axios.get(URL);
+
+  return response.data.lyricStats
+
+}
+
+export async function getFullLyricsNStats(album: string): Promise<LyricData[]> {
+
+	if (album == 'imthefighter') {
+		return []
+	} else {
+		const URL = `${BASE_URL}/getFullLyricsNStats`
+		const response = await axios.get(URL, { params:
+			{ 'album': album }
+			});
+		
+		return response.data.fullLyricsNStats
+	}
+	
+
+}
+
+
+export async function getSongs(): Promise<SongList[]> {
+
+	const URL = `${BASE_URL}/getSongs`
+  const response = await axios.get(URL);
+
+  return response.data.songList
+
+}
+
+export async function getSpotifyPlays(): Promise<SpotifyData[]> {
+
+	const URL = `${BASE_URL}/getSpotifyPlays`
+  const response = await axios.get(URL);
+
+  return response.data.spotify_plays
+
+}

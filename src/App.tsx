@@ -219,6 +219,8 @@ function App() {
 			songBank = songsFullDB
 		} else {
 			// filter by album 
+
+			console.log(lyricsFullDB)
 			lyricsBank = lyricsFullDB.filter(x=> x.album == albumMode && x.filler == 0 && x.title_in_lyric_match < 70)
 			songBank = songsFullDB.filter(x=> x.album == albumMode)
 		}

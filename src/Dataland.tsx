@@ -7,13 +7,10 @@ import useScreenSize from './useScreenSize.tsx';
 import LyricalVizLegend from './LyricalVizLegend.tsx';
 import Layout from './Layout.tsx';
 import * as TS from './Constants.tsx'
+import { getFullLyricsNStats, getLyricStats, getSongs, getSpotifyPlays } from './api.ts';
+import { useQuery } from "@tanstack/react-query";
 
-// import moment from 'moment';
 
-var lyricStats: LyricData[] = []   //unique list of lyrics w/speed/accuracy stats
-
-var fullLyricsNStats: LyricData[] = []  // lyrics for a song with accuracy/speed but not unique list of lyrics 
-var songsFullDB: SongList[] = [] // all songs 
 var spotify_full_data: SpotifyData[] = []
 
 function Dataland() {	
@@ -27,7 +24,7 @@ function Dataland() {
 
 	const albumKeyLkup = TS.albumKeyLkup
 
-	const albumCovers = ["imtheproblem", "Taylor_Swift", "Fearless", "Speak_Now", "Red", "1989", "reputation", "Lover", "folklore", "evermore", "Midnights"] as const
+	const albumCovers = ["imtheproblem", "Taylor_Swift", "Fearless", "Speak_Now", "Red", "1989", "reputation", "Lover", "folklore", "evermore", "Midnights", "TTPD"] as const
 	
 	const cultTitle = "The OH-ment I Knew" as const
 
@@ -44,15 +41,15 @@ function Dataland() {
 	const [albumFilter, setAlbumFilter] = useState<AlbumArt>('imtheproblem')
 	const [songFilter, setSongFilter] = useState<string>('')
 	const [displayLyrics, setDisplayLyrics] = useState<LyricData[]>([])
-	const [isLoading, setIsLoading] = useState<boolean>(false)
 
 	const [songList, setSongList] = useState<SongList[]>([])
 	const [gettingLyrics, setGettingLyrics] = useState<boolean>(false)
-	const [top40, setTop40] = useState<LyricData[]>([])
 	const [showTop40, setShowTop40] = useState<boolean>(true)
-	const [spotifyData, setSpotifyData] = useState<SpotifyData[]>([])
+	// const [spotifyData, setSpotifyData] = useState<SpotifyData[]>([])
 	const [scatterHighlight, setScatterHighlight] = useState<AlbumArt>('imtheproblem')	
 	const screenSize = useScreenSize()
+
+	const [useBrush, setUseBrush] = useState<boolean>(false)
 
 
 	function formatBigNumber(num: number) {
@@ -63,41 +60,59 @@ function Dataland() {
 			return (num/1000).toFixed(1) + 'Bn'; // convert to M for number from > 1 B 
 		}
 	}
+
+	// pull data w/usequery -- like use effect and state all in one
 	
-	useEffect(() => {
+	const { data: songDataFull, isPending: pendingSongs, error: songError} = useQuery({
+			queryKey: ['getSongs'], 
+				queryFn: () => getSongs(),
+			})
 
-		// bc one viz was nested in a setisloading thing, having one loader for multiple async axios reqs was making messing up the useeffect dep array
-
-		setIsLoading(true)	
-
-		Promise.all([fetch(`${URL}/getSongs`),
-		fetch(`${URL}/getSpotifyPlays`),
-		fetch(`${URL}/getLyricStats`)])
-		.then(responses => {
-			// can return a promise from .json() (which takes a response stream and reads it to completion) and chain another then for that return value or await for it to return data
-			return Promise.all(responses.map(res=> res.json()))
-					
-		})
-		.then(([r1, r2, r3])=> {
-			songsFullDB = r1.songList
-			// console.log(r2.spotify_plays, r3.lyricStats)
-			spotify_full_data = r2.spotify_plays
-			setSpotifyData(spotify_full_data)
-
-			lyricStats = r3.lyricStats
-			setTop40(lyricStats.filter(x => x.total >= 25 && x.accuracy >= 96).slice(0, 40))
-
-			setIsLoading(false)
-		})
-		.catch(error => {
-			console.log(error);
-		});
+	const songsFullDB = songDataFull || []
 	
-	}, [])
+	const { data: spotifyDataFull, isPending: pendingSpotify, error: spotifyError } =	useQuery({
+			queryKey: ['getSpotifyPlays'], 
+			queryFn: () => getSpotifyPlays(),
+		})
 
+	let spotifyData = spotifyDataFull || []
+
+	console.log('spotifyData', spotifyData)
+	//unique list of lyrics w/speed/accuracy stats
+	const { data: lyricStatsFull, isPending: pendingLyrics, error: lyricsError} =	useQuery({
+			queryKey: ['getLyricStats'], 
+			queryFn: () => getLyricStats(),
+		})
+
+	const lyricStats = lyricStatsFull || []
+
+	const top40 = lyricStats.filter(x => x.total >= 25 && x.accuracy >= 96).slice(0, 40)
+	
+	// lyrics for a song with accuracy/speed but not unique list of lyrics 
+	const { data: fullLyricsNStatsDB, isPending: pendingLyricsNStats, error: lyricsNStatsError } = useQuery({
+		queryKey: ['fullLyricsNStats', fighter],
+		queryFn: () => getFullLyricsNStats(fighter),
+	})
+
+	let fullLyricsNStats = fullLyricsNStatsDB || []
+
+	useEffect(()=> {
+		// for the display of lyrical accuracy by album/song, need to filter the data after but avoid infinite renders
+		if (fullLyricsNStats && songsFullDB && albumFilter != 'imtheproblem'){
+			let first_track = songsFullDB.filter(s=> s.album_key == albumFilter)[0].song
+			setSongFilter(first_track)
+			setDisplayLyrics(fullLyricsNStats.filter(s=> s.song == first_track))
+		}
+		// dont have song filter as a dependecy or itll never show a diff song 
+	}, [albumFilter, pendingLyricsNStats, pendingSongs])
+
+			
+	
 
 	// SPOTIFY VIZ VS ACCURACY SCATTERPLOT
 	useEffect(()=> {
+
+		console.log(pendingSpotify, spotifyData)
 		d3.selectAll('.spotify').remove()
 
 		// spotify - accuracy scatter plot
@@ -138,14 +153,20 @@ function Dataland() {
 			d3.selectAll('.tooltip').remove()
 			
 			if (selection) {
+				// HELP
+				setUseBrush(!useBrush)
 				const [[x0, y0], [x1, y1]] = selection;			
 				// console.log(selection)					
 
-				let selectedData = spotify_full_data.filter(x=> x.song_accuracy >= xInvScale(x0) && x.song_accuracy <= xInvScale(x1) && x.historical_counts <= yInvScale(y0) && x.historical_counts >= yInvScale(y1))
+				let selectedData = spotifyData.filter(x=> x.song_accuracy >= xInvScale(x0) && x.song_accuracy <= xInvScale(x1) && x.historical_counts <= yInvScale(y0) && x.historical_counts >= yInvScale(y1))
 
 				if (selectedData.length > 0) {
 					// // y1 is further up (larger than y0)
-					setSpotifyData(spotify_full_data.filter(x=> x.song_accuracy >= xInvScale(x0) && x.song_accuracy <= xInvScale(x1) && x.historical_counts <= yInvScale(y0) && x.historical_counts >= yInvScale(y1)))
+					console.log(selectedData, 'why isnt this running')
+
+					spotifyData = spotifyData.filter(x=> x.song_accuracy >= xInvScale(x0) && x.song_accuracy <= xInvScale(x1) && x.historical_counts <= yInvScale(y0) && x.historical_counts >= yInvScale(y1))
+
+					console.log('spotifyData', spotifyData)
 				}
 									
 			}
@@ -156,7 +177,9 @@ function Dataland() {
 		scatter.append('g').attr('class', 'brush')
 			.call(brush)
 			.on("dblclick", function() {
-				setSpotifyData(spotify_full_data)})		
+				// HELP
+				spotifyData = spotifyDataFull || []			
+			})		
 
 		let spotify = scatter.selectAll<SVGCircleElement, SpotifyData>('circle').data(spotifyData, function(d: SpotifyData) {
 			return d.song
@@ -288,54 +311,9 @@ function Dataland() {
 			)
 		
 				
-	}, [showTop40, spotifyData, scatterHighlight])
+	}, [showTop40, spotifyData, pendingSpotify, scatterHighlight])
 	
-// GET ALBUM DATA
-	useEffect(()=> {
 
-		// get lyrical stats data either from db or from array we already have
-		if (fighter == 'imtheproblem'){
-			setShowTop40(true)
-		} else {
-			// dont have data for particular album, pull from db
-			if (fullLyricsNStats.filter(x=> x.album_key == fighter).length == 0){
-
-				setGettingLyrics(true);
-
-				axios.get(`${URL}/getFullLyricsNStats`, { params:
-				{ 'album': fighter }
-				})
-				.then(function (response) {								
-					fullLyricsNStats = fullLyricsNStats.concat(response.data.fullLyricsNStats)
-					// setSongFilter('Anti-Hero')
-					console.log('fullLyricsNStats', fullLyricsNStats)
-					console.log('avg', d3.rollups(fullLyricsNStats, v => d3.mean(v, d => d.time), d=> d.album, d => d.song))
-
-					if (songsFullDB.length > 0) {
-						let first_track = songsFullDB.filter(s=> s.album_key == albumFilter)[0].song
-						setSongFilter(first_track)
-						setDisplayLyrics(fullLyricsNStats.filter(s=> s.song == first_track))
-					}
-	
-					setGettingLyrics(false);
-				})
-				.catch(function (error) {	
-					console.log(error);
-				});	
-			}
-			else {
-				// filter lyrics for album 
-				console.log('already have lyrics for ', fighter)
-				if (songsFullDB.length > 0) {
-					let first_track = songsFullDB.filter(s=> s.album_key == albumFilter)[0].song
-					setSongFilter(first_track)
-					setDisplayLyrics(fullLyricsNStats.filter(s=> s.song == first_track))
-				}
-			}
-
-		}
-		
-	}, [fighter])
 
 	// TOP/BOTTOM/CULT 40 VIZ
 	useEffect(() => {
@@ -570,8 +548,13 @@ function Dataland() {
 	function changeViz(cover: AlbumArt){
 		d3.selectAll('.lyrics').remove()
 
+		if (cover == 'imtheproblem'){			
+			setShowTop40(true)
+		} else {
+			setShowTop40(false)
+		}
 		setDisplayLyrics([])
-		setShowTop40(false)
+		console.log(cover)
 		setFighter(cover);	 
 		setAlbumFilter(cover);							
 		setSongList(songsFullDB.filter(s=> s.album_key == cover))				
@@ -581,8 +564,7 @@ function Dataland() {
 
 	return (
 		<>			
-			<Layout isLoading={isLoading}>
-						
+			<Layout isLoading={(pendingLyrics)}>
 				<div>
 					<div className='flex flex-row flex-wrap justify-center' ref={newSongRef}>					
 					{albumCovers.map(x=> <img src={`/icons/${x}.jpg`} key={x} className ={`albums ${fighter != x ? 'faded' : fighter == x ? 'selected' : ''}`} onClick={()=> {
@@ -591,18 +573,19 @@ function Dataland() {
 					</div>	
 				</div>
 
-				{<div className='ml-4 mr-4'>					
-						{gettingLyrics && <Loader/>}						
+				{<div className='ml-4 mr-4'>			
+						{/* loader for pulling lyrics for album data viz */}
+						{(pendingLyricsNStats && !showTop40) && <Loader/>}						
 				</div>}
 						
 				{/* legend for album on desktop */}
-				{!gettingLyrics && !showTop40 && displayLyrics && 
+				{!pendingLyricsNStats && !showTop40 && displayLyrics && 
 				screenSize.width >= 828 && <LyricalVizLegend fighter={fighter}/>
 				}			
 
 				{/* lyrics data viz by song  */}
 				<div className='flex flex-row flex-wrap justify-center'>
-					{!gettingLyrics && !showTop40 && displayLyrics && <div>
+					{!pendingLyricsNStats && !showTop40 && displayLyrics && <div>
 						{songList.map((x)=> 
 						<div onClick={() => { 
 							setSongFilter(x.song);
@@ -621,7 +604,7 @@ function Dataland() {
 							>{x.song}</div>)}
 					</div>}	
 
-					{!gettingLyrics && !showTop40 && displayLyrics && 
+					{!showTop40 && displayLyrics && 
 					screenSize.width < 828 && <LyricalVizLegend fighter={fighter}/>
 					}							
 					
@@ -633,7 +616,7 @@ function Dataland() {
 							onClick={()=> window.scrollTo({top: cultSuccessRef.current ? cultSuccessRef.current?.offsetTop - 95 : 0, behavior: 'smooth'})}> {cultTitle}</span> | <span className='cursor-pointer font-bold '
 							onClick={()=> window.scrollTo({top: cultFailRef.current ? cultFailRef.current?.offsetTop - 95 : 0, behavior: 'smooth'})}>We Forgot That These Existed</span> </p> </div>							
 						{/* <h2 ref={top40Ref}>Long Live the Swiftest Top 40</h2> */}
-						<h2 ref={top40Ref}>Marry Me, Juliet, I made the Swiftest Top 40</h2>
+						<h2 ref={top40Ref}>It's me, hi, Taylor Swift. I made the Swiftest Top 40</h2>
 						<h5>Most quickly identified lyrics with 96+% accuracy–do you recognize all of them? </h5>
 						<h6>Hover over the lyric to reveal the song! </h6>						
 
@@ -705,7 +688,7 @@ function Dataland() {
 
 					</div>}
 
-					{!showTop40 && !gettingLyrics && <div>
+					{!showTop40 && !pendingLyricsNStats && <div>
 						<div id='lyricalViz' ref={scrollRef}></div>
 						<div className='flex flex-row flex-wrap justify-center mx-auto m-2 text-center'><p><span className='font-bold cursor-pointer'
 							onClick={()=> window.scrollTo({top: newSongRef.current ? newSongRef.current?.offsetTop - 20: 0, behavior: 'smooth'})}> Jump to top for another song! </span> </p> </div>	

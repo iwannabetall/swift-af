@@ -254,6 +254,33 @@ div.tooltip {
 	color: var(--era-ttpd-text);	
 }
 
+.era-ttpd-gradeA, .era-ttpd-gradeAplus {
+	fill: var(--era-ttpd);
+	background-color: var(--era-ttpd);
+	color: var(--era-ttpd-text);
+	font-size: var(--font-size-A);
+}
+
+.era-ttpd-gradeB {
+	fill: var(--era-ttpd);
+	background-color: hsla(25,7.5%,31.4%);;
+	color: var(--era-ttpd-text);
+}
+
+.era-ttpd-gradeC {
+	fill: var(--era-ttpd);
+	background-color: hsla(25,7.5%,31.4%, 0.8);
+	color: var(--era-ttpd-text);
+}
+
+.era-ttpd-gradeD, .era-ttpd-gradeF {
+	fill: var(--era-ttpd);
+	background-color: hsla(25,7.5%,31.4%, 0.6);
+	color: var(--era-ttpd);
+}
+
+
+
 .era-taylor-swift-gradeA, .era-taylor-swift-gradeAplus {
 	fill: var(--era-taylor-swift);
 	background-color: hsl(120,25.4%,60.6%);
