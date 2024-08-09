@@ -75,9 +75,9 @@ function Dataland() {
 			queryFn: () => getSpotifyPlays(),
 		})
 
-	let spotifyData = spotifyDataFull || []
+	// don't modify usequery directly bc it's state.  make a shallow copy and then modify that
+	let spotifyData = [...spotifyDataFull || []]
 
-	console.log('spotifyData', spotifyData)
 	//unique list of lyrics w/speed/accuracy stats
 	const { data: lyricStatsFull, isPending: pendingLyrics, error: lyricsError} =	useQuery({
 			queryKey: ['getLyricStats'], 
@@ -112,6 +112,11 @@ function Dataland() {
 	// SPOTIFY VIZ VS ACCURACY SCATTERPLOT
 	useEffect(()=> {
 
+		if (spotifyData.length === 0) {
+			return
+		}
+
+		console.log(showTop40, 'showTop40   ')
 		console.log(pendingSpotify, spotifyData)
 		d3.selectAll('.spotify').remove()
 
@@ -145,6 +150,8 @@ function Dataland() {
 			.attr('height', h)
 			.attr('width', w)
 			.attr("viewBox", `0 0 ${h} ${w}`)	
+
+		console.log('scatter', scatter)
 		
 		const brush = d3.brush().on("end", ({selection}) => {
 
@@ -158,15 +165,14 @@ function Dataland() {
 				const [[x0, y0], [x1, y1]] = selection;			
 				// console.log(selection)					
 
-				let selectedData = spotifyData.filter(x=> x.song_accuracy >= xInvScale(x0) && x.song_accuracy <= xInvScale(x1) && x.historical_counts <= yInvScale(y0) && x.historical_counts >= yInvScale(y1))
+				let selectedData = spotifyDataFull?.filter(x=> x.song_accuracy >= xInvScale(x0) && x.song_accuracy <= xInvScale(x1) && x.historical_counts <= yInvScale(y0) && x.historical_counts >= yInvScale(y1))
 
-				if (selectedData.length > 0) {
+				if ((selectedData || []).length > 0) {
 					// // y1 is further up (larger than y0)
 					console.log(selectedData, 'why isnt this running')
 
-					spotifyData = spotifyData.filter(x=> x.song_accuracy >= xInvScale(x0) && x.song_accuracy <= xInvScale(x1) && x.historical_counts <= yInvScale(y0) && x.historical_counts >= yInvScale(y1))
+					spotifyData = spotifyDataFull?.filter(x=> x.song_accuracy >= xInvScale(x0) && x.song_accuracy <= xInvScale(x1) && x.historical_counts <= yInvScale(y0) && x.historical_counts >= yInvScale(y1))
 
-					console.log('spotifyData', spotifyData)
 				}
 									
 			}
@@ -178,7 +184,7 @@ function Dataland() {
 			.call(brush)
 			.on("dblclick", function() {
 				// HELP
-				spotifyData = spotifyDataFull || []			
+				// spotifyData = spotifyDataFull || []			
 			})		
 
 		let spotify = scatter.selectAll<SVGCircleElement, SpotifyData>('circle').data(spotifyData, function(d: SpotifyData) {
