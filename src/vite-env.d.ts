@@ -21,7 +21,12 @@ interface Lyrics {
 	orig_lyric_id?: number;
 }
 
-
+interface BrushRange {
+	x0: number | undefined;
+	x1: number | undefined;
+	y0: number | undefined;
+	y1: number | undefined;
+}
 
 // interface albumColorKey {
 // 	'Taylor_Swift': string;

@@ -1,5 +1,5 @@
 // import { useState, useEffect, MouseEvent } from 'react'
-import { useState, useEffect, useRef } from 'react'
+import { useCallback, useMemo, useState, useEffect, useRef } from 'react'
 import axios from 'axios';
 import * as d3 from 'd3';
 import Loader from './Loader.tsx';
@@ -50,7 +50,19 @@ function Dataland() {
 	const screenSize = useScreenSize()
 
 	const [useBrush, setUseBrush] = useState<boolean>(false)
+	const [brushRange, setBrushRange] = useState<BrushRange>({x0: undefined, y0: undefined, x1: undefined, y1: undefined})
 
+
+	const h = screenSize.width > 420 ? 600 : 460
+	const w = screenSize.width > 420 ? 600 : 420
+	const fontSize = screenSize.width > 420 ? '20px' : '18px'
+	const margin = 30
+	const marginBottom = 45
+	const marginTop = 36
+	const marginLeft = 60
+	const marginRight = 15
+	
+	
 
 	function formatBigNumber(num: number) {
 		// already in millions 
@@ -64,24 +76,46 @@ function Dataland() {
 	// pull data w/usequery -- like use effect and state all in one
 	
 	const { data: songDataFull, isPending: pendingSongs, error: songError} = useQuery({
-			queryKey: ['getSongs'], 
+				queryKey: ['getSongs'], 
 				queryFn: () => getSongs(),
 			})
 
 	const songsFullDB = songDataFull || []
 	
-	const { data: spotifyDataFull, isPending: pendingSpotify, error: spotifyError } =	useQuery({
+	// const pendingSpotify = false
+	// let spotifyDataFull = []
+
+	const { data: spotifyDataFull, isPending: pendingSpotify, error: spotifyError } = useQuery({
 			queryKey: ['getSpotifyPlays'], 
-			queryFn: () => getSpotifyPlays(),
+			select: (data) => {
+
+				let xInvScale = d3.scaleLinear().domain([marginLeft, w - marginRight]).range([Math.min(...data.map(x=> x.song_accuracy)), Math.max(...data.map(x=> x.song_accuracy))])					
+				
+				let yInvScale = d3.scaleLinear().domain([marginTop, h - marginBottom]).range([Math.max(...data.map(x=> x.historical_counts)), Math.min(...data.map(x=> x.historical_counts))])
+
+				return brushRange.x0 ? data.filter(x=> x.song_accuracy >= xInvScale(brushRange.x0 || 0) && x.song_accuracy <= xInvScale(brushRange.x1 || 0) && x.historical_counts <= yInvScale(brushRange.y0 || 0) && x.historical_counts >= yInvScale(brushRange.y1 || 0)) : data
+
+			},
+			queryFn: () => getSpotifyPlays(), 
+			staleTime: 1000 * 3600 * 24, // 1 day
 		})
 
-	// don't modify usequery directly bc it's state.  make a shallow copy and then modify that
-	let spotifyData = [...spotifyDataFull || []]
+	const spotifyData = spotifyDataFull || []
+
+	let xScale = d3.scaleLinear().domain([Math.min(...spotifyData.map(x=> x.song_accuracy)), Math.max(...spotifyData.map(x=> x.song_accuracy))]).range([marginLeft, w - marginRight])
+
+	let yScale = d3.scaleLinear().domain([Math.max(...spotifyData.map(x=> x.historical_counts)), Math.min(...spotifyData.map(x=> x.historical_counts))]).range([marginTop, h - marginBottom])
+
+	let xInvScale = d3.scaleLinear().domain([marginLeft, w - marginRight]).range([Math.min(...spotifyData.map(x=> x.song_accuracy)), Math.max(...spotifyData.map(x=> x.song_accuracy))])					
+			
+	let yInvScale = d3.scaleLinear().domain([marginTop, h - marginBottom]).range([Math.max(...spotifyData.map(x=> x.historical_counts)), Math.min(...spotifyData.map(x=> x.historical_counts))])
+
 
 	//unique list of lyrics w/speed/accuracy stats
 	const { data: lyricStatsFull, isPending: pendingLyrics, error: lyricsError} =	useQuery({
 			queryKey: ['getLyricStats'], 
 			queryFn: () => getLyricStats(),
+			staleTime: 1000 * 3600 * 24, // 1 day
 		})
 
 	const lyricStats = lyricStatsFull || []
@@ -92,6 +126,7 @@ function Dataland() {
 	const { data: fullLyricsNStatsDB, isPending: pendingLyricsNStats, error: lyricsNStatsError } = useQuery({
 		queryKey: ['fullLyricsNStats', fighter],
 		queryFn: () => getFullLyricsNStats(fighter),
+		staleTime: 1000 * 3600 * 24, // 1 day
 	})
 
 	let fullLyricsNStats = fullLyricsNStatsDB || []
@@ -111,12 +146,11 @@ function Dataland() {
 
 	// SPOTIFY VIZ VS ACCURACY SCATTERPLOT
 	useEffect(()=> {
+		
+		// if (spotifyData.length === 0) {
+		// 	return
+		// }
 
-		if (spotifyData.length === 0) {
-			return
-		}
-
-		console.log(showTop40, 'showTop40   ')
 		console.log(pendingSpotify, spotifyData)
 		d3.selectAll('.spotify').remove()
 
@@ -124,25 +158,7 @@ function Dataland() {
 		// const t = d3.transition()
 		// 	.duration(1500)
 		// 	.delay((_, i) => i * 500)
-		// 	.ease(d3.easeBounceOut);		
-
-		const h = screenSize.width > 420 ? 600 : 460
-		const w = screenSize.width > 420 ? 600 : 420
-		const fontSize = screenSize.width > 420 ? '20px' : '18px'
-		const margin = 30
-		const marginBottom = 45
-		const marginTop = 36
-		const marginLeft = 60
-		const marginRight = 15
-		
-		let xScale = d3.scaleLinear().domain([Math.min(...spotifyData.map(x=> x.song_accuracy)), Math.max(...spotifyData.map(x=> x.song_accuracy))]).range([marginLeft, w - marginRight])
-
-		let yScale = d3.scaleLinear().domain([Math.max(...spotifyData.map(x=> x.historical_counts)), Math.min(...spotifyData.map(x=> x.historical_counts))]).range([marginTop, h - marginBottom])
-
-
-		let xInvScale = d3.scaleLinear().domain([marginLeft, w - marginRight]).range([Math.min(...spotifyData.map(x=> x.song_accuracy)), Math.max(...spotifyData.map(x=> x.song_accuracy))])					
-				
-		let yInvScale = d3.scaleLinear().domain([marginTop, h - marginBottom]).range([Math.max(...spotifyData.map(x=> x.historical_counts)), Math.min(...spotifyData.map(x=> x.historical_counts))])
+		// 	.ease(d3.easeBounceOut);	
 	
 	
 		let scatter = d3.select("#spotifyscatter").append('svg')
@@ -160,18 +176,14 @@ function Dataland() {
 			d3.selectAll('.tooltip').remove()
 			
 			if (selection) {
-				// HELP
-				setUseBrush(!useBrush)
 				const [[x0, y0], [x1, y1]] = selection;			
-				// console.log(selection)					
 
-				let selectedData = spotifyDataFull?.filter(x=> x.song_accuracy >= xInvScale(x0) && x.song_accuracy <= xInvScale(x1) && x.historical_counts <= yInvScale(y0) && x.historical_counts >= yInvScale(y1))
+				let selectedData = spotifyDataFull?.filter(x=> x.song_accuracy >= xInvScale(x0) && x.song_accuracy <= xInvScale(x1) && x.historical_counts <= yInvScale(y0) && x.historical_counts >= yInvScale(y1)) || []
 
-				if ((selectedData || []).length > 0) {
+				if (selectedData.length > 0) {
+					setBrushRange({x0: x0, y0: y0, x1: x1, y1: y1})
 					// // y1 is further up (larger than y0)
 					console.log(selectedData, 'why isnt this running')
-
-					spotifyData = spotifyDataFull?.filter(x=> x.song_accuracy >= xInvScale(x0) && x.song_accuracy <= xInvScale(x1) && x.historical_counts <= yInvScale(y0) && x.historical_counts >= yInvScale(y1))
 
 				}
 									
@@ -183,8 +195,7 @@ function Dataland() {
 		scatter.append('g').attr('class', 'brush')
 			.call(brush)
 			.on("dblclick", function() {
-				// HELP
-				// spotifyData = spotifyDataFull || []			
+				setBrushRange({x0: undefined, y0: undefined, x1: undefined, y1: undefined})
 			})		
 
 		let spotify = scatter.selectAll<SVGCircleElement, SpotifyData>('circle').data(spotifyData, function(d: SpotifyData) {
@@ -578,7 +589,8 @@ function Dataland() {
 						}}></img>)}					
 					</div>	
 				</div>
-
+					
+					
 				{<div className='ml-4 mr-4'>			
 						{/* loader for pulling lyrics for album data viz */}
 						{(pendingLyricsNStats && !showTop40) && <Loader/>}						
@@ -614,7 +626,7 @@ function Dataland() {
 					screenSize.width < 828 && <LyricalVizLegend fighter={fighter}/>
 					}							
 					
-					{showTop40 && <div>	
+					{showTop40 && <div>
 						<div className='flex flex-row flex-wrap justify-center mx-auto m-2 text-center'><p className = 'text-xs'>Jump to: <span className='cursor-pointer font-bold '
 							onClick={()=> {
 								window.scrollTo({top: spotifyRef.current ? spotifyRef.current?.offsetTop - 95 : 0, behavior: 'smooth'})
