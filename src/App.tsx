@@ -19,14 +19,18 @@ import Leaderboard from './Leaderboard.tsx'
 import { useCookies } from 'react-cookie';
 import * as TS from './Constants.tsx'
 
+import { useQuery } from "@tanstack/react-query";
+import { getSongs, getLeaderboard, getLyrics } from './api.ts';
+import { getLeaderboardData } from './hooks.tsx'
+
 // import {
 //   QueryClient,
 //   QueryClientProvider,
 //   useQuery,
 // } from '@tanstack/react-query'
 
-let lyricsFullDB: Lyrics[] = [] // all lyrics 
-let songsFullDB: SongList[] = [] // all songs 
+// let lyricsFullDB: Lyrics[] = [] // all lyrics 
+// let songsFullDB: SongList[] = [] // all songs 
 let leaderboardFullDB: Leaderboard[] = []
 // const queryClient = new QueryClient()
 
@@ -76,8 +80,8 @@ function App() {
 	const [gameMode, setGameMode] = useState<game_mode | ''>('')
 	const [albumMode, setAlbumMode] = useState<Album | '' >('')
 	const [showGameModeQ, setShowGameModeQ] = useState<boolean>(false)
-	const [songList, setSongList] = useState<SongList[]>([])
-	const [lyricsDB, setLyricsDB] = useState<Lyrics[]>([])
+	// const [songList, setSongList] = useState<SongList[]>([])
+	// const [lyricsDB, setLyricsDB] = useState<Lyrics[]>([])
 	const [gameId, setGameId] = useState<string>(uuidv4())
 	const [playerName, setPlayerName] = useState<string>('')
 	const [userNameSet, setUserNameSet] = useState<boolean>(false)
@@ -93,7 +97,7 @@ function App() {
  	const [answerChoices, setAnsChoices] = useState<string[]>([])
 	const [result, setResult] = useState<string>() // true, false, null? 
 	const [gameStats, setGameStats] = useState<GameStats[]>([])  // make this an array of objects with lyric/song/album they got right and the time
-	const [leaderboardData, setLeaderboardData] = useState<Leaderboard[]>([])
+	// const [leaderboardData, setLeaderboardData] = useState<Leaderboard[]>([])
 	const [statsByAlbum, setStatsByAlbum] = useState<StatsByAlbum[]>([])
 	const [gameStarted, setGameStarted] = useState<boolean>(false)
 	const [displayStats, setDisplayStats] = useState<boolean>(false);
@@ -104,34 +108,83 @@ function App() {
 
 	const wrongAnswersOnly = ["This is why we can't have nice things", "Would you like closure and know the song", "Is this you trying", "It's you, you're the problem", "Can we tolerate this", "I wish you would get the right answer", "That was not the 1", "you'll have an ephiphany on it later", "Made my tears richochet with that one","You forgot that song existed", "You're losing it", "Death by a thousand wrongs", "False Swiftie", "You're on your own, kid", "Answer...?", "brain Glitch", "I bet you'll think about that", "You did something bad", "Exhiling you", "tis not the damn song", "Shake it off", "That was sweet nothing", "Your answers are ruining my life", "Do you hate it here?", "So long, Leaderboard", "You Can Fix This (No Really, You Can)", "Move to Florida", "Are we at the gym? Why Am I crying?"]
 
-	useEffect(() => {
 	
-		delayedDataFetch()					
-	
-	}, [])
-	
-
-	async function delayedDataFetch() {
-		setIsLoading(true)
-		
-		Promise.all([axios.get(`${URL}/getSongs`), axios.get(`${URL}/getLyrics`), axios.get(`${URL}/getLeaderboard`)])
-		.then(([r1, r2, r3]) => {
-
-			console.log('got data')
-			songsFullDB = r1.data.songList
-			setSongList(r1.data.songList)
-			lyricsFullDB = r2.data.lyrics	
+	const { data: songDB, isPending: pendingSongs, error: songError} = useQuery({
+		// do i need gameMode and albumMode as query keys if i always want the same cached data pulled?? what happens if i just want something to filter 
+		queryKey: ['getSongs'], 
+		select: (res): SongList[]=> {
 			
-			leaderboardFullDB = r3.data.leaderBoard
-				// console.log('init', 'got leaderboard')
-			setLeaderboardData(leaderboardFullDB.filter(x=> x.game_mode != 'album'))
-			
-			setIsLoading(false)
-		}).catch(function (error) {				
-			console.log(error);
-		});	
+			if (gameMode == 'easy'){				
+				return res.filter(x=> x.vault == 0 && x.album_key != 'TTPD')
+			} else if (gameMode == normal) {
+				return res.filter(x=> x.vault == 0 && x.album_key != 'TTPD')
+			} else if (gameMode == challenging) {
+				// normal + TTPD 			
+				return res.filter(x=> x.vault == 0)
+	
+			} else if (gameMode == hard) {
+				// hard is all + more recent vault songs but no filler				
+				return res.filter(x=> x.album_key != 'TTPD')
+			} else if (gameMode == pro) {
+				// pro gameMode = TV + TTPD				
+				return res
+			} else if (gameMode == expert) {
+				// expert gameMode has vault songs and only filler words lmao				
+				return res
+			} else {
+				// filter by album 				
+				return res.filter(x=> x.album == albumMode)
+			}
+		},
+		queryFn: () => getSongs(),
+	})
 
-	}
+	const songList = songDB || []
+	console.log('did this filter???', songList)
+
+	const { data: leaders, isPending : pendingLeaders, error } = useQuery({
+		queryKey: ['leaderboard'], 
+		queryFn: () => getLeaderboard(),
+    retry: false,
+    staleTime: 1000000, // 16 min
+  })
+
+	const leaderBoard = leaders || []
+
+	const leaderboardData = filterLeaderboard == 'all' ? leaderBoard.filter(x=> x.game_mode != 'album') : leaderBoard.filter(x=> x.game_mode == 'album')
+	// const leaderboard = getLeaderboardData(filterLeaderboard)
+	// const leaderboardData = leaderboard.data || []
+
+	const lyrics = useQuery({
+		queryKey: ['getLyrics'], 
+		select: (res): Lyrics[] => {
+			if (gameMode == 'easy'){
+				return res.filter(x=> x.filler == 0 && x.vault == 0 && x.album_key != 'TTPD')		
+			} else if (gameMode == normal) {
+				return res.filter(x=> x.filler == 0 && x.vault == 0 && x.title_in_lyric_match < 70 && x.album_key != 'TTPD')
+			} else if (gameMode == challenging) {
+				// normal + TTPD 
+				return res.filter(x=> x.filler == 0 && x.vault == 0 && x.title_in_lyric_match < 70)	
+			} else if (gameMode == hard) {
+				// hard is all + more recent vault songs but no filler
+				return res.filter(x=> x.filler == 0 && x.title_in_lyric_match < 70 && x.album_key != 'TTPD')		
+			} else if (gameMode == pro) {
+				// pro gameMode = TV + TTPD
+				return res.filter(x=> x.filler == 0 && x.title_in_lyric_match < 70)		
+			} else if (gameMode == expert) {
+				// expert gameMode has vault songs and only filler words lmao
+				return res.filter(x=> x.filler == 1)		
+			} else {
+				// filter by album 			
+				return res.filter(x=> x.album == albumMode && x.filler == 0 && x.title_in_lyric_match < 70)		
+			}
+		},
+		queryFn: () => getLyrics(),
+    retry: false,
+    staleTime: 1000000, // 16 min
+  })
+
+	const lyricsDB = lyrics.data || []
 	
 	function pickRandomAns(correctAnswer: string) {
 		// given the answer, pick 4 other random songs 
@@ -142,7 +195,7 @@ function App() {
 		// console.log(songIndices, songList)
 		// remove the song that is the answer so we don't get dupes
 		songIndices.splice(songList.map(x=> x.song).indexOf(correctAnswer), 1)
-		// console.log('spliced', songIndices, songList)
+		console.log('spliced', songIndices, songList)
 
 		for (let i = 0; i < 4; i++) {
 			let randInd = songIndices[Math.floor(Math.random() * (songIndices.length - 1))]			// sometimes the randint is 162 and we get undefined??? do i need a -1 or no?? 
@@ -162,13 +215,13 @@ function App() {
 
 	}
 
-	useEffect(() => {
-		// need use effect so that the song/lyric db for the diff game types update fast enough
-		// console.log(gameMode)
-		filterLyricsDB(gameMode)
-		// console.log(songList, lyricsDB, gameMode, albumMode)
+	// useEffect(() => {
+	// 	// need use effect so that the song/lyric db for the diff game types update fast enough
+	// 	// console.log(gameMode)
+	// 	filterLyricsDB(gameMode)
+	// 	// console.log(songList, lyricsDB, gameMode, albumMode)
 
-	}, [albumMode, gameMode, gameStarted, isLoading])
+	// }, [albumMode, gameMode, gameStarted, isLoading])
 
 	useEffect(()=> {
 		// if we tried to start the game and it's not ready yet
@@ -177,61 +230,6 @@ function App() {
 		}		
 	}, [isLoading])
 
-	useEffect(()=> {
-		if (filterLeaderboard == 'all') {			
-			setLeaderboardData(leaderboardFullDB.filter(x=> x.game_mode != 'album'))
-		} else {
-			setLeaderboardData(leaderboardFullDB.filter(x=> x.game_mode == 'album'))
-		}
-		
-	}, [filterLeaderboard])
-
-	function filterLyricsDB(level: string){
-		// filter/set the lyrics 		
-		// console.log('lyricsFullDB', level, lyricsFullDB)
-		let songBank: SongList[]
-		let lyricsBank: Lyrics[]
-
-		if (level == 'easy'){
-			lyricsBank = lyricsFullDB.filter(x=> x.filler == 0 && x.vault == 0 && x.album_key != 'TTPD')
-			songBank = songsFullDB.filter(x=> x.vault == 0 && x.album_key != 'TTPD')
-		} else if (level == normal) {
-			lyricsBank = lyricsFullDB.filter(x=> x.filler == 0 && x.vault == 0 && x.title_in_lyric_match < 70 && x.album_key != 'TTPD')
-
-			songBank = songsFullDB.filter(x=> x.vault == 0 && x.album_key != 'TTPD')
-		} else if (level == challenging) {
-			// normal + TTPD 
-			lyricsBank = lyricsFullDB.filter(x=> x.filler == 0 && x.vault == 0 && x.title_in_lyric_match < 70)
-
-			songBank = songsFullDB.filter(x=> x.vault == 0)
-
-		} else if (level == hard) {
-			// hard is all + more recent vault songs but no filler
-			lyricsBank = lyricsFullDB.filter(x=> x.filler == 0 && x.title_in_lyric_match < 70 && x.album_key != 'TTPD')
-			songBank = songsFullDB.filter(x=> x.album_key != 'TTPD')
-		} else if (level == pro) {
-			// pro level = TV + TTPD
-			lyricsBank = lyricsFullDB.filter(x=> x.filler == 0 && x.title_in_lyric_match < 70)
-			songBank = songsFullDB
-		} else if (level == expert) {
-			// expert level has vault songs and only filler words lmao
-			lyricsBank = lyricsFullDB.filter(x=> x.filler == 1)
-			songBank = songsFullDB
-		} else {
-			// filter by album 
-
-			console.log(lyricsFullDB)
-			lyricsBank = lyricsFullDB.filter(x=> x.album == albumMode && x.filler == 0 && x.title_in_lyric_match < 70)
-			songBank = songsFullDB.filter(x=> x.album == albumMode)
-		}
-
-		// console.log('filterLyricsDB', songList, lyricsDB, gameMode, albumMode)
-
-		setSongList(songBank)
-		setLyricsDB(lyricsBank)
-		// return { songBank: songBank, lyricsBank: lyricsBank}
-		
-	}
 
 	// start timer for beg of game 
 	function startGame() {
@@ -365,8 +363,7 @@ function App() {
 			setAnsChoices(pickRandomAns(lyricsDB[rand].song))
 
 		}
-		
-	
+			
 		// setUserResponse('')
 		
 		setStartTime(Date.now())

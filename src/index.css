@@ -641,7 +641,7 @@ div.tooltip {
 
 
 /* split dark colors and light colors bc using HSL and opacity for one color */
-.era-taylor-swift-gradeF, .era-fearless-gradeF, .era-midnights-gradeF, .era-red-gradeF {
+.era-taylor-swift-gradeF, .era-fearless-gradeF, .era-midnights-gradeF, .era-red-gradeF, .era-ttpd-gradeF {
 	font-size: 12px;
 	opacity: 0.85;
 }
@@ -652,7 +652,7 @@ div.tooltip {
 }
 
 
-.era-taylor-swift-gradeAplus, .era-fearless-gradeAplus, .era-speak-now-gradeAplus, .era-red-gradeAplus, .era-1989-gradeAplus, .era-reputation-gradeAplus, .era-lover-gradeAplus, .era-folklore-gradeAplus, .era-evermore-gradeAplus, .era-midnights-gradeAplus  {
+.era-taylor-swift-gradeAplus, .era-fearless-gradeAplus, .era-speak-now-gradeAplus, .era-red-gradeAplus, .era-1989-gradeAplus, .era-reputation-gradeAplus, .era-lover-gradeAplus, .era-folklore-gradeAplus, .era-evermore-gradeAplus, .era-midnights-gradeAplus, .era-ttpd-gradeAplus  {
 	font-weight: 700;
 	font-size: var(--font-size-Aplus);
 }

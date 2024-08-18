@@ -30,7 +30,7 @@ function Dataland() {
 
 	const scrollRef = useRef<HTMLInputElement | null>(null)
 	const spotifyRef = useRef<HTMLInputElement | null>(null)
-	const spotifyViz = useRef<HTMLInputElement | null>(null)
+	const spotifyViz = useRef<HTMLInputElement | null>()
 	const top40Ref = useRef<HTMLInputElement | null>(null)
 	const cultFailRef = useRef<HTMLInputElement | null>(null)
 	const cultSuccessRef = useRef<HTMLInputElement | null>(null)
@@ -45,7 +45,6 @@ function Dataland() {
 	const [songList, setSongList] = useState<SongList[]>([])
 	const [gettingLyrics, setGettingLyrics] = useState<boolean>(false)
 	const [showTop40, setShowTop40] = useState<boolean>(true)
-	// const [spotifyData, setSpotifyData] = useState<SpotifyData[]>([])
 	const [scatterHighlight, setScatterHighlight] = useState<AlbumArt>('imtheproblem')	
 	const screenSize = useScreenSize()
 
@@ -82,9 +81,6 @@ function Dataland() {
 
 	const songsFullDB = songDataFull || []
 	
-	// const pendingSpotify = false
-	// let spotifyDataFull = []
-
 	const { data: spotifyDataFull, isPending: pendingSpotify, error: spotifyError } = useQuery({
 			queryKey: ['getSpotifyPlays'], 
 			select: (data) => {
@@ -100,7 +96,8 @@ function Dataland() {
 			staleTime: 1000 * 3600 * 24, // 1 day
 		})
 
-	const spotifyData = spotifyDataFull || []
+	// not sure why but need to make a copy of the data here so that we dont get infinite rerenders of the chart and for the plot to show the dots on initial load 
+	const spotifyData = [...spotifyDataFull || []]
 
 	let xScale = d3.scaleLinear().domain([Math.min(...spotifyData.map(x=> x.song_accuracy)), Math.max(...spotifyData.map(x=> x.song_accuracy))]).range([marginLeft, w - marginRight])
 
@@ -147,11 +144,13 @@ function Dataland() {
 	// SPOTIFY VIZ VS ACCURACY SCATTERPLOT
 	useEffect(()=> {
 		
+		console.log('spotifyViz.current', spotifyViz.current)
 		// if (spotifyData.length === 0) {
 		// 	return
 		// }
 
-		console.log(pendingSpotify, spotifyData)
+		console.log([spotifyViz.current, showTop40, spotifyData, pendingSpotify, scatterHighlight])
+
 		d3.selectAll('.spotify').remove()
 
 		// spotify - accuracy scatter plot
@@ -161,7 +160,7 @@ function Dataland() {
 		// 	.ease(d3.easeBounceOut);	
 	
 	
-		let scatter = d3.select("#spotifyscatter").append('svg')
+		let scatter = d3.select('#spotifyscatter').append('svg')
 			.attr('class', 'spotify')
 			.attr('height', h)
 			.attr('width', w)
@@ -192,7 +191,7 @@ function Dataland() {
 		.extent([[marginLeft-10,0], [w, h-marginBottom + 10]])  // overlay sizing
 
 		//!!!! must create brush before appending bc it overlays a rect that will block mouseover events
-		scatter.append('g').attr('class', 'brush')
+		scatter.append('g').attr('class', 'spotify brush')
 			.call(brush)
 			.on("dblclick", function() {
 				setBrushRange({x0: undefined, y0: undefined, x1: undefined, y1: undefined})
@@ -205,7 +204,6 @@ function Dataland() {
 		// cant seem to get transitions to work with mouseover with joins...so using enter.append			
 		spotify.enter().append('circle')
 			.attr('class', function(d) { return `${albumColorKey[albumKeyLkup[d.album as keyof typeof albumKeyLkup] as keyof typeof albumColorKey]} ${scatterHighlight == 'imtheproblem' ? '' : scatterHighlight == albumKeyLkup[d.album as keyof typeof albumKeyLkup] ? '' : 'v-faded'}	`
-				
 			})									
 			.on('mouseover', function(event, d) {
 
@@ -328,7 +326,7 @@ function Dataland() {
 			)
 		
 				
-	}, [showTop40, spotifyData, pendingSpotify, scatterHighlight])
+	}, [spotifyViz.current, showTop40, spotifyData, pendingSpotify, scatterHighlight])
 	
 
 

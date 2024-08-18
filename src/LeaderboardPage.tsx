@@ -6,6 +6,7 @@ import * as TS from './Constants.tsx'
 import { getLeaderboard } from './api.ts';
 import { useQuery } from "@tanstack/react-query";
 import classNames from 'classnames';
+import { getLeaderboardData } from './hooks.tsx'
 
 function LeaderboardPage() {
 	
@@ -18,29 +19,24 @@ function LeaderboardPage() {
 
 	const [filterLeaderboard, setFilterLeaderboard] = useState<filterLeaderboard>('all')
 
+	const leaderboard = getLeaderboardData(filterLeaderboard)
+	// const { isPending, error, data } = useQuery({
+	// 	queryKey: ['leaderboard'], 
+	// 	select: (data) => {
+	// 		return filterLeaderboard == 'all' ? data.filter(x=> x.game_mode != 'album') : data.filter(x=> x.game_mode == 'album')
+	// 	},
+	// 	queryFn: () => getLeaderboard(),
+  //   retry: false, 
+  //   staleTime: 1000000, // 16 min
+  // })
 
-	const { isPending, error, data } = useQuery({
-		queryKey: ['leaderboard'], 
-		queryFn: () => getLeaderboard(),
-    retry: false,
-    // enabled: !!matchId,  // query wont run til matchId exists
-    // refetchInterval: (data) => {
-    //   if (!data || data.status === "r") {
-    //     return 3000
-    //   }
-    //   return false
-    // },
-    staleTime: 1000000, // 16 min
-  })
+	const leaderboardData = leaderboard.data || []
 
-	const leaderBoard = data || []
-
-	const leaderboardData = filterLeaderboard == 'all' ? leaderBoard.filter(x=> x.game_mode != 'album') : leaderBoard.filter(x=> x.game_mode == 'album')
 	
 
 	return (
 		<>			
-				<Layout isLoading={isPending}>
+				<Layout isLoading={leaderboard.isPending}>
 				<div className='flex flex-col container bold text-center justify-center items-center'>
 					<div className='flex flex-row container bold text-center justify-center'>
 						<div className={`${filterLeaderboard == 'all' ? 'era-reputation' : 'faded'} inline p-2 min-w-[120px] inline-flex justify-center text-l font-bold shadow cursor-pointer border w-full leading-tight focus:outline-none focus:shadow-outline text-center`}

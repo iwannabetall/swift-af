@@ -28,6 +28,16 @@ export async function getLyricStats(): Promise<LyricData[]> {
 
 }
 
+
+export async function getLyrics(): Promise<Lyrics[]> {
+
+	const URL = `${BASE_URL}/getLyrics`
+  const response = await axios.get(URL);
+
+  return response.data.lyrics
+
+}
+
 export async function getFullLyricsNStats(album: string): Promise<LyricData[]> {
 
 	if (album == 'imthefighter') {
