@@ -7,7 +7,7 @@ import useScreenSize from './useScreenSize.tsx';
 import LyricalVizLegend from './LyricalVizLegend.tsx';
 import Layout from './Layout.tsx';
 import * as TS from './Constants.tsx'
-import { getFullLyricsNStats, getLyricStats, getSongs, getSpotifyPlays } from './api.ts';
+import { getFullLyricsNStats, getLyricStats, getSongs, getSpotifyPlays } from './data/api.ts';
 import { useQuery } from "@tanstack/react-query";
 
 
@@ -30,7 +30,7 @@ function Dataland() {
 
 	const scrollRef = useRef<HTMLInputElement | null>(null)
 	const spotifyRef = useRef<HTMLInputElement | null>(null)
-	const spotifyViz = useRef<HTMLInputElement | null>()
+	const spotifyViz = useRef<HTMLInputElement | null>(null)
 	const top40Ref = useRef<HTMLInputElement | null>(null)
 	const cultFailRef = useRef<HTMLInputElement | null>(null)
 	const cultSuccessRef = useRef<HTMLInputElement | null>(null)
@@ -96,7 +96,7 @@ function Dataland() {
 			staleTime: 1000 * 3600 * 24, // 1 day
 		})
 
-	// not sure why but need to make a copy of the data here so that we dont get infinite rerenders of the chart and for the plot to show the dots on initial load 
+	// NOTE not sure why but need to make a copy of the data here so that we dont get infinite rerenders of the chart and for the plot to show the dots on initial load 
 	const spotifyData = [...spotifyDataFull || []]
 
 	let xScale = d3.scaleLinear().domain([Math.min(...spotifyData.map(x=> x.song_accuracy)), Math.max(...spotifyData.map(x=> x.song_accuracy))]).range([marginLeft, w - marginRight])
@@ -143,13 +143,6 @@ function Dataland() {
 
 	// SPOTIFY VIZ VS ACCURACY SCATTERPLOT
 	useEffect(()=> {
-		
-		console.log('spotifyViz.current', spotifyViz.current)
-		// if (spotifyData.length === 0) {
-		// 	return
-		// }
-
-		console.log([spotifyViz.current, showTop40, spotifyData, pendingSpotify, scatterHighlight])
 
 		d3.selectAll('.spotify').remove()
 
@@ -166,7 +159,7 @@ function Dataland() {
 			.attr('width', w)
 			.attr("viewBox", `0 0 ${h} ${w}`)	
 
-		console.log('scatter', scatter)
+		// console.log('scatter', scatter)
 		
 		const brush = d3.brush().on("end", ({selection}) => {
 
@@ -182,15 +175,13 @@ function Dataland() {
 				if (selectedData.length > 0) {
 					setBrushRange({x0: x0, y0: y0, x1: x1, y1: y1})
 					// // y1 is further up (larger than y0)
-					console.log(selectedData, 'why isnt this running')
-
 				}
 									
 			}
 		})		
 		.extent([[marginLeft-10,0], [w, h-marginBottom + 10]])  // overlay sizing
 
-		//!!!! must create brush before appending bc it overlays a rect that will block mouseover events
+		//NOTE !!!! must create brush before appending bc it overlays a rect that will block mouseover events
 		scatter.append('g').attr('class', 'spotify brush')
 			.call(brush)
 			.on("dblclick", function() {
@@ -656,7 +647,7 @@ function Dataland() {
 							<div className='spotifyscatter-wrapper' >
 
 								{screenSize.width >= 600 && <div className='flex flex-col flex-wrap justify-center' ref={newSongRef}>					
-								{albumCovers.map(x=> <img src={`/icons/${x}.jpg`} key={x} className ={`sm-albums ${scatterHighlight != x ? 'faded' : scatterHighlight == x ? 'selected' : ''}`} onClick={()=> {
+								{albumCovers.filter(x=> x != 'TTPD').map(x=> <img src={`/icons/${x}.jpg`} key={x} className ={`sm-albums ${scatterHighlight != x ? 'faded' : scatterHighlight == x ? 'selected' : ''}`} onClick={()=> {
 									setScatterHighlight(x)
 									}}></img>)}					
 								</div>	}

@@ -1,7 +1,7 @@
 import axios from "axios";
 // import type { AxiosRequestConfig } from "axios";
 
-import * as TS from './Constants.tsx'
+import * as TS from '../Constants.tsx'
 const BASE_URL = TS.config.url
 
 // const version = "v1";

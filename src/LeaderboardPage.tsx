@@ -3,10 +3,10 @@ import axios from 'axios';
 import moment from 'moment';
 import Layout from './Layout.tsx';
 import * as TS from './Constants.tsx'
-import { getLeaderboard } from './api.ts';
+import { getLeaderboard } from './data/api.ts';
 import { useQuery } from "@tanstack/react-query";
 import classNames from 'classnames';
-import { getLeaderboardData } from './hooks.tsx'
+import { useLeaderboardData } from './data/hooks.tsx'
 
 function LeaderboardPage() {
 	
@@ -19,7 +19,7 @@ function LeaderboardPage() {
 
 	const [filterLeaderboard, setFilterLeaderboard] = useState<filterLeaderboard>('all')
 
-	const leaderboard = getLeaderboardData(filterLeaderboard)
+	const leaderboard = useLeaderboardData(filterLeaderboard)
 	// const { isPending, error, data } = useQuery({
 	// 	queryKey: ['leaderboard'], 
 	// 	select: (data) => {

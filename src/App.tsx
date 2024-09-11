@@ -20,8 +20,8 @@ import { useCookies } from 'react-cookie';
 import * as TS from './Constants.tsx'
 
 import { useQuery } from "@tanstack/react-query";
-import { getSongs, getLeaderboard, getLyrics } from './api.ts';
-import { getLeaderboardData } from './hooks.tsx'
+import { getSongs, getLeaderboard, getLyrics } from './data/api.ts';
+import { useLeaderboardData, useLyricsData, useSongs } from './data/hooks.tsx'
 
 // import {
 //   QueryClient,
@@ -57,12 +57,6 @@ function App() {
 
 	const albumCovers = TS.albumCovers
 
-	const normal = "classics version" as const
- 	const challenging = 'Tortured Classics' as const
-	const hard = "Taylor's Version" as const
-	const pro = "The Eras" as const
-	const expert = 'cult version' as const
-
 	// const shareUrl = 'https://swift-af.com/' as const
 	// let songList: SongList[] = []
 
@@ -80,14 +74,10 @@ function App() {
 	const [gameMode, setGameMode] = useState<game_mode | ''>('')
 	const [albumMode, setAlbumMode] = useState<Album | '' >('')
 	const [showGameModeQ, setShowGameModeQ] = useState<boolean>(false)
-	// const [songList, setSongList] = useState<SongList[]>([])
-	// const [lyricsDB, setLyricsDB] = useState<Lyrics[]>([])
 	const [gameId, setGameId] = useState<string>(uuidv4())
 	const [playerName, setPlayerName] = useState<string>('')
 	const [userNameSet, setUserNameSet] = useState<boolean>(false)
 	const [filterLeaderboard, setFilterLeaderboard] = useState<filterLeaderboard>('all')
-	const [isLoading, setIsLoading] = useState<boolean>(false)
-
 	const [fighter, setFighter] = useState<AlbumArt | ''>('')
 	const [fighterChosen, setFighterChosen] = useState<boolean>(false)
 
@@ -97,7 +87,6 @@ function App() {
  	const [answerChoices, setAnsChoices] = useState<string[]>([])
 	const [result, setResult] = useState<string>() // true, false, null? 
 	const [gameStats, setGameStats] = useState<GameStats[]>([])  // make this an array of objects with lyric/song/album they got right and the time
-	// const [leaderboardData, setLeaderboardData] = useState<Leaderboard[]>([])
 	const [statsByAlbum, setStatsByAlbum] = useState<StatsByAlbum[]>([])
 	const [gameStarted, setGameStarted] = useState<boolean>(false)
 	const [displayStats, setDisplayStats] = useState<boolean>(false);
@@ -109,38 +98,10 @@ function App() {
 	const wrongAnswersOnly = ["This is why we can't have nice things", "Would you like closure and know the song", "Is this you trying", "It's you, you're the problem", "Can we tolerate this", "I wish you would get the right answer", "That was not the 1", "you'll have an ephiphany on it later", "Made my tears richochet with that one","You forgot that song existed", "You're losing it", "Death by a thousand wrongs", "False Swiftie", "You're on your own, kid", "Answer...?", "brain Glitch", "I bet you'll think about that", "You did something bad", "Exhiling you", "tis not the damn song", "Shake it off", "That was sweet nothing", "Your answers are ruining my life", "Do you hate it here?", "So long, Leaderboard", "You Can Fix This (No Really, You Can)", "Move to Florida", "Are we at the gym? Why Am I crying?"]
 
 	
-	const { data: songDB, isPending: pendingSongs, error: songError} = useQuery({
-		// do i need gameMode and albumMode as query keys if i always want the same cached data pulled?? what happens if i just want something to filter 
-		queryKey: ['getSongs'], 
-		select: (res): SongList[]=> {
-			
-			if (gameMode == 'easy'){				
-				return res.filter(x=> x.vault == 0 && x.album_key != 'TTPD')
-			} else if (gameMode == normal) {
-				return res.filter(x=> x.vault == 0 && x.album_key != 'TTPD')
-			} else if (gameMode == challenging) {
-				// normal + TTPD 			
-				return res.filter(x=> x.vault == 0)
-	
-			} else if (gameMode == hard) {
-				// hard is all + more recent vault songs but no filler				
-				return res.filter(x=> x.album_key != 'TTPD')
-			} else if (gameMode == pro) {
-				// pro gameMode = TV + TTPD				
-				return res
-			} else if (gameMode == expert) {
-				// expert gameMode has vault songs and only filler words lmao				
-				return res
-			} else {
-				// filter by album 				
-				return res.filter(x=> x.album == albumMode)
-			}
-		},
-		queryFn: () => getSongs(),
-	})
+	const { data: songDB, isPending: pendingSongs, error: songError} = useSongs(gameMode, albumMode)
 
 	const songList = songDB || []
-	console.log('did this filter???', songList)
+	// console.log('did this filter???', songList)
 
 	const { data: leaders, isPending : pendingLeaders, error } = useQuery({
 		queryKey: ['leaderboard'], 
@@ -152,40 +113,13 @@ function App() {
 	const leaderBoard = leaders || []
 
 	const leaderboardData = filterLeaderboard == 'all' ? leaderBoard.filter(x=> x.game_mode != 'album') : leaderBoard.filter(x=> x.game_mode == 'album')
-	// const leaderboard = getLeaderboardData(filterLeaderboard)
-	// const leaderboardData = leaderboard.data || []
 
-	const lyrics = useQuery({
-		queryKey: ['getLyrics'], 
-		select: (res): Lyrics[] => {
-			if (gameMode == 'easy'){
-				return res.filter(x=> x.filler == 0 && x.vault == 0 && x.album_key != 'TTPD')		
-			} else if (gameMode == normal) {
-				return res.filter(x=> x.filler == 0 && x.vault == 0 && x.title_in_lyric_match < 70 && x.album_key != 'TTPD')
-			} else if (gameMode == challenging) {
-				// normal + TTPD 
-				return res.filter(x=> x.filler == 0 && x.vault == 0 && x.title_in_lyric_match < 70)	
-			} else if (gameMode == hard) {
-				// hard is all + more recent vault songs but no filler
-				return res.filter(x=> x.filler == 0 && x.title_in_lyric_match < 70 && x.album_key != 'TTPD')		
-			} else if (gameMode == pro) {
-				// pro gameMode = TV + TTPD
-				return res.filter(x=> x.filler == 0 && x.title_in_lyric_match < 70)		
-			} else if (gameMode == expert) {
-				// expert gameMode has vault songs and only filler words lmao
-				return res.filter(x=> x.filler == 1)		
-			} else {
-				// filter by album 			
-				return res.filter(x=> x.album == albumMode && x.filler == 0 && x.title_in_lyric_match < 70)		
-			}
-		},
-		queryFn: () => getLyrics(),
-    retry: false,
-    staleTime: 1000000, // 16 min
-  })
+	const lyrics = useLyricsData(gameMode, albumMode)
 
 	const lyricsDB = lyrics.data || []
 	
+	const isLoading = pendingSongs || lyrics.isPending
+
 	function pickRandomAns(correctAnswer: string) {
 		// given the answer, pick 4 other random songs 
 		// pick 3 random songs that aren't the same as the answer 
@@ -195,7 +129,7 @@ function App() {
 		// console.log(songIndices, songList)
 		// remove the song that is the answer so we don't get dupes
 		songIndices.splice(songList.map(x=> x.song).indexOf(correctAnswer), 1)
-		console.log('spliced', songIndices, songList)
+		// console.log('spliced', songIndices, songList)
 
 		for (let i = 0; i < 4; i++) {
 			let randInd = songIndices[Math.floor(Math.random() * (songIndices.length - 1))]			// sometimes the randint is 162 and we get undefined??? do i need a -1 or no?? 
@@ -215,16 +149,10 @@ function App() {
 
 	}
 
-	// useEffect(() => {
-	// 	// need use effect so that the song/lyric db for the diff game types update fast enough
-	// 	// console.log(gameMode)
-	// 	filterLyricsDB(gameMode)
-	// 	// console.log(songList, lyricsDB, gameMode, albumMode)
-
-	// }, [albumMode, gameMode, gameStarted, isLoading])
-
+	
+	// TODO UPDATE/REMOVE THIS 
 	useEffect(()=> {
-		// if we tried to start the game and it's not ready yet
+		// if we tried to start the game and it's not ready yet, start the the game when the datas ready?? 
 		if (gameStarted){
 			startGame()
 		}		
@@ -246,6 +174,7 @@ function App() {
 			setFighter('imtheproblem')
 		}
 
+		// game is done loading all data
 		if (!isLoading){
 			if (gameMode == 'album' && albumMode == '') {
 				setGameStarted(false)
@@ -449,44 +378,6 @@ function App() {
 			'game_mode' : gameMode, 
 			'fighter' : fighter, 
 			'game_date' : gameDate?.toString()
-		}
-
-		// squeeze new player into leaderboard and update database if they met leaderboard reqs
-		if (parseFloat(overall) > min_accuracy && total_correct > min_correct && avg_time <= 3 && gameMode != 'easy') {	
-
-		// if (parseFloat(overall) > 3) {	// for testing
-	
-			let currentLeaders = leaderboardFullDB.filter(x=> x.game_mode == gameMode && x.album_mode == albumMode && x.time < avg_time)
-			// console.log(gameMode, albumMode, avg_time)
-			let rank : number;
-			let id : string | undefined;
-			let id_index : number;
-
-			// currentLeaders will be null if if you're the leader
-			if (currentLeaders.length == 0) {				
-				rank = 1	
-				id_index = 1			
-			} else {
-				// if not the leader, have to get game id of relevant game so we know what rank to give it for updating table			
-				id = currentLeaders.slice(-1)[0].game_id
-				rank = currentLeaders.slice(-1)[0].speed_rk + 1
-				id_index = currentLeaders.map(x=> x.game_id).indexOf(id)				
-			}
-			stats.speed_rk = rank
-			
-			// insert into leader board, subtract 1 bc zero indexed
-			leaderboardFullDB.splice(id_index - 1, 0, stats) // need to pass an obj not an array
-			// update local leader data
-			setLeaderboardData(leaderboardFullDB.filter(x=> x.game_mode != 'album'))
-			// update leaderboard/save to database 
-			axios.post(`${URL}/updateLeaderboard`, stats)
-			.then(function () {
-				// console.log(response)
-			})
-			.catch(function (error) {			
-				console.log(error);
-			});
-
 		}
 
 		setGameRank([stats])
