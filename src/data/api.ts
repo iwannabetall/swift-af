@@ -55,6 +55,18 @@ export async function getFullLyricsNStats(album: string): Promise<LyricData[]> {
 }
 
 
+export async function getUserStats(sess_id: string): Promise<GameResults[]> {
+
+	const URL = `${BASE_URL}/getUserStats`
+  const response = await axios.post(URL, {
+		 'sess_id': sess_id 
+		});
+
+  return response.data.userGameStats
+
+}
+
+
 export async function getSongs(): Promise<SongList[]> {
 
 	const URL = `${BASE_URL}/getSongs`
