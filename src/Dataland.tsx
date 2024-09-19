@@ -11,14 +11,7 @@ import { getFullLyricsNStats, getLyricStats, getSongs, getSpotifyPlays } from '.
 import { useQuery } from "@tanstack/react-query";
 
 
-var spotify_full_data: SpotifyData[] = []
-
 function Dataland() {	
-
-	const URL = TS.config.url
-
-	// const accuracy_filter = 95;  // for the initial view, have min 95 accuracy;
-	// const ltErasColors = ['eras_green', 'eras_gold', 'eras_purple', 'eras_lblue', 'eras_pink', 'eras_maroon', 'eras_indigo', 'eras_tan', 'eras_grey', 'eras_black'];
 
 	const albumColorKey = TS.albumColorKey
 
@@ -48,21 +41,20 @@ function Dataland() {
 	const [scatterHighlight, setScatterHighlight] = useState<AlbumArt>('imtheproblem')	
 	const screenSize = useScreenSize()
 
-	const [useBrush, setUseBrush] = useState<boolean>(false)
 	const [brushRange, setBrushRange] = useState<BrushRange>({x0: undefined, y0: undefined, x1: undefined, y1: undefined})
 
 
 	const h = screenSize.width > 420 ? 600 : 460
 	const w = screenSize.width > 420 ? 600 : 420
 	const fontSize = screenSize.width > 420 ? '20px' : '18px'
-	const margin = 30
-	const marginBottom = 45
-	const marginTop = 36
-	const marginLeft = 60
-	const marginRight = 15
-	
-	
 
+	const margin = TS.margin
+	const marginBottom = TS.marginBottom
+	const marginTop = TS.marginTop
+	const marginLeft = TS.marginLeft
+	const marginRight = TS.marginRight
+	
+	
 	function formatBigNumber(num: number) {
 		// already in millions 
 		if(num < 1000){
