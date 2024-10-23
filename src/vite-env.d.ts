@@ -106,7 +106,7 @@ interface GameStats {
 	
 }
 
-
+// raw data type
 interface GameResults {
 	time: number; 
 	song: string;
@@ -123,8 +123,21 @@ interface GameResults {
 	game_id: string;	
 }
 
+interface Quantiles {
+	q1: number;
+	median: number;
+	q3: number;
+	max: number;
+	min: number;
+	max_limit: number;
+	min_limit: number;
+	album_key: string;
+	accuracy: number;
+}
+
+// stats by game or album
 interface AggGameStats {
-	time: number | string; 
+	avg_time: number; 
 	song: string;
 	album_key: AlbumKey;
 	album: string;

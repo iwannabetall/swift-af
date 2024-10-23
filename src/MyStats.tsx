@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react'
-import axios from 'axios';
 import * as d3 from 'd3';
 import { useCookies } from 'react-cookie';
 // import Loader from './Loader.tsx';
@@ -9,7 +8,6 @@ import useScreenSize from './useScreenSize.tsx';
 import { useGetUserStats } from './data/hooks.tsx';
 import Layout from './Layout.tsx';
 
-let userStats: GameResults[] = []
 
 function MyStats() {
 
@@ -17,10 +15,14 @@ function MyStats() {
 	const albumColorKey = TS.albumColorKey
 	const albumColorKeyvLighter = TS.albumColorKeyvLighter
 	const albumKeyLkup = TS.albumKeyLkup
+	const keyToAlbumNameLkup = TS.keyToAlbumNameLkup
 
 	const [isLoading, setIsLoading] = useState<boolean>(false)
 	const [cookies] = useCookies(['sess']);
 	const [brushRange, setBrushRange] = useState<BrushRange>({x0: undefined, y0: undefined, x1: undefined, y1: undefined})
+	const [brushRange_ByAlbum, setBrushRangeByAlbum] = useState<BrushRange>({x0: undefined, y0: undefined, x1: undefined, y1: undefined})
+	const [sortBy, setSortBy] = useState<string>('accuracy')
+	const [sortDir, setSortDir] = useState<boolean>(true)  // true = best to worst
 	const navigate = useNavigate()
 	const screenSize = useScreenSize()
 
@@ -32,12 +34,19 @@ function MyStats() {
 	const marginLeft = TS.marginLeft
 	const marginRight = TS.marginRight
 
+	const h = screenSize.width > 420 ? 600 : 460
+	const w = screenSize.width > 420 ? 600 : 420
+	const fontSize = screenSize.width > 420 ? '20px' : '18px'
+
+	
+
 	// plot of avg accuracy vs speed with colors by album
 		// repeat for their game type, size based off number of plays 
 	// highest accuracy, fastest game thats at least their median accuracy - percentile vs overall by level 
 	// 
-	console.log('brushRange', brushRange)
-	const userGameData = useGetUserStats(cookies.sess, brushRange)
+	const userGameData = useGetUserStats(cookies.sess, brushRange, brushRange_ByAlbum)
+
+	const userGameDataFull = userGameData.data?.db ? userGameData.data.db : []
 
 	const statsByGame = userGameData.data?.statsByGame ? userGameData.data.statsByGame : []
 
@@ -45,21 +54,157 @@ function MyStats() {
 	console.log('userGameData', userGameData.isFetching, userGameData.data)
 	const swiftestLyrics = userGameData.data?.fastest ? userGameData.data.fastest : []
 	// TODO how to redirect if page expired 
+	const dataByAlbum = {}  // keys are album_key and value is array of values 
+	const quantilesByAlbums: Quantiles[] = [] 
+
+	useEffect(()=>{
+
+		if (userGameData) {
+
+			d3.selectAll('.boxplot').remove()
+
+			// reformat the data filtered by album so we can calc quantiles for a boxplot 
+
+			for (let i = 0; i < TS.albumCovers.length; i++){
+				dataByAlbum[TS.albumCovers[i]] = []
+			}
+			
+			for (let i = 0; i < userGameDataFull.length; i++){
+				dataByAlbum[userGameDataFull[i].album_key].push(userGameDataFull[i])
+			}
+			
+			// calc quantiles for boxplots
+			for (let i = 0; i < TS.albumCovers.length; i++){
+								
+				let times = dataByAlbum[TS.albumCovers[i]].map(x => x.time)
+				let totalCorrect = dataByAlbum[TS.albumCovers[i]].filter(x => x.correct == 1).length
+
+				if (times.length >= 5) {
+					let quantiles = {} as Quantiles			
+					quantiles.q1 = d3.quantile(times, 0.25) || 0
+					quantiles.median = d3.quantile(times, 0.5) || 0
+					quantiles.q3 = d3.quantile(times, 0.75) || 0
+					let iqr = quantiles.q3 - quantiles.q1
+					quantiles.min = Math.min(...times)
+					quantiles.max = Math.max(...times)
+					quantiles.min_limit = quantiles.q1 - 1.5 * iqr
+					quantiles.max_limit = quantiles.q3 + 1.5 * iqr					
+					quantiles.album_key = TS.albumCovers[i]
+
+					// accuracy 
+					quantiles.accuracy = totalCorrect/times.length
+					quantilesByAlbums.push(quantiles)
+				}
+			
+			}
+
+			quantilesByAlbums.sort((a,b) => b[sortBy] - a[sortBy])
+
+			console.log('quantilesByAlbums', quantilesByAlbums)
+
+			console.log('dataByAlbum', dataByAlbum)
+
+			const boxHeight = 30
+			const shiftdY = 4
+
+			// scale x axis by max/min time for each individual lyric 
+			let xScale = d3.scaleLinear().domain([Math.min(...userGameDataFull.map(x=> x.time)), Math.max(...userGameDataFull.map(x=> x.time))]).range([marginLeft, w - marginRight])
+
+			// scale opacity based on min/max accuracy per album 
+			let opacityScale = d3.scaleLinear().domain([0, Math.max(...quantilesByAlbums.map(x=> x.accuracy))]).range([0.2, 1])
+
+			let yScale = d3.scaleBand().domain(quantilesByAlbums.map(x=> x.album_key)).range([margin, h])
+
+			// display actual names and not the abbrevs
+			let legendScale = d3.scaleBand().domain(quantilesByAlbums.map(x=> keyToAlbumNameLkup[x.album_key as keyof typeof keyToAlbumNameLkup])).range([margin, h])
+
 	
+			let boxplot = d3.select("#boxplot").append('svg')
+				.attr('class', 'boxplot')
+				.attr('height', h)
+				.attr('width', w)
+				.attr("viewBox", `0 0 ${h} ${w}`)	
+
+			let albums = boxplot.selectAll<SVGPathElement, Quantiles>('path').data(quantilesByAlbums, function(d: Quantiles) {
+				return d.album_key
+			})	
+
+			// main line 
+			albums.enter().append("line")
+				.attr("x1", function(d){return(xScale(d.min))})
+				.attr("x2", function(d){return(xScale(d.max))})
+				.attr("y1", function(d){return(yScale(d.album_key))})
+				.attr("y2", function(d){return(yScale(d.album_key))})
+				.attr("stroke", "black")
+				.attr('opacity', d => opacityScale(d.accuracy))
+				.attr('transform', `translate(0, -${shiftdY})`)
+				.attr("stroke-width", 1)
+		
+		// box 
+		albums.enter().append("rect")
+			.attr('class', function(d) {
+				return `${albumColorKey[d.album_key as keyof typeof albumColorKey]}`
+			})			
+			.attr('opacity', d => opacityScale(d.accuracy))
+			.attr('transform', `translate(0, -${shiftdY})`)
+			.attr("x", function(d){return(xScale(d.q1))})
+			.attr("y", function(d){return(yScale(d.album_key) - boxHeight/2)})
+			.attr("height", boxHeight)
+			.attr("width", function(d){
+				return xScale(d.q3) - xScale(d.q1)
+			})
+			.attr("stroke", "black")
+
+			// median lines 
+			albums.enter().append("line")
+				.attr('class', function(d) {
+					return `${albumColorKey[d.album_key as keyof typeof albumColorKey]}-stroke`
+				})			
+				.attr('opacity', d => opacityScale(d.accuracy))
+				.attr('transform', `translate(0, -${shiftdY})`)
+				.attr("x1", function(d){return(xScale(d.median))})
+				.attr("x2", function(d){return(xScale(d.median))})
+				.attr("y1", function(d){return(yScale(d.album_key) - boxHeight/2)})
+				.attr("y2", function(d){return(yScale(d.album_key) + boxHeight/2)})
+				.attr("stroke", "black")
+				.attr("stroke-width", 2)
+			
+			d3.select('.boxplot').append('g')
+				.attr('class', 'boxplot-xaxis')
+				.attr('transform', `translate(0, ${h - margin})`)
+				// .call(xAxisGen, xScale)				
+				.call(d3.axisBottom(xScale))
+				.call(g=> g.append('text')
+					.attr('y', 27)
+					.attr('x', w/2)
+					.attr('font-size', '12px')
+					.style('fill', 'black')  // fill defaults to none w/axis generator 
+					.text('Time (s)'))
+			
+			//y axis 
+			d3.select('.boxplot').append('g')
+				.attr('class', 'boxplot-yaxis')
+				.attr('transform', `translate(${1.95*margin}, -30)`)			
+				.call(d3.axisLeft(legendScale))
+				.attr('font-size', '9px')
+			
+			// add points for correct/wrong 
+
+
+
+		}
+
+
+	}, [userGameDataFull, quantilesByAlbums, sortBy])
+	 
+
+
+
 	useEffect(()=> {
 		// scatter plot of accuracy vs date -- each circle color coded by album, squares for game mode - diff colors 
+		// TODO opacity to account for diff number of plays per game 
 		d3.selectAll('.yourgames').remove()
 
-		
-		const h = screenSize.width > 420 ? 600 : 460
-		const w = screenSize.width > 420 ? 600 : 420
-		const fontSize = screenSize.width > 420 ? '20px' : '18px'
-		const margin = 30
-		const marginBottom = 45
-		const marginTop = 36
-		const marginLeft = 60
-		const marginRight = 15
-		
 		// statsByGame is in d3 rollup form so need the d[1] -- but don't need it later bc we make an array of JS obj
 		let xScale = d3.scaleUtc(d3.extent(statsByGame, d=> new Date(d.date)), [marginLeft, w - marginRight])
 
@@ -98,8 +243,6 @@ function MyStats() {
 			if (selection) {
 				const [[x0, y0], [x1, y1]] = selection;			
 
-				console.log('selection', [x0, xInvScale(x0), x1, xInvScale(x1)], [x1,  yInvScale(y0), y0, yInvScale(y1), y1])					
-
 				let selectedData = statsByGame?.filter(x=> (new Date(x.date)).getTime() >= xInvScale(x0) && (new Date(x.date)).getTime() <= xInvScale(x1) && x.accuracy <= yInvScale(y0) && x.accuracy >= yInvScale(y1))
 
 				if (selectedData.length > 0) {
@@ -121,7 +264,7 @@ function MyStats() {
 			})		
 
 		
-		let gameModes = scatter.selectAll<SVGPathElement, GameResults>('path').data(byGameMode, function(d: GameResults) {
+		let gameModes = scatter.selectAll<SVGPathElement, AggGameStats>('path').data(byGameMode, function(d: AggGameStats) {
 			return d.game_id
 		})	
 
@@ -129,7 +272,7 @@ function MyStats() {
 			.attr("d", d3.symbol(d3.symbolCross))
 			.attr('transform', function(d) { return `translate(${xScale(new Date(d.date))}, ${yScale(d.accuracy)})`})
 
-		let mygames = scatter.selectAll<SVGCircleElement, GameResults>('circle').data(byAlbumMode, function(d: GameResults) {
+		let mygames = scatter.selectAll<SVGCircleElement, AggGameStats>('circle').data(byAlbumMode, function(d: AggGameStats) {
 			return d.game_id
 		})		
 		
@@ -152,7 +295,7 @@ function MyStats() {
 					.attr('x', xPos)
 					.attr('y', startY)
 					.attr('font-size', fontSize)
-					.html(`${d.accuracy}% (${d.correct}/${d.total}) | Avg Time: ${d.time}s`)
+					.html(`${d.accuracy}% (${d.correct}/${d.total}) | Avg Time: ${d.avg_time}s`)
 	
 					d3.select('.yourgames').append('text')
 					.attr('class', 'hoverlabel')
@@ -184,7 +327,7 @@ function MyStats() {
 					.style('top', `${event.pageY + 10}px`)
 					.style('left', `${event.pageX + 10}px`)
 					.html(
-						`<div>${d.accuracy}% (${d.correct}/${d.total}) | Avg Time: ${d.time}s</div>
+						`<div>${d.accuracy}% (${d.correct}/${d.total}) | Avg Time: ${d.avg_time}s</div>
 						<div>${d.album_mode}</div>`
 					)
 					// .style('visibility', 'visible');
@@ -237,6 +380,171 @@ function MyStats() {
 
 	}, [statsByGame])
 
+	
+	useEffect(()=> {
+		// scatter plot of accuracy vs speed by album -- larger circles = more plays, --separate by vault songs, add cult 
+
+		d3.selectAll('.byalbum').remove()
+
+
+		let xScale = d3.scaleLinear().domain([Math.min(...statsByAlbum.map(x=> x.avg_time)), Math.max(...statsByAlbum.map(x=> x.avg_time))]).range([marginLeft, w - marginRight])
+
+		
+		let yScale = d3.scaleLinear().domain([Math.min(Math.max(...statsByAlbum.map(x=> x.accuracy)) + 5, 100), Math.max(0, Math.min(...statsByAlbum.map(x=> x.accuracy)) - 5)]).range([marginTop, h - marginBottom])
+
+		const rScale =  d3.scaleLinear().domain([Math.min(...statsByAlbum.map(x=> x.total)), Math.max(...statsByAlbum.map(x=> x.total))]).range([6, 20])
+
+		let xInvScale = d3.scaleUtc().domain([marginLeft, w - marginRight]).range([Math.min(...statsByAlbum.map(x=> x.avg_time)), Math.max(...statsByAlbum.map(x=> x.avg_time))])				
+				
+		let yInvScale = d3.scaleLinear().domain([marginTop, h - marginBottom]).range([Math.max(...statsByAlbum.map(x=> x.accuracy)), Math.min(...statsByAlbum.map(x=> x.accuracy))])
+
+
+		// ['classics version', "Tortured Classics", "Taylor's Version", "The Eras", 'cult version']
+
+	
+		let scatter = d3.select("#byalbum").append('svg')
+			.attr('class', 'byalbum')
+			.attr('height', h)
+			.attr('width', w)
+			.attr("viewBox", `0 0 ${h} ${w}`)	
+		
+		const brush = d3.brush().on("end", ({selection}) => {
+
+			// setScatterHighlight('')
+			d3.selectAll('.hoverlabel').remove()
+			d3.selectAll('.tooltip').remove()
+			
+			if (selection) {
+				const [[x0, y0], [x1, y1]] = selection;			
+
+				console.log('selection', [x0, xInvScale(x0), x1, xInvScale(x1)], [x1,  yInvScale(y0), y0, yInvScale(y1), y1])					
+
+				let selectedData = statsByGame?.filter(x=> x.avg_time >= xInvScale(x0) && x.avg_time <= xInvScale(x1) && x.accuracy <= yInvScale(y0) && x.accuracy >= yInvScale(y1))
+
+				if (selectedData.length > 0) {
+					// // y1 is further up (larger than y0)
+					setBrushRangeByAlbum({x0: x0, y0: y0, x1: x1, y1: y1})
+
+				}
+									
+			}
+		})		
+		.extent([[marginLeft-10,0], [w, h-marginBottom + 10]])  // overlay sizing
+
+		//!!!! must create brush before appending bc it overlays a rect that will block mouseover events
+		scatter.append('g').attr('class', 'brush')
+			.call(brush)
+			.on("dblclick", function() {
+				setBrushRangeByAlbum({x0: undefined, y0: undefined, x1: undefined, y1: undefined})
+			})		
+
+		let albums = scatter.selectAll<SVGCircleElement, AggGameStats>('circle').data(statsByAlbum, function(d: AggGameStats) {
+			return d.album_key
+		})		
+		
+		// cant seem to get transitions to work with mouseover with joins...so using enter.append			
+		albums.enter().append('circle')
+			.attr('class', function(d) {
+				 return `${albumColorKey[d.album_key as keyof typeof albumColorKey]}`
+			})									
+			.on('mouseover', function(event, d) {
+
+				// console.log(d.album)
+				const startY = -40
+				const xPos = screenSize.width < 420 ? 10 : 60		
+				
+				if (screenSize.width < 600) {
+					// if mobile, tool tip goes off page
+					d3.select('.byalbum').append('text')
+					.attr('class', 'hoverlabel')
+					.attr('x', xPos)
+					.attr('y', startY)
+					.attr('font-size', fontSize)
+					.html(`${d.accuracy}% (${d.correct}/${d.total}) | Avg Time: ${d.avg_time?.toFixed(1)}s`)
+	
+					d3.select('.byalbum').append('text')
+					.attr('class', 'hoverlabel')
+					.attr('x', xPos)
+					.attr('y', startY + 25)
+					.attr('font-size', fontSize)
+					.text(`${d.album}`)
+						
+				} else {
+
+					d3.selectAll('.tooltip').remove()
+					
+					var	tooltip = d3
+						.select('body')
+						.append('g')
+							.attr('class', 'tooltip')
+						.append('div')
+						.style('width', '320px')
+						.attr('class', 'd3-tooltip')
+						.style('position', 'absolute')
+						.style('z-index', '10')
+						// .style('visibility', 'hidden')
+						.style('padding', '10px')
+						.style('background', 'rgba(0,0,0,0.6)')
+						.style('border-radius', '4px')
+						.style('color', '#fff')
+
+				tooltip
+					.style('top', `${event.pageY + 10}px`)
+					.style('left', `${event.pageX + 10}px`)
+					.html(
+						`<div>${d.accuracy}% (${d.correct}/${d.total}) | Avg Time: ${d.avg_time?.toFixed(1)}s</div>
+						<div>${d.album}</div>`
+					)
+					// .style('visibility', 'visible');
+ 
+				}			
+							
+			})		
+			.on('mouseout', function(){
+				d3.selectAll('.hoverlabel').remove()
+				d3.selectAll('.tooltip').remove()
+				// setScatterHighlight('')
+			})				
+			// .attr('cx', 0)  // make bounce look like spray bottle 
+			// .attr('cy', h)
+			// .transition(t)
+			.attr('r', d=> rScale(d.total))				
+			.attr('cy', function(d){					
+				return yScale(d.accuracy)
+			})
+			.attr('cx', function(d){					
+				return xScale(d.avg_time || 0)
+			})
+		
+		d3.select('.byalbum').append('g')
+			.attr('class', 'date-xaxis')
+			.attr('transform', `translate(0, ${h - margin})`)
+			// .call(xAxisGen, xScale)				
+			.call(d3.axisBottom(xScale))
+			.call(g=> g.append('text')
+				.attr('y', 27)
+				.attr('x', w/2)
+				.attr('font-size', '12px')
+				.style('fill', 'black')  // fill defaults to none w/axis generator 
+				.text('Game Date'))
+			
+		//y axis 
+		d3.select('.byalbum').append('g')
+			.attr('class', 'accuracy-yaxis')
+			.attr('transform', `translate(${1.7*margin}, 0)`)			
+			.call(d3.axisLeft(yScale))
+			.call(g=> g
+				.append('text')
+				.attr('x', -26)
+				.attr('y', 25)
+				.attr("text-anchor", "middle")
+				.attr('font-size', '12px')
+				.style('fill', 'black')
+				.text('Accuracy')			
+			)
+
+	}, [statsByAlbum])
+
 	useEffect(()=> {
 		// swiftest 10 lyrics 
 		if (swiftestLyrics) {
@@ -277,14 +585,32 @@ function MyStats() {
 				.text(function(d: GameResults) { return d.lyric })
 			
 		}
-		
 
 	}, [swiftestLyrics])
+
+
 
 	return (
 		<>
 		<Layout isLoading={isLoading}>
 		
+			<div className='wrapper'>
+				<h2>How Well Do You Know Each Album</h2>
+				<div className=''>
+					<div>Sort By...</div>
+					<div onClick={() => setSortBy('accuracy')}>Accuracy</div>
+					<div onClick={() => setSortBy('median')}>Median</div>
+					<div onClick={() => setSortBy('min')}>Min</div>
+					<div onClick={() => setSortBy('max')}>Max</div>
+
+					<div onClick={() => setSortDir(!sortDir)}>Best to Worst</div>
+
+				</div>
+				
+				<div id='boxplot'></div>
+			</div>
+
+
 			<div className='wrapper'>
 				<h2>Your Swiftest Top 10</h2>
 				<div id='swiftest10'></div>
@@ -292,7 +618,10 @@ function MyStats() {
 
 			<div className='wrapper'>
 				<h2>View Your Games</h2>
+				
 				<div id='yourgames'></div>
+				<h2>How Well Do You Know Each Album</h2>
+				<div id='byalbum'></div>
 			</div>
 
 			
@@ -306,12 +635,12 @@ function MyStats() {
 						</tr>
 					</thead>
 					<tbody>
-						{statsByAlbum.map(x =><tr className={`text-center text-[#68416d] ${albumColorKey[x[0] as keyof typeof albumColorKey]}`}
-						key={`${x[0]}`}
+						{statsByAlbum.map(x =><tr className={`text-center text-[#68416d] ${albumColorKey[x.album_key as keyof typeof albumColorKey]}`}
+						key={`${x.album_key}`}
 						>
-							<td className="border p-1">{x[1].album}</td>
-							<td className="border p-1">{x.accuracy}% ({x[1].correct}/{x[1].total})</td>
-							<td className="border p-1">{x[1].time}</td>
+							<td className="border p-1">{x.album}</td>
+							<td className="border p-1">{x.accuracy}% ({x.correct}/{x.total})</td>
+							<td className="border p-1">{x.album_key}</td>
 						</tr>)}		
 					</tbody>					
 

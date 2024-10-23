@@ -242,16 +242,24 @@ div.tooltip {
 	background-color: var(--eras-indigo);
 }
 
+.era-taylor-swift-stroke {
+	stroke: var(--era-taylor-swift-text);
+}
+
 .era-taylor-swift {
 	fill: var(--era-taylor-swift);
 	background-color: var(--era-taylor-swift);
 	color: var(--era-taylor-swift-text);
 }
 
+.era-ttpd-stroke{
+	stroke: white;
+}
+
 .era-ttpd{
 	fill: var(--era-ttpd);
 	background-color: var(--era-ttpd);
-	color: var(--era-ttpd-text);	
+	color: var(--era-ttpd-text);
 }
 
 .era-ttpd-gradeA, .era-ttpd-gradeAplus {
@@ -306,7 +314,9 @@ div.tooltip {
 	font-size: var(--font-size-D);
 }
 
-
+.era-fearless-stroke {
+	stroke: var(--era-fearless-text);
+}
 
 .era-fearless {
 	fill: var(--era-fearless);
@@ -338,7 +348,9 @@ div.tooltip {
 	color: var(--era-fearless-text);
 	font-size: var(--font-size-D);
 }
-
+.era-speak-now-stroke {
+	stroke: var(--era-speak-now-text);
+}
 
 .era-speak-now {
 	fill: var(--era-speak-now);
@@ -366,12 +378,13 @@ div.tooltip {
 	color: var(--era-speak-now-text);
 }
 
-
-
 .era-speak-now-gradeD, .era-speak-now-gradeF {
 	background-color: hsla(293.1,25.2%,72.7%, 0.8);
 	color: var(--era-speak-now-text);
 	font-size: var(--font-size-D);
+}
+.era-red-stroke {
+	stroke: var(--era-red-text);
 }
 
 .era-red {
@@ -405,6 +418,9 @@ div.tooltip {
 	font-size: var(--font-size-D);
 }
 
+.era-1989-stroke {
+	stroke: var(--era-1989-text);
+}
 
 .era-1989 {
 	fill: #8cd7f4;
@@ -424,8 +440,8 @@ div.tooltip {
 	background-color: #8cd7f4;
 	/* background-color: rgb(158,226,243); */
 	color: var(--era-1989-text);
+	stroke: var(--era-1989-text);
 	font-size: var(--font-size-A);
-
 }
 
 .era-1989-gradeB {
@@ -454,7 +470,9 @@ div.tooltip {
 	font-size: var(--font-size-D);
 }
 
-
+.era-reputation-stroke {
+	stroke: var(--era-reputation-text);
+}
 
 .era-reputation {
 	fill: var(--era-reputation);
@@ -488,6 +506,10 @@ div.tooltip {
 	font-size: var(--font-size-D);
 }
 
+.era-lover-stroke{
+	stroke: var(--era-lover-text);
+
+}
 
 .era-lover {
 	fill: var(--era-lover);
@@ -523,6 +545,9 @@ div.tooltip {
 	font-size: var(--font-size-D);
 }
 
+.era-folklore-stroke{
+	stroke: black;
+}
 
 .era-folklore {
 	fill: var(--era-folklore);
@@ -538,7 +563,6 @@ div.tooltip {
 	font-size: var(--font-size-A);
 
 }
-
 
 .era-folklore-gradeB {
 	opacity: 0.8;
@@ -560,7 +584,9 @@ div.tooltip {
 	font-size: var(--font-size-D);
 }
 
-
+.era-evermore-stroke {
+	stroke: var(--era-evermore-text);
+}
 .era-evermore {
 	fill: var(--era-evermore);
 	background-color: var(--era-evermore);
@@ -604,6 +630,10 @@ div.tooltip {
 .era-ttpd-lighter {
 	fill: hsl(28,7.6%,38.6%);
 	background-color: hsl(28,7.6%,38.6%);
+}
+
+.era-midnights-stroke {
+	stroke: black;
 }
 
 .era-midnights {

@@ -24,3 +24,17 @@ export const albumKeyLkup = { "Taylor Swift" : "Taylor_Swift", "Fearless" : "Fea
 export const albums = ["Taylor Swift", "Fearless", "Speak Now", "Red", "1989", "reputation", "Lover", "folklore", "evermore", "Midnights", "THE TORTURED POETS DEPARTMENT"] as const
 
 export const albumCovers = ["Taylor_Swift", "Fearless", "Speak_Now", "Red", "1989", "reputation", "Lover", "folklore", "evermore", "Midnights", 'TTPD'] as const
+
+export const keyToAlbumNameLkup = {
+	"1989": "1989",
+	"Taylor_Swift": "Taylor Swift",
+	"Fearless": "Fearless",
+	"Speak_Now": "Speak Now",
+	"Red": "Red",
+	"reputation": "reputation",
+	"Lover": "Lover",
+	"folklore": "folklore",
+	"evermore": "evermore",
+	"Midnights": "Midnights",
+	"TTPD": "TTPD"
+}
