@@ -96,7 +96,7 @@ export function useLeaderboardData(filter: string) {
 
 }
 
-export function useGetUserStats(sess_id: string, brushRange: BrushRange) {
+export function useGetUserStats(sess_id: string, brushRange: BrushRange, brushRange_ByAlbum: BrushRange) {
 	const screenSize = useScreenSize()
 
 	const h = screenSize.width > 420 ? 600 : 460
@@ -117,13 +117,14 @@ export function useGetUserStats(sess_id: string, brushRange: BrushRange) {
 					total: v.length,
 					correct: d3.sum(v, d=> d.correct),
 					accuracy: Math.round(100*(d3.sum(v, d=> d.correct)/v.length)),
-					time: v ? d3.mean(v, d=> d.time)?.toFixed(1): '-',
+					avg_time: d3.mean(v, d=> d.time),
 					correct_time: v.filter(x=> x.correct == 1).length > 0 ? d3.mean(v.filter(x=> x.correct == 1), d=> d.time) : '-',
 					wrong_time: v.filter(x=> x.correct == 0).length > 0 ? d3.mean(v.filter(x=> x.correct == 0), d=> d.time) : '-'
 
 				}
 
 			}, d=> d.album_key)
+
 
 			const statsByGameAgg = d3.rollups(data, v=> {
 				return {
@@ -133,7 +134,7 @@ export function useGetUserStats(sess_id: string, brushRange: BrushRange) {
 					total: v.length,
 					correct: d3.sum(v, d=> d.correct),
 					accuracy: Math.round(100*(d3.sum(v, d=> d.correct)/v.length)),
-					time: v ? d3.mean(v, d=> d.time)?.toFixed(1): '-',
+					avg_time: v ? d3.mean(v, d=> d.time)?.toFixed(1): '-',
 					correct_time: v.filter(x=> x.correct == 1).length > 0 ? d3.mean(v.filter(x=> x.correct == 1), d=> d.time) : '-',
 					wrong_time: v.filter(x=> x.correct == 0).length > 0 ? d3.mean(v.filter(x=> x.correct == 0), d=> d.time) : '-'
 
@@ -142,22 +143,33 @@ export function useGetUserStats(sess_id: string, brushRange: BrushRange) {
 			}, d=> d.game_id)
 
 			// need to flatten 
-			const statsByGame = []
+			const statsByAlbum = []
+			for (let i = 0; i < albumStats.length; i++) {
+				statsByAlbum.push({...albumStats[i][1], 'album_key': albumStats[i][0]})		
+			}
 
+			const statsByGame = []
 			for (let i = 0; i < statsByGameAgg.length; i++) {
 				statsByGame.push({...statsByGameAgg[i][1], 'game_id': statsByGameAgg[i][0]})		
 			}
-
-			// need to add .getTime to make TS happy bc it will return a 
+ 
+			// need to add .getTime to make TS happy bc it will return a number
 			let xInvScale = d3.scaleUtc().domain([marginLeft, w - marginRight]).range([Math.min(...statsByGame.map(x=> (new Date(x.date)).getTime())), Math.max(...statsByGame.map(x=> (new Date(x.date)).getTime()))])				
 				
 			let yInvScale = d3.scaleLinear().domain([marginTop, h - marginBottom]).range([Math.max(...statsByGame.map(x=> x.accuracy)), Math.min(...statsByGame.map(x=> x.accuracy))])
 
 			const statsByGameFiltered = brushRange.x0 ? statsByGame.filter(x=> (new Date(x.date)).getTime() >= xInvScale(brushRange.x0 || 0) && (new Date(x.date)).getTime() <= xInvScale(brushRange.x1 || 0) && x.accuracy <= yInvScale(brushRange.y0 || 0) && x.accuracy >= yInvScale(brushRange.y1 || 0)) : statsByGame
 
+			// repeat for by album 
+			let xInvScaleByAlbum = d3.scaleUtc().domain([marginLeft, w - marginRight]).range([Math.min(...statsByAlbum.map(x=> x.avg_time)), Math.max(...statsByAlbum.map(x=> x.avg_time))])				
+				
+			let yInvScaleByAlbum = d3.scaleLinear().domain([marginTop, h - marginBottom]).range([Math.max(...statsByAlbum.map(x=> x.accuracy)), Math.min(...statsByAlbum.map(x=> x.accuracy))])
+
+			const statsByAlbumFiltered = brushRange_ByAlbum.x0 ? statsByAlbum.filter(x=> x.avg_time >= xInvScaleByAlbum(brushRange_ByAlbum.x0 || 0) && x.avg_time <= xInvScaleByAlbum(brushRange_ByAlbum.x1 || 0) && x.accuracy <= yInvScaleByAlbum(brushRange_ByAlbum.y0 || 0) && x.accuracy >= yInvScaleByAlbum(brushRange_ByAlbum.y1 || 0)) : statsByAlbum
+
 			let fastest = data.filter(x=> x.correct == 1).sort((a,b) => a.time - b.time).slice(0,10)
 
-			return { albumStats: albumStats, statsByGame: statsByGameFiltered, fastest: fastest }
+			return { albumStats: statsByAlbumFiltered, statsByGame: statsByGameFiltered, fastest: fastest, db: data}
 		},
 		queryFn: () => getUserStats(sess_id),
 	})
