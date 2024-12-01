@@ -46,7 +46,7 @@ function Nav({ location } : {location: {pathname: string}}){
 
 	return (
 		<div className="era-reputation left-0">
-			<nav className="nav era-reputation min-w-full fixed p-2 top-0 block justify-between mx-auto">
+			<nav className="nav era-reputation min-w-full fixed p-2 top-0 block justify-between mx-auto left-0">
 				<ul className='flex flex-row flex-wrap'>
 					{!cookies.sess && paths.map(x=> <li key={x.key} className={`era-reputation inline ml-1 mr-1 p-1 ${location.pathname == x.key ? 'underline' :'faded'}`}><a className="color-white" href={x.key}>{location.pathname == '/' && x.value == 'Home' ? 'Begin' : x.value == 'Home' ? 'Begin Again' : x.value}</a></li>)}					
 					{cookies.sess && loggedInPaths.map(x=> <li key={x.key} className={`era-reputation inline navlink ${location.pathname == x.key ? 'underline' :'faded'}`}><a className="color-white" href={x.key}>{location.pathname == '/' && x.value == 'Home' ? 'Begin' : x.value == 'Home' ? 'Begin Again' : x.value}</a></li>)}	
