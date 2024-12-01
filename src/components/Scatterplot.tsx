@@ -34,7 +34,7 @@ function getScale(type: string, data: any, key: string) {
 }
 
 // reuseable scatterplot with zoomable brush 
-function Scatterplot (className: string, data: any, vizDiv: string, xType: string, yType: string, xKey: string, yKey: string) {
+function Scatterplot (className: string, data: any, vizDiv: string, xType: string, yType: string, xKey: string, yKey: string, updateBrush: function) {
 	// vizDiv = name of div that we're appending to -- will also double as the class name of objects we're appending 
 	// xKey, yKey are the accessors in the data for the scale ie what are we scaling on 
 	// need to pass in an object of the data type 

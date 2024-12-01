@@ -424,7 +424,7 @@ function MyStats() {
 
 		const rScale =  d3.scaleLinear().domain([Math.min(...statsByAlbum.map(x=> x.total)), Math.max(...statsByAlbum.map(x=> x.total))]).range([6, 20])
 
-		let xInvScale = d3.scaleUtc().domain([marginLeft, w - marginRight]).range([Math.min(...statsByAlbum.filter(x=> x.avg_time != undefined).map(x=> x.avg_time)), Math.max(...statsByAlbum.map(x=> x.avg_time))])				
+		let xInvScale = d3.scaleUtc().domain([marginLeft, w - marginRight]).range([Math.min(...statsByAlbum.map(x=> x.avg_time)), Math.max(...statsByAlbum.map(x=> x.avg_time))])				
 				
 		let yInvScale = d3.scaleLinear().domain([marginTop, h - marginBottom]).range([Math.max(...statsByAlbum.map(x=> x.accuracy)), Math.min(...statsByAlbum.map(x=> x.accuracy))])
 
