@@ -132,7 +132,10 @@ interface Quantiles {
 	max_limit: number;
 	min_limit: number;
 	album_key: string;
-	accuracy: number;
+	accuracy?: number;
+	type: number;
+	count: number;
+	data_key: string;
 }
 
 // stats by game or album

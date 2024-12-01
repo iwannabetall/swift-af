@@ -74,38 +74,55 @@ function MyStats() {
 			}
 			
 			// calc quantiles for boxplots
-			for (let i = 0; i < TS.albumCovers.length; i++){
-								
-				let times = dataByAlbum[TS.albumCovers[i]].map(x => x.time)
-				let totalCorrect = dataByAlbum[TS.albumCovers[i]].filter(x => x.correct == 1).length
+			const options = [1, 0] // calc by accuracy
 
+			for (let i = 0; i < TS.albumCovers.length; i++){
+				for (let j = 0; j < options.length; j++){
+								
+				let times = dataByAlbum[TS.albumCovers[i]].filter(x => x.correct == options[j]).map(x => x.time)
+				let count = dataByAlbum[TS.albumCovers[i]].filter(x => x.correct == options[j]).length
+				let accuracy = dataByAlbum[TS.albumCovers[i]].filter(x => x.correct == 1).length/dataByAlbum[TS.albumCovers[i]].map(x => x.time).length
+				
 				if (times.length >= 5) {
-					let quantiles = {} as Quantiles			
+
+					let quantiles = {} as Quantiles		
+					quantiles.type = options[j]
+					quantiles.count = count
 					quantiles.q1 = d3.quantile(times, 0.25) || 0
 					quantiles.median = d3.quantile(times, 0.5) || 0
 					quantiles.q3 = d3.quantile(times, 0.75) || 0
 					let iqr = quantiles.q3 - quantiles.q1
 					quantiles.min = Math.min(...times)
 					quantiles.max = Math.max(...times)
-					quantiles.min_limit = quantiles.q1 - 1.5 * iqr
+					quantiles.min_limit = quantiles.q1 - 1.5 * iqr > 0 ? quantiles.q1 - 1.5 * iqr : 0 
 					quantiles.max_limit = quantiles.q3 + 1.5 * iqr					
 					quantiles.album_key = TS.albumCovers[i]
+					quantiles.data_key = `${TS.albumCovers[i]}_${options[j]}`
 
 					// accuracy 
-					quantiles.accuracy = totalCorrect/times.length
+					quantiles.accuracy = accuracy
 					quantilesByAlbums.push(quantiles)
 				}
 			
 			}
+		}
 
-			quantilesByAlbums.sort((a,b) => b[sortBy] - a[sortBy])
+			if (sortBy == 'accuracy') {
+				// sort descending order
+				quantilesByAlbums.sort((a,b) => b[sortBy] - a[sortBy])
+			} else {
+				// sort best to worst times ie ascending order 
+				quantilesByAlbums.sort((a,b) => a[sortBy] - b[sortBy])
+			}
+			
 
 			console.log('quantilesByAlbums', quantilesByAlbums)
 
 			console.log('dataByAlbum', dataByAlbum)
 
-			const boxHeight = 30
+			const boxHeight = 20
 			const shiftdY = 4
+			const typeShift = 10
 
 			// scale x axis by max/min time for each individual lyric 
 			let xScale = d3.scaleLinear().domain([Math.min(...userGameDataFull.map(x=> x.time)), Math.max(...userGameDataFull.map(x=> x.time))]).range([marginLeft, w - marginRight])
@@ -133,10 +150,16 @@ function MyStats() {
 			albums.enter().append("line")
 				.attr("x1", function(d){return(xScale(d.min))})
 				.attr("x2", function(d){return(xScale(d.max))})
-				.attr("y1", function(d){return(yScale(d.album_key))})
-				.attr("y2", function(d){return(yScale(d.album_key))})
+				.attr("y1", function(d){
+					const shift = d.type == 1 ? yScale(d.album_key) - typeShift : yScale(d.album_key) + typeShift 
+					return shift
+				})
+				.attr("y2", function(d){
+					const shift = d.type == 1 ? yScale(d.album_key) - typeShift : yScale(d.album_key) + typeShift 
+					return shift
+				})
 				.attr("stroke", "black")
-				.attr('opacity', d => opacityScale(d.accuracy))
+				// .attr('opacity', d => opacityScale(d.accuracy))
 				.attr('transform', `translate(0, -${shiftdY})`)
 				.attr("stroke-width", 1)
 		
@@ -145,10 +168,13 @@ function MyStats() {
 			.attr('class', function(d) {
 				return `${albumColorKey[d.album_key as keyof typeof albumColorKey]}`
 			})			
-			.attr('opacity', d => opacityScale(d.accuracy))
+			// .attr('opacity', d => opacityScale(d.accuracy))
 			.attr('transform', `translate(0, -${shiftdY})`)
 			.attr("x", function(d){return(xScale(d.q1))})
-			.attr("y", function(d){return(yScale(d.album_key) - boxHeight/2)})
+			.attr("y", function(d){
+				const y = d.type == 1 ? yScale(d.album_key) - boxHeight/2 - typeShift : yScale(d.album_key) - boxHeight/2 + typeShift
+				return y
+			})
 			.attr("height", boxHeight)
 			.attr("width", function(d){
 				return xScale(d.q3) - xScale(d.q1)
@@ -160,12 +186,18 @@ function MyStats() {
 				.attr('class', function(d) {
 					return `${albumColorKey[d.album_key as keyof typeof albumColorKey]}-stroke`
 				})			
-				.attr('opacity', d => opacityScale(d.accuracy))
+				// .attr('opacity', d => opacityScale(d.accuracy))
 				.attr('transform', `translate(0, -${shiftdY})`)
 				.attr("x1", function(d){return(xScale(d.median))})
-				.attr("x2", function(d){return(xScale(d.median))})
-				.attr("y1", function(d){return(yScale(d.album_key) - boxHeight/2)})
-				.attr("y2", function(d){return(yScale(d.album_key) + boxHeight/2)})
+				.attr("x2", function(d){return(xScale(d.median))})				
+				.attr("y1", function(d){
+					const shift = d.type == 1 ? yScale(d.album_key) - boxHeight/2 - typeShift : yScale(d.album_key) - boxHeight/2 + typeShift 
+					return shift
+				})
+				.attr("y2", function(d){
+					const shift = d.type == 1 ? yScale(d.album_key) + boxHeight/2 - typeShift : yScale(d.album_key) + boxHeight/2 + typeShift 
+					return shift
+				})
 				.attr("stroke", "black")
 				.attr("stroke-width", 2)
 			
@@ -386,18 +418,15 @@ function MyStats() {
 
 		d3.selectAll('.byalbum').remove()
 
-
 		let xScale = d3.scaleLinear().domain([Math.min(...statsByAlbum.map(x=> x.avg_time)), Math.max(...statsByAlbum.map(x=> x.avg_time))]).range([marginLeft, w - marginRight])
 
-		
 		let yScale = d3.scaleLinear().domain([Math.min(Math.max(...statsByAlbum.map(x=> x.accuracy)) + 5, 100), Math.max(0, Math.min(...statsByAlbum.map(x=> x.accuracy)) - 5)]).range([marginTop, h - marginBottom])
 
 		const rScale =  d3.scaleLinear().domain([Math.min(...statsByAlbum.map(x=> x.total)), Math.max(...statsByAlbum.map(x=> x.total))]).range([6, 20])
 
-		let xInvScale = d3.scaleUtc().domain([marginLeft, w - marginRight]).range([Math.min(...statsByAlbum.map(x=> x.avg_time)), Math.max(...statsByAlbum.map(x=> x.avg_time))])				
+		let xInvScale = d3.scaleUtc().domain([marginLeft, w - marginRight]).range([Math.min(...statsByAlbum.filter(x=> x.avg_time != undefined).map(x=> x.avg_time)), Math.max(...statsByAlbum.map(x=> x.avg_time))])				
 				
 		let yInvScale = d3.scaleLinear().domain([marginTop, h - marginBottom]).range([Math.max(...statsByAlbum.map(x=> x.accuracy)), Math.min(...statsByAlbum.map(x=> x.accuracy))])
-
 
 		// ['classics version', "Tortured Classics", "Taylor's Version", "The Eras", 'cult version']
 
@@ -600,6 +629,8 @@ function MyStats() {
 					<div>Sort By...</div>
 					<div onClick={() => setSortBy('accuracy')}>Accuracy</div>
 					<div onClick={() => setSortBy('median')}>Median</div>
+					<div onClick={() => setSortBy('q1')}>1st Quartile</div>
+					<div onClick={() => setSortBy('q3')}>3rd Quartile</div>
 					<div onClick={() => setSortBy('min')}>Min</div>
 					<div onClick={() => setSortBy('max')}>Max</div>
 
@@ -631,7 +662,8 @@ function MyStats() {
 						<tr>
 						<th>Album</th>
 						<th>Total</th>
-						<th>Time</th>
+						<th>Correct Time</th>
+						<th>Wrong Time</th>
 						</tr>
 					</thead>
 					<tbody>
@@ -640,7 +672,8 @@ function MyStats() {
 						>
 							<td className="border p-1">{x.album}</td>
 							<td className="border p-1">{x.accuracy}% ({x.correct}/{x.total})</td>
-							<td className="border p-1">{x.album_key}</td>
+							<td className="border p-1">{x.correct_time?.toFixed(1)}</td>
+							<td className="border p-1">{x.wrong_time?.toFixed(1)}</td>
 						</tr>)}		
 					</tbody>					
 
