@@ -7,7 +7,8 @@ import { useNavigate } from 'react-router-dom';
 import useScreenSize from './useScreenSize.tsx';
 import { useGetUserStats } from './data/hooks.tsx';
 import Layout from './Layout.tsx';
-
+import SortableTable from '/src/components/SortableTable.tsx'
+import moment from 'moment';
 
 function MyStats() {
 
@@ -23,6 +24,7 @@ function MyStats() {
 	const [brushRange_ByAlbum, setBrushRangeByAlbum] = useState<BrushRange>({x0: undefined, y0: undefined, x1: undefined, y1: undefined})
 	const [sortBy, setSortBy] = useState<string>('accuracy')
 	const [sortDir, setSortDir] = useState<boolean>(true)  // true = best to worst
+	const [compareCorrect, setCompareCorrect] = useState<boolean>(true) // compare correct vs incorrect
 	const navigate = useNavigate()
 	const screenSize = useScreenSize()
 
@@ -56,6 +58,43 @@ function MyStats() {
 	// TODO how to redirect if page expired 
 	const dataByAlbum = {}  // keys are album_key and value is array of values 
 	const quantilesByAlbums: Quantiles[] = [] 
+ 
+
+	const gameHeaders = [{
+			Header: '',
+			id:'games',
+			columns: [
+		{
+			Header: 'Date',
+			accessor: d => moment(d.date).format('MMM D, YYYY'),
+		},
+		{
+			Header: 'Game Type',
+			id:'game_mode',       
+			accessor: d=> d.album_mode == 'THE TORTURED POETS DEPARTMENT' ? 'TTPD' : d.game_mode == 'album' ? d.album_mode : d.game_mode 
+		},				
+		{
+			Header: 'Accuracy',
+			id:'accuracy',
+			accessor: d=> `${d.accuracy}%`,			 
+		},
+		{
+			Header: 'Correct',
+			id:'correct',
+			accessor: d=> `${d.correct}`,			 
+		},
+		{
+			Header: 'Total Plays',
+			id:'total',
+			accessor: d=> `${d.total}`,			 
+		},
+		{
+			Header: 'Speed (s)',
+			id: 'speed',
+			accessor: d=> d.avg_time,
+		}
+	]
+}]
 
 	useEffect(()=>{
 
@@ -229,7 +268,6 @@ function MyStats() {
 
 	}, [userGameDataFull, quantilesByAlbums, sortBy])
 	 
-
 
 
 	useEffect(()=> {
@@ -418,7 +456,10 @@ function MyStats() {
 
 		d3.selectAll('.byalbum').remove()
 
-		let xScale = d3.scaleLinear().domain([Math.min(...statsByAlbum.map(x=> x.avg_time)), Math.max(...statsByAlbum.map(x=> x.avg_time))]).range([marginLeft, w - marginRight])
+		const minTimeBoundary = Math.min(...statsByAlbum.map(x=> x.avg_time)) 
+		const maxTimeBoundary = Math.max(...statsByAlbum.map(x=> x.avg_time))
+
+		let xScale = d3.scaleLinear().domain([minTimeBoundary, maxTimeBoundary]).range([marginLeft, w - marginRight])
 
 		let yScale = d3.scaleLinear().domain([Math.min(Math.max(...statsByAlbum.map(x=> x.accuracy)) + 5, 100), Math.max(0, Math.min(...statsByAlbum.map(x=> x.accuracy)) - 5)]).range([marginTop, h - marginBottom])
 
@@ -555,7 +596,7 @@ function MyStats() {
 				.attr('x', w/2)
 				.attr('font-size', '12px')
 				.style('fill', 'black')  // fill defaults to none w/axis generator 
-				.text('Game Date'))
+				.text('Avg Speed (s)'))
 			
 		//y axis 
 		d3.select('.byalbum').append('g')
@@ -622,9 +663,51 @@ function MyStats() {
 	return (
 		<>
 		<Layout isLoading={isLoading}>
-		
+			<h2>How Well Do You Know Each Album</h2>
+			
+			{statsByAlbum && <div className='mb-4'>
+				<table>
+					<thead>
+						<tr>
+						<th>Album</th>
+						<th>Total</th>
+						<th>Correct Time</th>
+						<th>Wrong Time</th>
+						<th>Delta (s)</th>
+						</tr>
+					</thead>
+					<tbody>
+						{statsByAlbum.map(x =><tr className={`text-center text-[#68416d] ${albumColorKey[x.album_key as keyof typeof albumColorKey]}`}
+						key={`${x.album_key}`}
+						>
+							<td className="border p-1">{x.album}</td>
+							<td className="border p-1">{x.accuracy}% ({x.correct}/{x.total})</td>
+							<td className="border p-1">{x.correct_time?.toFixed(1)}</td>
+							<td className="border p-1">{x.wrong_time?.toFixed(1)}</td>
+							<td className="border p-1">{x.correct_time && x.wrong_time ? (x.correct_time - x.wrong_time)?.toFixed(1) : '-'}</td>
+						</tr>)}		
+					</tbody>					
+
+				</table>
+			</div>}
+
 			<div className='wrapper'>
-				<h2>How Well Do You Know Each Album</h2>
+				<h2>Accuracy vs. Speed</h2>
+				<div id='byalbum'></div>
+
+				<h2 className='m-6'>View Your Games</h2>
+				<h3 className='text-lg'>Select a game to view individual game results</h3>
+				<div className="tableContainer mt-4 max-h-96 overflow-auto">
+					<SortableTable 
+					data={statsByGame}
+					columns={gameHeaders}
+					/>
+				</div>
+				<div id='yourgames'></div>
+				
+			</div>
+
+			<div className='wrapper'>
 				<div className=''>
 					<div>Sort By...</div>
 					<div onClick={() => setSortBy('accuracy')}>Accuracy</div>
@@ -647,38 +730,10 @@ function MyStats() {
 				<div id='swiftest10'></div>
 			</div>
 
-			<div className='wrapper'>
-				<h2>View Your Games</h2>
-				
-				<div id='yourgames'></div>
-				<h2>How Well Do You Know Each Album</h2>
-				<div id='byalbum'></div>
-			</div>
+			
 
 			
-			{statsByAlbum && <div className='mb-4'>
-				<table>
-					<thead>
-						<tr>
-						<th>Album</th>
-						<th>Total</th>
-						<th>Correct Time</th>
-						<th>Wrong Time</th>
-						</tr>
-					</thead>
-					<tbody>
-						{statsByAlbum.map(x =><tr className={`text-center text-[#68416d] ${albumColorKey[x.album_key as keyof typeof albumColorKey]}`}
-						key={`${x.album_key}`}
-						>
-							<td className="border p-1">{x.album}</td>
-							<td className="border p-1">{x.accuracy}% ({x.correct}/{x.total})</td>
-							<td className="border p-1">{x.correct_time?.toFixed(1)}</td>
-							<td className="border p-1">{x.wrong_time?.toFixed(1)}</td>
-						</tr>)}		
-					</tbody>					
-
-				</table>
-			</div>}
+		
 		</Layout>
 		</>
 	)

@@ -34,6 +34,8 @@ import { useLeaderboardData, useLyricsData, useSongs } from './data/hooks.tsx'
 let leaderboardFullDB: Leaderboard[] = []
 // const queryClient = new QueryClient()
 
+console.log('does this api key thing work is this', import.meta.env.API_KEY, 'how do i do this', process.env.API_KEY)
+
 function App() {	
 	// const location = useLocation()
 	

@@ -4,7 +4,16 @@ import * as d3 from 'd3';
 import useScreenSize from '../useScreenSize.tsx';
 import * as TS from '../Constants.tsx'
 
+// interface Env {
+// 	API_KEY: string;
+// 	ENVIRONMENT: string;
+// }
 
+// export async function onRequest(context) {
+//   const KEY = context.env.API_KEY;
+
+//   return new Response(KEY)
+// }
 const normal = "classics version" as const
 const challenging = 'Tortured Classics' as const
 const hard = "Taylor's Version" as const

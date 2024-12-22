@@ -1007,3 +1007,16 @@ div.tooltip {
 @media (min-width:768px){
 }
 
+
+
+table td {
+  background: #fff;
+  padding: 4px 5px;
+  text-align: center;
+	word-wrap: normal;
+}
+
+table th {
+	padding-left: 4px;
+	padding-right: 4px;
+}
