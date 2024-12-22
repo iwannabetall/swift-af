@@ -33,7 +33,7 @@ import { useLeaderboardData, useLyricsData, useSongs } from './data/hooks.tsx'
 // let songsFullDB: SongList[] = [] // all songs 
 let leaderboardFullDB: Leaderboard[] = []
 // const queryClient = new QueryClient()
-console.log('does this api key thing work is this', import.meta.env.VITE_API_KEY, 'how do i do this', process.env.VITE_API_KEY)
+console.log('does this api key thing work is this', import.meta.env.VITE_API_KEY, 'how do i do this', process.env.VITE_API_KEY, process.env.NODE_ENV, process.env.REACT_APP_API_KEY)
 
 function App() {	
 	// const location = useLocation()
