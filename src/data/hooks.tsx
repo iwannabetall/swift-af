@@ -100,7 +100,7 @@ export function useLeaderboardData(filter: string) {
 		},
 		queryFn: () => getLeaderboard(),
     retry: false, 
-    staleTime: 1000000, // 16 min
+    staleTime: 300000, // 5 min
   })
 
 }
@@ -113,6 +113,7 @@ export function useGetUserStats(sess_id: string, brushRange: BrushRange, brushRa
 
 	// const h = 600
 	// const w = 600
+	//TODO - is this the right query key??  if you pull your stats, play a game, will it update immediately 
 
 	return useQuery({
 		queryKey: ['userStats', sess_id],

@@ -7,7 +7,7 @@ import { useNavigate } from 'react-router-dom';
 import useScreenSize from './useScreenSize.tsx';
 import { useGetUserStats } from './data/hooks.tsx';
 import Layout from './Layout.tsx';
-import SortableTable from '/src/components/SortableTable.tsx'
+import SortableTable from './components/SortableTable.tsx';
 import moment from 'moment';
 
 function MyStats() {
