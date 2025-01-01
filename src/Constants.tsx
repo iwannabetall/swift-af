@@ -8,6 +8,8 @@ const development = {
 
 export const config: { url: string } = process.env.NODE_ENV === 'development' ? development : production; 
 
+export const forgotyouexisted = 'soL0ng_16BN_ROWS'
+
 // for data viz
 export const margin = 30
 export const marginBottom = 45

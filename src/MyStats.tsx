@@ -91,7 +91,7 @@ function MyStats() {
 		{
 			Header: 'Speed (s)',
 			id: 'speed',
-			accessor: d=> d.avg_time,
+			accessor: d=> parseFloat(d.avg_time),
 		}
 	]
 }]
@@ -148,16 +148,16 @@ function MyStats() {
 
 			if (sortBy == 'accuracy') {
 				// sort descending order
-				quantilesByAlbums.sort((a,b) => b[sortBy] - a[sortBy])
+				quantilesByAlbums.sort((a,b) => (b[sortBy] ?? 0) - (a[sortBy] ?? 0))
 			} else {
 				// sort best to worst times ie ascending order 
 				quantilesByAlbums.sort((a,b) => a[sortBy] - b[sortBy])
 			}
 			
 
-			console.log('quantilesByAlbums', quantilesByAlbums)
+			// console.log('quantilesByAlbums', quantilesByAlbums)
 
-			console.log('dataByAlbum', dataByAlbum)
+			// console.log('dataByAlbum', dataByAlbum)
 
 			const boxHeight = 20
 			const shiftdY = 4
@@ -167,7 +167,7 @@ function MyStats() {
 			let xScale = d3.scaleLinear().domain([Math.min(...userGameDataFull.map(x=> x.time)), Math.max(...userGameDataFull.map(x=> x.time))]).range([marginLeft, w - marginRight])
 
 			// scale opacity based on min/max accuracy per album 
-			let opacityScale = d3.scaleLinear().domain([0, Math.max(...quantilesByAlbums.map(x=> x.accuracy))]).range([0.2, 1])
+			// let opacityScale = d3.scaleLinear().domain([0, Math.max(...quantilesByAlbums.map(x=> x.accuracy))]).range([0.2, 1])
 
 			let yScale = d3.scaleBand().domain(quantilesByAlbums.map(x=> x.album_key)).range([margin, h])
 
@@ -190,11 +190,14 @@ function MyStats() {
 				.attr("x1", function(d){return(xScale(d.min))})
 				.attr("x2", function(d){return(xScale(d.max))})
 				.attr("y1", function(d){
-					const shift = d.type == 1 ? yScale(d.album_key) - typeShift : yScale(d.album_key) + typeShift 
-					return shift
+					const y = yScale(d.album_key) ?? 0
+					const shift = d.type == 1 ? y - typeShift : y + typeShift 
+					return shift					
+					
 				})
 				.attr("y2", function(d){
-					const shift = d.type == 1 ? yScale(d.album_key) - typeShift : yScale(d.album_key) + typeShift 
+					const y = yScale(d.album_key) ?? 0
+					const shift = d.type == 1 ? y - typeShift : y + typeShift 
 					return shift
 				})
 				.attr("stroke", "black")
@@ -211,7 +214,9 @@ function MyStats() {
 			.attr('transform', `translate(0, -${shiftdY})`)
 			.attr("x", function(d){return(xScale(d.q1))})
 			.attr("y", function(d){
-				const y = d.type == 1 ? yScale(d.album_key) - boxHeight/2 - typeShift : yScale(d.album_key) - boxHeight/2 + typeShift
+				const yShift = yScale(d.album_key) ?? 0
+
+				const y = d.type == 1 ? yShift - boxHeight/2 - typeShift : yShift - boxHeight/2 + typeShift
 				return y
 			})
 			.attr("height", boxHeight)
@@ -230,11 +235,15 @@ function MyStats() {
 				.attr("x1", function(d){return(xScale(d.median))})
 				.attr("x2", function(d){return(xScale(d.median))})				
 				.attr("y1", function(d){
-					const shift = d.type == 1 ? yScale(d.album_key) - boxHeight/2 - typeShift : yScale(d.album_key) - boxHeight/2 + typeShift 
+					const y = yScale(d.album_key) ?? 0
+
+					const shift = d.type == 1 ? y - boxHeight/2 - typeShift : y - boxHeight/2 + typeShift 
 					return shift
 				})
 				.attr("y2", function(d){
-					const shift = d.type == 1 ? yScale(d.album_key) + boxHeight/2 - typeShift : yScale(d.album_key) + boxHeight/2 + typeShift 
+					const y = yScale(d.album_key) ?? 0
+
+					const shift = d.type == 1 ? y + boxHeight/2 - typeShift : y + boxHeight/2 + typeShift 
 					return shift
 				})
 				.attr("stroke", "black")
@@ -276,13 +285,13 @@ function MyStats() {
 		d3.selectAll('.yourgames').remove()
 
 		// statsByGame is in d3 rollup form so need the d[1] -- but don't need it later bc we make an array of JS obj
-		let xScale = d3.scaleUtc(d3.extent(statsByGame, d=> new Date(d.date)), [marginLeft, w - marginRight])
+		let xScale = d3.scaleUtc(d3.extent(statsByGame, d=> new Date(d.date as string)) as [Date, Date], [marginLeft, w - marginRight])
 
 		
 		let yScale = d3.scaleLinear().domain([Math.min(Math.max(...statsByGame.map(x=> x.accuracy)) + 5, 100), Math.max(0, Math.min(...statsByGame.map(x=> x.accuracy)) - 5)]).range([marginTop, h - marginBottom])
 
 
-		let xInvScale = d3.scaleUtc().domain([marginLeft, w - marginRight]).range([Math.min(...statsByGame.map(x=> (new Date(x.date)).getTime())), Math.max(...statsByGame.map(x=> (new Date(x.date)).getTime()))])				
+		let xInvScale = d3.scaleUtc().domain([marginLeft, w - marginRight]).range([Math.min(...statsByGame.map(x=> (new Date(x.date as string)).getTime())), Math.max(...statsByGame.map(x=> (new Date(x.date as string)).getTime()))])				
 				
 		let yInvScale = d3.scaleLinear().domain([marginTop, h - marginBottom]).range([Math.max(...statsByGame.map(x=> x.accuracy)), Math.min(...statsByGame.map(x=> x.accuracy))])
 
@@ -313,7 +322,7 @@ function MyStats() {
 			if (selection) {
 				const [[x0, y0], [x1, y1]] = selection;			
 
-				let selectedData = statsByGame?.filter(x=> (new Date(x.date)).getTime() >= xInvScale(x0) && (new Date(x.date)).getTime() <= xInvScale(x1) && x.accuracy <= yInvScale(y0) && x.accuracy >= yInvScale(y1))
+				let selectedData = statsByGame?.filter(x=> (new Date(x.date as string)).getTime() >= xInvScale(x0) && (new Date(x.date as string)).getTime() <= xInvScale(x1) && x.accuracy <= yInvScale(y0) && x.accuracy >= yInvScale(y1))
 
 				if (selectedData.length > 0) {
 
@@ -333,18 +342,20 @@ function MyStats() {
 				setBrushRange({x0: undefined, y0: undefined, x1: undefined, y1: undefined})
 			})		
 
-		
-		let gameModes = scatter.selectAll<SVGPathElement, AggGameStats>('path').data(byGameMode, function(d: AggGameStats) {
-			return d.game_id
-		})	
+		// REMOVED FROM DATA FUNCTION, function(d: AggGameStats) {
+		// 	return d.game_id
+		// }
+		let gameModes = scatter.selectAll<SVGPathElement, AggGameStats>('path').data(byGameMode)	
 
 		gameModes.enter().append("path")
 			.attr("d", d3.symbol(d3.symbolCross))
-			.attr('transform', function(d) { return `translate(${xScale(new Date(d.date))}, ${yScale(d.accuracy)})`})
+			.attr('transform', function(d) { return `translate(${xScale(new Date(d.date as string))}, ${yScale(d.accuracy)})`})
 
-		let mygames = scatter.selectAll<SVGCircleElement, AggGameStats>('circle').data(byAlbumMode, function(d: AggGameStats) {
-			return d.game_id
-		})		
+		// TODO REMOVED FROM DATA FUNCTION - DOES IT MATTER? 
+		// , function(d: AggGameStats) {
+		// 	return d.game_id
+		// }
+		let mygames = scatter.selectAll<SVGCircleElement, AggGameStats>('circle').data(byAlbumMode)		
 		
 		// cant seem to get transitions to work with mouseover with joins...so using enter.append			
 		mygames.enter().append('circle')
@@ -365,7 +376,7 @@ function MyStats() {
 					.attr('x', xPos)
 					.attr('y', startY)
 					.attr('font-size', fontSize)
-					.html(`${d.accuracy}% (${d.correct}/${d.total}) | Avg Time: ${d.avg_time}s`)
+					.html(`${d.accuracy}% (${d.correct}/${d.total}) | Avg Time: ${parseFloat(d.avg_time)}s`)
 	
 					d3.select('.yourgames').append('text')
 					.attr('class', 'hoverlabel')
@@ -397,7 +408,7 @@ function MyStats() {
 					.style('top', `${event.pageY + 10}px`)
 					.style('left', `${event.pageX + 10}px`)
 					.html(
-						`<div>${d.accuracy}% (${d.correct}/${d.total}) | Avg Time: ${d.avg_time}s</div>
+						`<div>${d.accuracy}% (${d.correct}/${d.total}) | Avg Time: ${parseFloat(d.avg_time)}s</div>
 						<div>${d.album_mode}</div>`
 					)
 					// .style('visibility', 'visible');
@@ -418,7 +429,7 @@ function MyStats() {
 				return yScale(d.accuracy)
 			})
 			.attr('cx', function(d){					
-				return xScale(new Date(d.date))
+				return xScale(new Date(d.date as string))
 			})
 		
 		d3.select('.yourgames').append('g')
@@ -456,16 +467,16 @@ function MyStats() {
 
 		d3.selectAll('.byalbum').remove()
 
-		const minTimeBoundary = Math.min(...statsByAlbum.map(x=> x.avg_time)) 
-		const maxTimeBoundary = Math.max(...statsByAlbum.map(x=> x.avg_time))
+		const minTimeBoundary = Math.min(...statsByAlbum.map(x=> parseFloat(x.avg_time))) 
+		const maxTimeBoundary = Math.max(...statsByAlbum.map(x=> parseFloat(x.avg_time)))
 
 		let xScale = d3.scaleLinear().domain([minTimeBoundary, maxTimeBoundary]).range([marginLeft, w - marginRight])
 
 		let yScale = d3.scaleLinear().domain([Math.min(Math.max(...statsByAlbum.map(x=> x.accuracy)) + 5, 100), Math.max(0, Math.min(...statsByAlbum.map(x=> x.accuracy)) - 5)]).range([marginTop, h - marginBottom])
 
-		const rScale =  d3.scaleLinear().domain([Math.min(...statsByAlbum.map(x=> x.total)), Math.max(...statsByAlbum.map(x=> x.total))]).range([6, 20])
+		const rScale =  d3.scaleLinear().domain([Math.min(...statsByAlbum.map(x=> x.total as number)), Math.max(...statsByAlbum.map(x=> x.total as number))]).range([6, 20])
 
-		let xInvScale = d3.scaleUtc().domain([marginLeft, w - marginRight]).range([Math.min(...statsByAlbum.map(x=> x.avg_time)), Math.max(...statsByAlbum.map(x=> x.avg_time))])				
+		let xInvScale = d3.scaleUtc().domain([marginLeft, w - marginRight]).range([Math.min(...statsByAlbum.map(x=> parseFloat(x.avg_time))), Math.max(...statsByAlbum.map(x=> parseFloat(x.avg_time)))])				
 				
 		let yInvScale = d3.scaleLinear().domain([marginTop, h - marginBottom]).range([Math.max(...statsByAlbum.map(x=> x.accuracy)), Math.min(...statsByAlbum.map(x=> x.accuracy))])
 
@@ -489,7 +500,7 @@ function MyStats() {
 
 				console.log('selection', [x0, xInvScale(x0), x1, xInvScale(x1)], [x1,  yInvScale(y0), y0, yInvScale(y1), y1])					
 
-				let selectedData = statsByGame?.filter(x=> x.avg_time >= xInvScale(x0) && x.avg_time <= xInvScale(x1) && x.accuracy <= yInvScale(y0) && x.accuracy >= yInvScale(y1))
+				let selectedData = statsByGame?.filter(x=> parseFloat(x.avg_time) >= xInvScale(x0) && parseFloat(x.avg_time) <= xInvScale(x1) && x.accuracy <= yInvScale(y0) && x.accuracy >= yInvScale(y1))
 
 				if (selectedData.length > 0) {
 					// // y1 is further up (larger than y0)
@@ -508,9 +519,11 @@ function MyStats() {
 				setBrushRangeByAlbum({x0: undefined, y0: undefined, x1: undefined, y1: undefined})
 			})		
 
-		let albums = scatter.selectAll<SVGCircleElement, AggGameStats>('circle').data(statsByAlbum, function(d: AggGameStats) {
-			return d.album_key
-		})		
+
+		// TODO - REMOVED from data function function(d: AggGameStats ) {
+		// 	return d?.album_key
+		// }
+		let albums = scatter.selectAll<SVGCircleElement, AggGameStats>('circle').data(statsByAlbum)		
 		
 		// cant seem to get transitions to work with mouseover with joins...so using enter.append			
 		albums.enter().append('circle')
@@ -530,7 +543,7 @@ function MyStats() {
 					.attr('x', xPos)
 					.attr('y', startY)
 					.attr('font-size', fontSize)
-					.html(`${d.accuracy}% (${d.correct}/${d.total}) | Avg Time: ${d.avg_time?.toFixed(1)}s`)
+					.html(`${d.accuracy}% (${d.correct}/${d.total}) | Avg Time: ${d.avg_time}s`)
 	
 					d3.select('.byalbum').append('text')
 					.attr('class', 'hoverlabel')
@@ -562,7 +575,7 @@ function MyStats() {
 					.style('top', `${event.pageY + 10}px`)
 					.style('left', `${event.pageX + 10}px`)
 					.html(
-						`<div>${d.accuracy}% (${d.correct}/${d.total}) | Avg Time: ${d.avg_time?.toFixed(1)}s</div>
+						`<div>${d.accuracy}% (${d.correct}/${d.total}) | Avg Time: ${d.avg_time}s</div>
 						<div>${d.album}</div>`
 					)
 					// .style('visibility', 'visible');
@@ -578,12 +591,12 @@ function MyStats() {
 			// .attr('cx', 0)  // make bounce look like spray bottle 
 			// .attr('cy', h)
 			// .transition(t)
-			.attr('r', d=> rScale(d.total))				
+			.attr('r', d=> rScale(d.total as number))				
 			.attr('cy', function(d){					
 				return yScale(d.accuracy)
 			})
 			.attr('cx', function(d){					
-				return xScale(d.avg_time || 0)
+				return xScale(parseFloat(d.avg_time) || 0)
 			})
 		
 		d3.select('.byalbum').append('g')
@@ -682,9 +695,9 @@ function MyStats() {
 						>
 							<td className="border p-1">{x.album}</td>
 							<td className="border p-1">{x.accuracy}% ({x.correct}/{x.total})</td>
-							<td className="border p-1">{x.correct_time?.toFixed(1)}</td>
-							<td className="border p-1">{x.wrong_time?.toFixed(1)}</td>
-							<td className="border p-1">{x.correct_time && x.wrong_time ? (x.correct_time - x.wrong_time)?.toFixed(1) : '-'}</td>
+							<td className="border p-1">{x.correct_time}</td>
+							<td className="border p-1">{x.wrong_time}</td>
+							<td className="border p-1">{x.correct_time != '-' && x.wrong_time != '-' ? (parseFloat(x.correct_time as string) - parseFloat(x.wrong_time as string))?.toFixed(1) : '-'}</td>
 						</tr>)}		
 					</tbody>					
 
