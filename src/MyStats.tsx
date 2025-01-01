@@ -695,8 +695,8 @@ function MyStats() {
 						>
 							<td className="border p-1">{x.album}</td>
 							<td className="border p-1">{x.accuracy}% ({x.correct}/{x.total})</td>
-							<td className="border p-1">{x.correct_time}</td>
-							<td className="border p-1">{x.wrong_time}</td>
+							<td className="border p-1">{x.correct_time != '-' ? parseFloat(x.correct_time as string).toFixed(1) : '-'}</td>
+							<td className="border p-1">{x.wrong_time != '-' ? parseFloat(x.wrong_time as string).toFixed(1) : '-'}</td>
 							<td className="border p-1">{x.correct_time != '-' && x.wrong_time != '-' ? (parseFloat(x.correct_time as string) - parseFloat(x.wrong_time as string))?.toFixed(1) : '-'}</td>
 						</tr>)}		
 					</tbody>					
