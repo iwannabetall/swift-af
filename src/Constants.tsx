@@ -8,6 +8,14 @@ const development = {
 
 export const config: { url: string } = process.env.NODE_ENV === 'development' ? development : production; 
 
+export const forgotyouexisted = 'soL0ng_16BN_ROWS'
+
+// for data viz
+export const margin = 30
+export const marginBottom = 45
+export const marginTop = 36
+export const marginLeft = 60
+export const marginRight = 15
 
 export const albumColorKey = {'Taylor_Swift': 'era-taylor-swift', 'Fearless': 'era-fearless', 'Speak_Now': 'era-speak-now', 'Red': 'era-red', '1989': 'era-1989', 'reputation': 'era-reputation', 'Lover': 'era-lover', 'folklore': 'era-folklore', 'evermore': 'era-evermore', 'Midnights': 'era-midnights', 'TTPD': 'era-ttpd'} as const
 
@@ -18,3 +26,17 @@ export const albumKeyLkup = { "Taylor Swift" : "Taylor_Swift", "Fearless" : "Fea
 export const albums = ["Taylor Swift", "Fearless", "Speak Now", "Red", "1989", "reputation", "Lover", "folklore", "evermore", "Midnights", "THE TORTURED POETS DEPARTMENT"] as const
 
 export const albumCovers = ["Taylor_Swift", "Fearless", "Speak_Now", "Red", "1989", "reputation", "Lover", "folklore", "evermore", "Midnights", 'TTPD'] as const
+
+export const keyToAlbumNameLkup = {
+	"1989": "1989",
+	"Taylor_Swift": "Taylor Swift",
+	"Fearless": "Fearless",
+	"Speak_Now": "Speak Now",
+	"Red": "Red",
+	"reputation": "reputation",
+	"Lover": "Lover",
+	"folklore": "folklore",
+	"evermore": "evermore",
+	"Midnights": "Midnights",
+	"TTPD": "TTPD"
+}

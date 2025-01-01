@@ -75,7 +75,10 @@ interface StatsByAlbum {
 	albumKey: AlbumKey;
 }
 
+
+
 interface Leaderboard {
+	user_id?: number | undefined;	
 	player_name: string; 
 	game_id: string;
 	accuracy: number;
@@ -106,42 +109,76 @@ interface GameStats {
 	
 }
 
-
+// raw data type
 interface GameResults {
 	time: number; 
 	song: string;
 	album_key: AlbumKey;
 	album: string;
+	album_mode: string;
 	correct: number;
+	game_mode: string;	
+	game_date: string;
+	game_id: string;	
+	level?: string;
 	lyric: string;
 	lyric_id: number;
-	game_mode: string;
-	album_mode: string;
-	level: string;
-	game_date: string;
 	date: string;
-	game_id: string;	
+	play_count: number;
+	month: number;
 }
 
-interface AggGameStats {
-	time: number | string; 
-	song: string;
-	album_key: AlbumKey;
-	album: string;
-	correct: number;
-	accuracy: number;
-	lyric: string;
-	// lyric_id: number;
-	game_date: string;
-	date: string;
-	game_mode: string;
-	album_mode: string;
+interface Quantiles {
+	q1: number;
+	median: number;
+	q3: number;
+	max: number;
+	min: number;
+	max_limit: number;
+	min_limit: number;
+	album_key: string;
+	accuracy?: number;
+	type: number;
+	count: number;
+	data_key: string;
+}
+
+interface UserAggStats {
+	date?: string;	
 	game_id?: string;
+	game_mode?: string;
+	album_mode?: string;
+	accuracy: number;
+	album?: string;
+	correct: number;
+	correct_time?: string | number;
+	wrong_time?: string | number;
+	total: number;
+	avg_time: string;
+	album_key?: AlbumKey;
+	
+}
+
+// stats by game or album
+interface AggGameStats {
+	avg_time: string; 
+	accuracy: number;
+	album_key?: AlbumKey;
+	album?: string;	
+	correct: number;
+	correct_time? : string | number;
+	lyric?: string;
+	// lyric_id: number;
+	date?: string;
+	game_date?: string;	
+	game_id?: string;
+	game_mode?: string;
+	album_mode?: string;	
+	song?: string;
 	total?: number;
 	play_count?:number;
-	game_mode?: string;
-	correct_time? : number;
-	wrong_time? : number;
+	game_mode?: string;	
+	wrong_time? : string | number;
 }
 
 

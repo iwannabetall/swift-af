@@ -34,6 +34,7 @@ import { useLeaderboardData, useLyricsData, useSongs } from './data/hooks.tsx'
 let leaderboardFullDB: Leaderboard[] = []
 // const queryClient = new QueryClient()
 
+ 
 function App() {	
 	// const location = useLocation()
 	
@@ -123,7 +124,7 @@ function App() {
 	function pickRandomAns(correctAnswer: string) {
 		// given the answer, pick 4 other random songs 
 		// pick 3 random songs that aren't the same as the answer 
-		let answerChoices = []
+		let answerChoices: string[] = []
 		// array of indexes, we remove when we get a match 
 		let songIndices = Array(songList.length).fill(0).map((x,i) => x + i)
 		// console.log(songIndices, songList)
@@ -133,6 +134,7 @@ function App() {
 
 		for (let i = 0; i < 4; i++) {
 			let randInd = songIndices[Math.floor(Math.random() * (songIndices.length - 1))]			// sometimes the randint is 162 and we get undefined??? do i need a -1 or no?? 
+			
 			answerChoices.push(songList.map(x=> x.song)[randInd])
 			// remove the index so we don't have repeats
 			songIndices.splice(songIndices.indexOf(randInd), 1)
@@ -343,6 +345,7 @@ function App() {
 			setGameStats(gameStats.sort((a,b) => (a.album > b.album) ? 1 : (b.album > a.album) ? -1 : 0))
 		}
 		
+
 		// end game and show game stats
 		setGameStarted(false)
 		if (gameStats.length > 0) {
@@ -355,6 +358,7 @@ function App() {
 	async function getPostGameReport(){
 			
 		// runs only if they played at least one round 
+		const forgotyouexisted = TS.forgotyouexisted
 
 		// calc stats by album and other various stats
 		// overall accuracy
@@ -380,6 +384,34 @@ function App() {
 			'game_date' : gameDate?.toString()
 		}
 
+		// IF got over 50 correct and accuracy over 97.5% and under 3.5s average, add them to the leaderboard    
+		
+		if (avg_time < 3 && total_correct > 49 &&  parseInt(overall) >= 97.5) {
+
+			axios.post(`${URL}/updateLeaderboard`, {
+				game_mode: gameMode,
+ 				correct: total_correct, 
+				total: gameStats.length,
+				time: avg_time,
+				accuracy: parseInt(overall), 
+				date: gameDate,
+				gameId: gameId,
+				playerName: playerName,
+				albumMode: albumMode,
+				fighter: fighter,
+				id: gameStats.length,
+				sess: cookies.sess ? cookies.sess : null,
+				florida: forgotyouexisted, 
+			})
+			.then(function () {
+				// console.log(response)
+			})
+			.catch(function (error) {			
+				console.log(error);
+			});
+	
+		}
+	
 		setGameRank([stats])
 		setAccuracy(overall)
 	
@@ -404,11 +436,9 @@ function App() {
 			
 		}
 
-		// console.log(allStatsByAlbums)
-
+ 
 		setStatsByAlbum(allStatsByAlbums)
-	
-		
+			
 	}
 
 	let secondsElapsed = 0;

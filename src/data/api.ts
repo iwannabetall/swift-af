@@ -10,11 +10,14 @@ const BASE_URL = TS.config.url
 // axios.defaults.xsrfHeaderName = "X-CSRFTOKEN";
 // axios.defaults.xsrfCookieName = "csrftoken";
 
+const forgotyouexisted = TS.forgotyouexisted
 
 
 export async function getLeaderboard() : Promise<Leaderboard[]> {
   const URL = `${BASE_URL}/getLeaderboard`
-  const response = await axios.get(URL);
+  const response = await axios.get(URL, { params:
+		{ 'florida': forgotyouexisted }
+	})
 
   return response.data.leaderBoard
 }
@@ -22,7 +25,9 @@ export async function getLeaderboard() : Promise<Leaderboard[]> {
 export async function getLyricStats(): Promise<LyricData[]> {
 
 	const URL = `${BASE_URL}/getLyricStats`
-  const response = await axios.get(URL);
+  const response = await axios.get(URL, { params:
+		{ 'florida': forgotyouexisted }
+	})
 
   return response.data.lyricStats
 
@@ -32,7 +37,9 @@ export async function getLyricStats(): Promise<LyricData[]> {
 export async function getLyrics(): Promise<Lyrics[]> {
 
 	const URL = `${BASE_URL}/getLyrics`
-  const response = await axios.get(URL);
+  const response = await axios.get(URL, { params:
+		{ 'florida': forgotyouexisted, 'getLyrics': getLyrics }
+	})
 
   return response.data.lyrics
 
@@ -45,7 +52,7 @@ export async function getFullLyricsNStats(album: string): Promise<LyricData[]> {
 	} else {
 		const URL = `${BASE_URL}/getFullLyricsNStats`
 		const response = await axios.get(URL, { params:
-			{ 'album': album }
+			{ 'album': album, 'florida': forgotyouexisted }
 			});
 		
 		return response.data.fullLyricsNStats
@@ -55,10 +62,25 @@ export async function getFullLyricsNStats(album: string): Promise<LyricData[]> {
 }
 
 
+export async function getUserStats(sess_id: string): Promise<GameResults[]> {
+
+	const URL = `${BASE_URL}/getUserStats`
+  const response = await axios.post(URL, {
+		 'sess_id': sess_id,
+		 'florida': forgotyouexisted
+		});
+
+  return response.data.userGameStats
+
+}
+
+
 export async function getSongs(): Promise<SongList[]> {
 
 	const URL = `${BASE_URL}/getSongs`
-  const response = await axios.get(URL);
+  const response = await axios.get(URL, { params:
+		{ 'florida': forgotyouexisted }
+	})
 
   return response.data.songList
 
@@ -67,7 +89,9 @@ export async function getSongs(): Promise<SongList[]> {
 export async function getSpotifyPlays(): Promise<SpotifyData[]> {
 
 	const URL = `${BASE_URL}/getSpotifyPlays`
-  const response = await axios.get(URL);
+  const response = await axios.get(URL, { params:
+		{ 'florida': forgotyouexisted }
+	})
 
   return response.data.spotify_plays
 

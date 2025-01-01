@@ -1,14 +1,30 @@
-import { getSongs, getLyrics, getSpotifyPlays, getLeaderboard } from './api.ts'
+import { getSongs, getLyrics, getSpotifyPlays, getUserStats, getLeaderboard } from './api.ts'
 import { useQuery } from "@tanstack/react-query";
 import * as d3 from 'd3';
 import useScreenSize from '../useScreenSize.tsx';
+import * as TS from '../Constants.tsx'
 
+// interface Env {
+// 	API_KEY: string;
+// 	ENVIRONMENT: string;
+// }
 
+// export async function onRequest(context) {
+//   const KEY = context.env.API_KEY;
+
+//   return new Response(KEY)
+// }
 const normal = "classics version" as const
 const challenging = 'Tortured Classics' as const
 const hard = "Taylor's Version" as const
 const pro = "The Eras" as const
 const expert = 'cult version' as const
+
+const margin = TS.margin
+const marginBottom = TS.marginBottom
+const marginTop = TS.marginTop
+const marginLeft = TS.marginLeft
+const marginRight = TS.marginRight
 
 
 export function useSongs(gameMode: string, albumMode: string) {
@@ -84,12 +100,92 @@ export function useLeaderboardData(filter: string) {
 		},
 		queryFn: () => getLeaderboard(),
     retry: false, 
-    staleTime: 1000000, // 16 min
+    staleTime: 300000, // 5 min
   })
 
 }
 
-export function spotifyFilteredData(brushRange: BrushRange, ) {
+export function useGetUserStats(sess_id: string, brushRange: BrushRange, brushRange_ByAlbum: BrushRange) {
+	const screenSize = useScreenSize()
+
+	const h = screenSize.width > 420 ? 600 : 460
+	const w = screenSize.width > 420 ? 600 : 420
+
+	// const h = 600
+	// const w = 600
+	//TODO - is this the right query key??  if you pull your stats, play a game, will it update immediately 
+
+	return useQuery({
+		queryKey: ['userStats', sess_id],
+		select: (data) => {
+
+			console.log('data', data)
+
+			let albumStats = d3.rollups(data, v=> {
+				return {
+					album: v[0].album,
+					total: v.length,
+					correct: d3.sum(v, d=> d.correct),
+					accuracy: Math.round(100*(d3.sum(v, d=> d.correct)/v.length)),
+					avg_time: d3.mean(v, d=> d.time)?.toFixed(1) ?? '-',
+					correct_time: d3.mean(v.filter(x=> x.correct == 1), d=> d.time) ?? '-',
+					wrong_time: d3.mean(v.filter(x=> x.correct == 0), d=> d.time) ?? '-'
+
+				}
+
+			}, d=> d.album_key)
+
+
+			const statsByGameAgg = d3.rollups(data, v=> {
+				return {
+					date: v[0].game_date,
+					game_mode: v[0].game_mode,
+					album_mode: v[0].album_mode,						
+					total: v.length,
+					correct: d3.sum(v, d=> d.correct),
+					accuracy: Math.round(100*(d3.sum(v, d=> d.correct)/v.length)),
+					avg_time: d3.mean(v, d=> d.time)?.toFixed(1) ?? '-',
+					correct_time: v.filter(x=> x.correct == 1).length > 0 ? d3.mean(v.filter(x=> x.correct == 1), d=> d.time) : '-',
+					wrong_time: v.filter(x=> x.correct == 0).length > 0 ? d3.mean(v.filter(x=> x.correct == 0), d=> d.time) : '-'
+
+				}
+
+			}, d=> d.game_id)
+
+			// need to flatten 
+			const statsByAlbum: AggGameStats[] = []
+			for (let i = 0; i < albumStats.length; i++) {
+				statsByAlbum.push({...albumStats[i][1], 'album_key': albumStats[i][0]})		
+			}
+
+			const statsByGame: AggGameStats[] = []
+			for (let i = 0; i < statsByGameAgg.length; i++) {
+				statsByGame.push({...statsByGameAgg[i][1], 'game_id': statsByGameAgg[i][0]})		
+			}
+ 
+			// need to add .getTime to make TS happy bc it will return a number
+			let xInvScale = d3.scaleUtc().domain([marginLeft, w - marginRight]).range([Math.min(...statsByGame.map(x=> (new Date(x.date as string)).getTime())), Math.max(...statsByGame.map(x=> (new Date(x.date as string)).getTime()))])				
+				
+			let yInvScale = d3.scaleLinear().domain([marginTop, h - marginBottom]).range([Math.max(...statsByGame.map(x=> x.accuracy)), Math.min(...statsByGame.map(x=> x.accuracy))])
+
+			const statsByGameFiltered = brushRange.x0 ? statsByGame.filter(x=> (new Date(x.date as string)).getTime() >= xInvScale(brushRange.x0 || 0) && (new Date(x.date as string)).getTime() <= xInvScale(brushRange.x1 || 0) && x.accuracy <= yInvScale(brushRange.y0 || 0) && x.accuracy >= yInvScale(brushRange.y1 || 0)) : statsByGame
+
+			// repeat for by album 
+			let xInvScaleByAlbum = d3.scaleUtc().domain([marginLeft, w - marginRight]).range([Math.min(...statsByAlbum.map(x=> parseFloat(x.avg_time))), Math.max(...statsByAlbum.map(x=> parseFloat(x.avg_time)))])				
+				
+			let yInvScaleByAlbum = d3.scaleLinear().domain([marginTop, h - marginBottom]).range([Math.max(...statsByAlbum.map(x=> x.accuracy)), Math.min(...statsByAlbum.map(x=> x.accuracy))])
+
+			const statsByAlbumFiltered = brushRange_ByAlbum.x0 ? statsByAlbum.filter(x=> parseFloat(x.avg_time) >= xInvScaleByAlbum(brushRange_ByAlbum.x0 || 0) && parseFloat(x.avg_time) <= xInvScaleByAlbum(brushRange_ByAlbum.x1 || 0) && x.accuracy <= yInvScaleByAlbum(brushRange_ByAlbum.y0 || 0) && x.accuracy >= yInvScaleByAlbum(brushRange_ByAlbum.y1 || 0)) : statsByAlbum
+
+			let fastest = data.filter(x=> x.correct == 1).sort((a,b) => a.time - b.time).slice(0,10)
+
+			return { albumStats: statsByAlbumFiltered, statsByGame: statsByGameFiltered, fastest: fastest, db: data}
+		},
+		queryFn: () => getUserStats(sess_id),
+	})
+}
+
+export function useSpotifyFilteredData(brushRange: BrushRange, ) {
 
 	const screenSize = useScreenSize()
 

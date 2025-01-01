@@ -1,0 +1,219 @@
+
+/* table css */
+
+.tableContainer{	
+	margin: auto;
+	max-width: 100%;
+	overflow-y: auto;
+	margin-top: 10px;
+	margin-bottom: 10px;
+	max-height: 800px;
+	display: flex;
+	flex-direction: column;
+	/* align-items: center; */
+}
+
+.smTableContainer{	
+	margin: auto;
+	max-width: 100%;
+	overflow-y: auto;
+	margin-top: 10px;
+	margin-bottom: 10px;
+	max-height: 450px;
+	display: flex;
+	flex-direction: column;
+	/* align-items: center; */
+}
+
+table {
+  /* white-space: nowrap; */
+  /* margin: 0; */
+  border: none;
+  /* border-collapse: separate; */
+  /* border-spacing: 0; */
+  /* table-layout: fixed; */
+  /* border: 1px solid black; */
+}
+
+th, td.data {
+	text-align: center;
+	padding: 3px;
+}
+
+
+table td,
+table th {
+  /* border: 1px solid black; */
+  /* padding: 0.5rem 1rem; */
+}
+
+.coaching-td{
+	white-space: nowrap;
+	border-bottom: 1px solid grey;	
+	padding: 2px;
+	height: 32px;
+}
+
+table thead th {
+  padding: 3px;
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  /* width: 25vw; */
+  background: white;
+}
+
+table td {
+  background: #fff;
+  /* padding: 4px 5px; */
+  text-align: center;
+	word-wrap: normal;
+}
+
+.leftAlign{
+	text-align: left;
+	padding-left: 4px;
+}
+
+.bold {
+	font-weight: bold;
+}
+
+td.indent {
+	text-indent: 20px;
+	font-weight: normal !important;
+}
+
+
+.fixedCell { 
+	max-width: 250px;;
+}
+
+.altRowHighlighting tr:nth-child(even) {
+	background-color: var(--bg-box);
+
+}
+
+table tbody th {
+  font-weight: 100;
+  font-style: italic;
+  text-align: left;
+  position: relative;
+}
+
+table.stickyHeader thead th:first-child {
+  position: sticky;
+  left: 0;
+  z-index: 2;
+}
+
+table.stickyHeader tbody th {
+  position: sticky;
+  left: 0;
+  background: white;
+  z-index: 1;
+}
+
+table.stickyHeader tr td:first-child {
+	position: sticky;
+	background: white;
+	left: 0;
+	z-index: 0;
+}
+
+.noStick{
+	position: unset;
+	left: unset;
+}
+
+
+caption {
+  text-align: left;
+  padding: 0.25rem;
+  position: sticky;
+  left: 0;
+}
+
+[role="region"][aria-labelledby][tabindex] {
+  width: 100%;
+  max-height: 98vh;
+  overflow: auto;
+}
+[role="region"][aria-labelledby][tabindex]:focus {
+  box-shadow: 0 0 0.5em rgba(0, 0, 0, 0.5);
+  outline: 0;
+}
+
+/* rotated iphone */
+@media (max-width:812px){
+	/* 
+		table tr td:first-child {
+			position: sticky;
+			inset-inline-start: 0; 
+			background: white;
+		} */
+
+	.tableContainer, .smTableContainer{
+		max-width: 780px;
+		max-height: 550px;
+	}
+	
+}
+
+/*IPAD MINI*/
+@media (max-width:768px){
+	/* 
+		table tr td:first-child {
+			position: sticky;
+			inset-inline-start: 0; 
+			background: white;
+		} */
+
+	.tableContainer, .smTableContainer{
+		max-width: 725px;
+		max-height: 600px;
+	}
+	
+}
+/* iphone 12 pro  -390 px wide*/
+@media (max-width:414px) {  
+	.tableContainer, .smTableContainer{
+		max-width: 375px;
+	}
+}
+
+/* iphone 12 pro  -390 px wide*/
+@media (max-width:395px) {  
+	.tableContainer, .smTableContainer{
+		max-width: 360px;
+	}
+}
+
+/*iphone 6/7/8/X*/
+@media (max-width:380px){
+	.tableContainer, .smTableContainer{
+		max-width: 355px;
+	}
+
+}
+
+/* iphone 10 */
+@media (max-width:375px) {  
+	.tableContainer, .smTableContainer{
+		max-width: 340px;
+	}
+
+}
+
+
+/* iphone 5s */
+@media (max-width:325px){
+	.lgLogo{
+		max-width: 50px;
+		margin: 0;
+	}
+
+	.tableContainer, .smTableContainer{
+		max-width: 300px;
+	}
+}
