@@ -1,6 +1,5 @@
 /** @type {import('tailwindcss').Config} */
 const colors = require('tailwindcss/colors')
-
 export default {
   content: [
     "./index.html",
@@ -8,7 +7,7 @@ export default {
   ],
   theme: {
     extend: {},
-		colors: {
+		colors: {...colors, 
 			'eras_green': 'rgb(185,210,181)',
 			'eras_gold': 'rgb(244,203,141)',
 			'eras_purple': 'rgb(209,178,210)',

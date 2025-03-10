@@ -179,8 +179,21 @@ interface AggGameStats {
 	play_count?:number;
 	game_mode?: string;	
 	wrong_time? : string | number;
+	topSong?: string
+	topSongStats?: number | string;
+	topSongSpeed?: number | string;
 }
 
+interface SongStats{
+	avg_time: number; 
+	accuracy: number;
+	album_key: AlbumKey;
+	album: string;	
+	correct: number;
+	song: string;
+	total: number;
+	totalTime: number;
+}
 
 interface LyricData {
 	album: string;

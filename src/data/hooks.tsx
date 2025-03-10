@@ -3,7 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import * as d3 from 'd3';
 import useScreenSize from '../useScreenSize.tsx';
 import * as TS from '../Constants.tsx'
-
+import { summarize, tidy } from '@tidyjs/tidy'
 // interface Env {
 // 	API_KEY: string;
 // 	ENVIRONMENT: string;
@@ -119,7 +119,43 @@ export function useGetUserStats(sess_id: string, brushRange: BrushRange, brushRa
 		queryKey: ['userStats', sess_id],
 		select: (data) => {
 
+			// if have more than 5 guessed correctly for a song, go with that song 
 			console.log('data', data)
+			const songStatsDict: { [k: string]: SongStats } = {}
+			
+			for (let i = 0; i < data.length; i++) {
+				if (Object.keys(songStatsDict).includes(data[i].song)) {
+					// get stats by song 
+					songStatsDict[data[i].song].total += 1
+					
+					songStatsDict[data[i].song].accuracy = (data[i].correct + songStatsDict[data[i].song].correct)/songStatsDict[data[i].song].total
+					
+					songStatsDict[data[i].song].correct = songStatsDict[data[i].song].correct + data[i].correct
+
+					songStatsDict[data[i].song].totalTime = songStatsDict[data[i].song].totalTime + data[i].time
+
+					songStatsDict[data[i].song].avg_time = songStatsDict[data[i].song].totalTime/songStatsDict[data[i].song].total
+				
+
+				} else {
+					songStatsDict[data[i].song] = {
+						album_key: data[i].album_key,
+						album: data[i].album,
+						song: data[i].song,
+						total: 1,
+						correct: data[i].correct,
+						accuracy: data[i].correct,
+						avg_time: data[i].time, 
+						totalTime: data[i].time
+					}
+				}
+
+			}
+			
+			const songStats: SongStats[] = Object.values(songStatsDict).sort((a: any,b: any) => (b.accuracy - a.accuracy || a.avg_time - b.avg_time))
+
+			console.log('songstats', songStats)
+			// get top songs by album 
 
 			let albumStats = d3.rollups(data, v=> {
 				return {
@@ -133,7 +169,7 @@ export function useGetUserStats(sess_id: string, brushRange: BrushRange, brushRa
 
 				}
 
-			}, d=> d.album_key)
+			}, d=> d.album_key).sort((a: any,b: any) => (b.accuracy - a.accuracy || a.avg_time - b.avg_time))
 
 
 			const statsByGameAgg = d3.rollups(data, v=> {
@@ -163,6 +199,7 @@ export function useGetUserStats(sess_id: string, brushRange: BrushRange, brushRa
 				statsByGame.push({...statsByGameAgg[i][1], 'game_id': statsByGameAgg[i][0]})		
 			}
  
+			// if want to have brush feature, need to clean the data here 
 			// need to add .getTime to make TS happy bc it will return a number
 			let xInvScale = d3.scaleUtc().domain([marginLeft, w - marginRight]).range([Math.min(...statsByGame.map(x=> (new Date(x.date as string)).getTime())), Math.max(...statsByGame.map(x=> (new Date(x.date as string)).getTime()))])				
 				
@@ -175,11 +212,23 @@ export function useGetUserStats(sess_id: string, brushRange: BrushRange, brushRa
 				
 			let yInvScaleByAlbum = d3.scaleLinear().domain([marginTop, h - marginBottom]).range([Math.max(...statsByAlbum.map(x=> x.accuracy)), Math.min(...statsByAlbum.map(x=> x.accuracy))])
 
-			const statsByAlbumFiltered = brushRange_ByAlbum.x0 ? statsByAlbum.filter(x=> parseFloat(x.avg_time) >= xInvScaleByAlbum(brushRange_ByAlbum.x0 || 0) && parseFloat(x.avg_time) <= xInvScaleByAlbum(brushRange_ByAlbum.x1 || 0) && x.accuracy <= yInvScaleByAlbum(brushRange_ByAlbum.y0 || 0) && x.accuracy >= yInvScaleByAlbum(brushRange_ByAlbum.y1 || 0)) : statsByAlbum
+			const statsByAlbumFiltered = brushRange_ByAlbum.x0 ? statsByAlbum.filter(x=> parseFloat(x.avg_time) >= xInvScaleByAlbum(brushRange_ByAlbum.x0 || 0) && parseFloat(x.avg_time) <= xInvScaleByAlbum(brushRange_ByAlbum.x1 || 0) && x.accuracy <= yInvScaleByAlbum(brushRange_ByAlbum.y0 || 0) && x.accuracy >= yInvScaleByAlbum(brushRange_ByAlbum.y1 || 0)).sort((a: any,b: any) => (b.accuracy - a.accuracy || a.avg_time - b.avg_time)) : statsByAlbum.sort((a: any,b: any) => (b.accuracy - a.accuracy || a.avg_time - b.avg_time))
 
+			for (let i = 0; i < statsByAlbumFiltered.length; i++) {
+				const topSong = songStats.filter(x=> x.album_key == statsByAlbumFiltered[i].album_key && x.total >= 5)
+
+				statsByAlbumFiltered[i].topSong = topSong.length > 0 ? topSong[0].song : ''
+
+				statsByAlbumFiltered[i].topSongStats = topSong.length > 0 ? `${(100*topSong[0].accuracy).toFixed(0)}% (${topSong[0].correct}/${topSong[0].total})` : ''
+
+				statsByAlbumFiltered[i].topSongSpeed = topSong.length > 0 ? topSong[0].avg_time : ''
+
+
+			}
+						
 			let fastest = data.filter(x=> x.correct == 1).sort((a,b) => a.time - b.time).slice(0,10)
 
-			return { albumStats: statsByAlbumFiltered, statsByGame: statsByGameFiltered, fastest: fastest, db: data}
+			return { albumStats: statsByAlbumFiltered, statsByGame: statsByGameFiltered, fastest: fastest, db: data, songStats: songStats}
 		},
 		queryFn: () => getUserStats(sess_id),
 	})
