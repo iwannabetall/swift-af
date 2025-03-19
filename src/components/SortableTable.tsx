@@ -1,9 +1,11 @@
 import React from 'react';
 import { useTable, useSortBy } from 'react-table'
+import cx from 'classnames'
+import * as TS from '../Constants.tsx'
 
 function SortableTable(props) {	
 	// console.log(props)
-
+	const albumColorKey = TS.albumColorKey
 	let data = props.data
 	let columns = props.columns
 	let rowClick = props.rowClick  // function that runs when row is clicked
@@ -30,7 +32,7 @@ function SortableTable(props) {
 
 	// conditionally render some columns.  column.hideHeader only works for the main top bar  
 	let hideHeaders = props.hideHeaders ? props.hideHeaders : []
-
+ 
 	// Use the state and functions returned from useTable to build your UI
   const {
     getTableProps,
@@ -87,20 +89,21 @@ function SortableTable(props) {
       </thead>
       <tbody {...getTableBodyProps()}>
         {rows.map((row, i) => {  	
-					// console.log(row)
+					console.log(row)
           prepareRow(row)
           return (
             <tr {...row.getRowProps()} 
 							id={rowId ? `boxrow-${row.original[rowId]}` : `boxrow-${i}`}
 							// if no highlight id provided, ignore and just make the table black and white 
-							className={`${!highlightId ? 'data' : highlightId == row.original[rowId] ? 'highlightrow' : highlightId != row.original[rowId] && highlightId != '' ? 'faderow' : 'data'} ${!highlightId && row.original['season_type'] ? row.original['season_type'] == 'Playoffs' ? 'playoffs' : altRowHighlight ? 'altRowHighlighting' : '' : ''}`}
+							className={cx(`text-center text-[#68416d] ${albumColorKey[row.original.album_key as keyof typeof albumColorKey]}`)}
+
 							onClick={rowClick && rowClickId ? (e) => rowClick(row.original[rowClickId]) : rowClick ? rowClick() : () => {} }							 
 							onMouseEnter={rowHover ? (e) => rowHover(row.original[rowId]) : () => {}} 
 							onMouseLeave={rowMouseOut ? (e) => rowMouseOut('') : () => {} }>
               {row.cells.map((cell,i) => {
                 return hideHeaders.includes(cell.column.Header) ? null : <td {...cell.getCellProps([{
 									style: cell.column.styleit }])} 
-									className={stickyCol.includes(cell.column.Header) ? 'stickyCol' : (cell.column.isSorted || sortBy == cell.column.id) && leftBorder.includes(cell.column.Header) ? 'leftborder sortBy' : (cell.column.isSorted || sortBy == cell.column.id) ? 'sortBy' : cell.column.Header != leftAlign && !leftBorder.includes(cell.column.Header) ? 'data' : leftBorder.includes(cell.column.Header) ? 'leftborder' : cell.column.Header != leftAlign ? 'ldata' : 'data'}
+									className={cx('border p-1', stickyCol.includes(cell.column.Header) ? 'stickyCol' : (cell.column.isSorted || sortBy == cell.column.id) && leftBorder.includes(cell.column.Header) ? 'leftborder sortBy' : (cell.column.isSorted || sortBy == cell.column.id) ? 'sortBy' : cell.column.Header != leftAlign && !leftBorder.includes(cell.column.Header) ? 'data' : leftBorder.includes(cell.column.Header) ? 'leftborder' : cell.column.Header != leftAlign ? 'ldata' : 'data')}
 									onMouseEnter={cellMouseOver ? (e) => {
 											// console.log(row.original, `${cell.column.id}${cellRef}`)
 										// run function if value exists, ie not all columns have pctls

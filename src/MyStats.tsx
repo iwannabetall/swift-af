@@ -9,6 +9,7 @@ import { useGetUserStats } from './data/hooks.tsx';
 import Layout from './Layout.tsx';
 import SortableTable from './components/SortableTable.tsx';
 import moment from 'moment';
+import { AlbumStatsTable } from './components/AlbumStatsTable.tsx'
 
 function MyStats() {
 
@@ -25,6 +26,8 @@ function MyStats() {
 	const [sortBy, setSortBy] = useState<string>('accuracy')
 	const [sortDir, setSortDir] = useState<boolean>(true)  // true = best to worst
 	const [compareCorrect, setCompareCorrect] = useState<boolean>(true) // compare correct vs incorrect
+
+	const [displayTable, setDisplayTable] = useState<string>('album')
 	const navigate = useNavigate()
 	const screenSize = useScreenSize()
 
@@ -98,191 +101,6 @@ function MyStats() {
 		}
 	]
 }]
-
-	// useEffect(()=>{
-
-	// 	if (userGameData) {
-
-	// 		d3.selectAll('.boxplot').remove()
-
-	// 		// reformat the data filtered by album so we can calc quantiles for a boxplot 
-
-	// 		for (let i = 0; i < TS.albumCovers.length; i++){
-	// 			dataByAlbum[TS.albumCovers[i]] = []
-	// 		}
-			
-	// 		for (let i = 0; i < userGameDataFull.length; i++){
-	// 			dataByAlbum[userGameDataFull[i].album_key].push(userGameDataFull[i])
-	// 		}
-			
-	// 		// calc quantiles for boxplots
-	// 		const options = [1, 0] // calc by accuracy
-
-	// 		for (let i = 0; i < TS.albumCovers.length; i++){
-	// 			for (let j = 0; j < options.length; j++){
-								
-	// 			let times = dataByAlbum[TS.albumCovers[i]].filter(x => x.correct == options[j]).map(x => x.time)
-	// 			let count = dataByAlbum[TS.albumCovers[i]].filter(x => x.correct == options[j]).length
-	// 			let accuracy = dataByAlbum[TS.albumCovers[i]].filter(x => x.correct == 1).length/dataByAlbum[TS.albumCovers[i]].map(x => x.time).length
-				
-	// 			if (times.length >= 5) {
-
-	// 				let quantiles = {} as Quantiles		
-	// 				quantiles.type = options[j]
-	// 				quantiles.count = count
-	// 				quantiles.q1 = d3.quantile(times, 0.25) || 0
-	// 				quantiles.median = d3.quantile(times, 0.5) || 0
-	// 				quantiles.q3 = d3.quantile(times, 0.75) || 0
-	// 				let iqr = quantiles.q3 - quantiles.q1
-	// 				quantiles.min = Math.min(...times)
-	// 				quantiles.max = Math.max(...times)
-	// 				quantiles.min_limit = quantiles.q1 - 1.5 * iqr > 0 ? quantiles.q1 - 1.5 * iqr : 0 
-	// 				quantiles.max_limit = quantiles.q3 + 1.5 * iqr					
-	// 				quantiles.album_key = TS.albumCovers[i]
-	// 				quantiles.data_key = `${TS.albumCovers[i]}_${options[j]}`
-
-	// 				// accuracy 
-	// 				quantiles.accuracy = accuracy
-	// 				quantilesByAlbums.push(quantiles)
-	// 			}
-			
-	// 		}
-	// 	}
-
-	// 	console.log('quantilesByAlbums', quantilesByAlbums)
-
-	// 		if (sortBy == 'accuracy') {
-	// 			// sort descending order
-	// 			quantilesByAlbums.sort((a,b) => (b[sortBy] ?? 0) - (a[sortBy] ?? 0))
-	// 		} else {
-	// 			// sort best to worst times ie ascending order 
-	// 			quantilesByAlbums.sort((a,b) => a[sortBy] - b[sortBy])
-	// 		}
-			
-
-	// 		// console.log('quantilesByAlbums', quantilesByAlbums)
-
-	// 		// console.log('dataByAlbum', dataByAlbum)
-
-	// 		const boxHeight = 20
-	// 		const shiftdY = 4
-	// 		const typeShift = 10
-
-	// 		// scale x axis by max/min time for each individual lyric 
-	// 		let xScale = d3.scaleLinear().domain([Math.min(...userGameDataFull.map(x=> x.time)), Math.max(...userGameDataFull.map(x=> x.time))]).range([marginLeft, w - marginRight])
-
-	// 		// scale opacity based on min/max accuracy per album 
-	// 		// let opacityScale = d3.scaleLinear().domain([0, Math.max(...quantilesByAlbums.map(x=> x.accuracy))]).range([0.2, 1])
-
-	// 		let yScale = d3.scaleBand().domain(quantilesByAlbums.map(x=> x.album_key)).range([margin, h])
-
-	// 		// display actual names and not the abbrevs
-	// 		let legendScale = d3.scaleBand().domain(quantilesByAlbums.map(x=> keyToAlbumNameLkup[x.album_key as keyof typeof keyToAlbumNameLkup])).range([margin, h])
-
-	
-	// 		let boxplot = d3.select("#boxplot").append('svg')
-	// 			.attr('class', 'boxplot')
-	// 			.attr('height', h)
-	// 			.attr('width', w)
-	// 			.attr("viewBox", `0 0 ${h} ${w}`)	
-
-	// 		let albums = boxplot.selectAll<SVGPathElement, Quantiles>('path').data(quantilesByAlbums, function(d: Quantiles) {
-	// 			return d.album_key
-	// 		})	
-
-	// 		// main line 
-	// 		albums.enter().append("line")
-	// 			.attr("x1", function(d){return(xScale(d.min))})
-	// 			.attr("x2", function(d){return(xScale(d.max))})
-	// 			.attr("y1", function(d){
-	// 				const y = yScale(d.album_key) ?? 0
-	// 				const shift = d.type == 1 ? y - typeShift : y + typeShift 
-	// 				return shift					
-					
-	// 			})
-	// 			.attr("y2", function(d){
-	// 				const y = yScale(d.album_key) ?? 0
-	// 				const shift = d.type == 1 ? y - typeShift : y + typeShift 
-	// 				return shift
-	// 			})
-	// 			.attr("stroke", "black")
-	// 			// .attr('opacity', d => opacityScale(d.accuracy))
-	// 			.attr('transform', `translate(0, -${shiftdY})`)
-	// 			.attr("stroke-width", 1)
-		
-	// 	// box 
-	// 	albums.enter().append("rect")
-	// 		.attr('class', function(d) {
-	// 			return `${albumColorKey[d.album_key as keyof typeof albumColorKey]}`
-	// 		})			
-	// 		// .attr('opacity', d => opacityScale(d.accuracy))
-	// 		.attr('transform', `translate(0, -${shiftdY})`)
-	// 		.attr("x", function(d){return(xScale(d.q1))})
-	// 		.attr("y", function(d){
-	// 			const yShift = yScale(d.album_key) ?? 0
-
-	// 			const y = d.type == 1 ? yShift - boxHeight/2 - typeShift : yShift - boxHeight/2 + typeShift
-	// 			return y
-	// 		})
-	// 		.attr("height", boxHeight)
-	// 		.attr("width", function(d){
-	// 			return xScale(d.q3) - xScale(d.q1)
-	// 		})
-	// 		.attr("stroke", "black")
-
-	// 		// median lines 
-	// 		albums.enter().append("line")
-	// 			.attr('class', function(d) {
-	// 				return `${albumColorKey[d.album_key as keyof typeof albumColorKey]}-stroke`
-	// 			})			
-	// 			// .attr('opacity', d => opacityScale(d.accuracy))
-	// 			.attr('transform', `translate(0, -${shiftdY})`)
-	// 			.attr("x1", function(d){return(xScale(d.median))})
-	// 			.attr("x2", function(d){return(xScale(d.median))})				
-	// 			.attr("y1", function(d){
-	// 				const y = yScale(d.album_key) ?? 0
-
-	// 				const shift = d.type == 1 ? y - boxHeight/2 - typeShift : y - boxHeight/2 + typeShift 
-	// 				return shift
-	// 			})
-	// 			.attr("y2", function(d){
-	// 				const y = yScale(d.album_key) ?? 0
-
-	// 				const shift = d.type == 1 ? y + boxHeight/2 - typeShift : y + boxHeight/2 + typeShift 
-	// 				return shift
-	// 			})
-	// 			.attr("stroke", "black")
-	// 			.attr("stroke-width", 2)
-			
-	// 		d3.select('.boxplot').append('g')
-	// 			.attr('class', 'boxplot-xaxis')
-	// 			.attr('transform', `translate(0, ${h - margin})`)
-	// 			// .call(xAxisGen, xScale)				
-	// 			.call(d3.axisBottom(xScale))
-	// 			.call(g=> g.append('text')
-	// 				.attr('y', 27)
-	// 				.attr('x', w/2)
-	// 				.attr('font-size', '12px')
-	// 				.style('fill', 'black')  // fill defaults to none w/axis generator 
-	// 				.text('Time (s)'))
-			
-	// 		//y axis 
-	// 		d3.select('.boxplot').append('g')
-	// 			.attr('class', 'boxplot-yaxis')
-	// 			.attr('transform', `translate(${1.95*margin}, -30)`)			
-	// 			.call(d3.axisLeft(legendScale))
-	// 			.attr('font-size', '9px')
-			
-	// 		// add points for correct/wrong 
-
-
-
-	// 	}
-
-
-	// }, [userGameDataFull, quantilesByAlbums, sortBy])
-	 
-
 
 	useEffect(()=> {
 		// scatter plot of accuracy vs date -- each circle color coded by album, squares for game mode - diff colors 
@@ -645,94 +463,88 @@ function MyStats() {
 
 	}, [statsByAlbum])
  
+	const lyricHeaders = [
+		{
+			Header: '',
+			id:'toplyrics',
+			columns: [
+		{
+			Header: 'Lyric',
+			id: 'lyric', 
+			albumKey: d=> d.album_key,
+		className: 'data',
+		accessor: d=> d.lyric,
+		},
+		{
+			Header: 'Speed',
+			id: 'speed', 
+		className: 'data',
+		accessor: d=> `${(d.time).toFixed(2)}s`,
+		},
+		{
+			Header: 'Pctl',
+			id: 'pctl', 
+		className: 'data',
+		accessor: d=> getPercentile(d.time),
+		}]}]
 
+		const songHeaders = [
+			{
+				Header: '',
+				id:'topsongs',
+				columns: [
+			{
+				Header: 'Song',
+				id: 'song', 
+				albumKey: d=> d.album_key,
+			className: 'data',
+			accessor: d=> d.song,
+			},
+			{
+				Header: 'Accuracy',
+				id: 'accuracy', 
+			className: 'data',
+			accessor: d=> `${(100*d.accuracy).toFixed(0)}% (${d.correct}/${d.total}s`,
+			},
+			{
+				Header: 'Avg (Pctl)',
+				id: 'pctl', 
+			className: 'data',
+			accessor: d=> `${d.avg_time.toFixed(2)}s ${getPercentile(d.avg_time)}`,
+			}]}]
+ 
 	return (
 		<>
 		<Layout isLoading={isLoading}>
 			{swiftestLyrics && <div className='wrapper'>
-				<h2>Your Swiftest Top 10</h2>
-
-				<table>
-					<thead>
-						<th>Lyric</th>
-						<th>Speed</th>
-						<th>Pcntl</th>
-						</thead>	 
-					<tbody>
-						{swiftestLyrics.map(x =><tr className={`text-center text-[#68416d] ${albumColorKey[x.album_key as keyof typeof albumColorKey]}`}
-						key={`${x.lyric_id}-${x.game_id}-top10`}
-						>							 
-							<td className="border p-1">{x.lyric}</td>
-							<td className="border p-1">{(x.time).toFixed(2)}s</td>
-							<td className="border p-1">{getPercentile(x.time)}</td>
-							 
-						</tr>)}		
-					</tbody>					
-
-				</table>
+				<h2>Your Swiftest...</h2>
+				<div className='flex flex-col container bold text-center justify-center items-center'>
+					<div className='flex flex-row container bold text-center justify-center'>
+						<div className={`${displayTable == 'album' ? 'era-reputation' : 'faded'} inline p-2 min-w-[120px] inline-flex justify-center text-l font-bold shadow cursor-pointer border w-full leading-tight focus:outline-none focus:shadow-outline text-center`}
+							onClick={() => setDisplayTable('album')}>Album</div>
+						<div className={`${displayTable == 'song' ? 'era-reputation' : 'faded'} inline p-2 min-w-[120px] inline-flex justify-center text-l font-bold shadow cursor-pointer border w-full leading-tight focus:outline-none focus:shadow-outline text-center`}
+							onClick={() => setDisplayTable('song')}>Song</div>
+							<div className={`${displayTable == 'lyric' ? 'era-reputation' : 'faded'} inline p-2 min-w-[120px] inline-flex justify-center text-l font-bold shadow cursor-pointer border w-full leading-tight focus:outline-none focus:shadow-outline text-center`}
+							onClick={() => setDisplayTable('lyric')}>Lyric</div>
+					</div>
+					{displayTable === 'album' && <AlbumStatsTable data={statsByAlbum}/>}
+					{displayTable === 'lyric' && <SortableTable 
+					data = {swiftestLyrics}
+					columns={lyricHeaders}
+					/>}
+					{displayTable === 'song' && songStats.filter((x: any)=> x.total > 5 && x.accuracy > 0.5).slice(0,10).length > 0 && <SortableTable 
+					data = {songStats.filter((x: any)=> x.total > 5 && x.accuracy > 0.5).slice(0,10)}
+					columns={songHeaders}
+					/>}
+					
+				</div>			
+ 
 			</div>}
-
-			{songStats.filter((x: any)=> x.total > 5 && x.accuracy > 0.5).slice(0,10).length > 0 ?  <div className='mb-4'><table><thead>
-						<tr>
-						<th>Song</th>
-						<th>Accuracy</th>						
-						<th>Avg (Pctl)</th>
- 						</tr>
-					</thead>
-					<tbody>
-						{songStats.filter((x: any)=> x.total > 5 && x.accuracy > 0.5).slice(0,10).map((x: any) =><tr className={`text-center text-[#68416d] ${albumColorKey[x.album_key as keyof typeof albumColorKey]}`}
-						key={`${x.album_key}-${x.song}`}
-						>
-							<td className="border p-1">{x.song}</td>
-							<td className="border p-1">{(100*x.accuracy).toFixed(0)}% ({x.correct}/{x.total})</td>
-							<td className="border p-1">{x.avg_time.toFixed(1)}s ({getPercentile(x.avg_time)})</td>
- 						</tr>)}		
-					</tbody>				
-					</table>
-				</div> : <div>See your top songs for which you have at least 5 attempts. </div>
-				}
-
-			<h2>How Well Do You Know Each Album</h2>				
-			<h6>Including top song for each album with at least 5 attempts</h6>
-			{statsByAlbum && <div className='mb-4'>
-				<table>
-					<thead>
-						<tr>
-						<th>Album</th>
-						<th>Total</th>
-						<th>Avg Time</th>
-						</tr>
-					</thead>
-					<tbody>
-						{statsByAlbum.map(x =><>
-						<tr className={`text-center text-[#68416d] ${albumColorKey[x.album_key as keyof typeof albumColorKey]}`}
-						key={`${x.album_key}-albumstats`}
-						>
-							<td className="border p-1">{x.album}</td>
-							<td className="border p-1">{x.accuracy}% ({x.correct}/{x.total})</td>
-							<td className="border p-1">{x.correct_time != '-' ? parseFloat(x.correct_time as string).toFixed(1) : '-'} 
-								{/* ({x.correct_time != '-' ? getPercentile(parseFloat(x.correct_time as string)) : '-'}) */}
-								</td>
-						 
-						</tr>
-						{x.topSong != '' && <tr className={`text-center text-[#68416d] ${albumColorKey[x.album_key as keyof typeof albumColorKey]}`}						
-						>
-							<td className="border p-1">{x.topSong}</td>
-							<td className="border p-1">{x.topSongStats} </td>
-							<td className="border p-1">{ typeof x.topSongSpeed == 'number' ? x.topSongSpeed.toFixed(1) : ''}s</td>
-						 
-						</tr>}
-						</>
-					)}		
-					</tbody>					
-
-				</table>
-			</div>}
+ 
 
 			<div className='wrapper'>
 				<h2>Accuracy vs. Speed</h2>
 				<div id='byalbum'></div>
-
 				<h2 className='m-6'>View Your Games</h2>
 				<h3 className='text-lg'>Select a game to view individual game results</h3>
 				<div className="tableContainer mt-4 max-h-96 overflow-auto">
