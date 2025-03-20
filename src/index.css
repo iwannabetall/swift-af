@@ -740,7 +740,7 @@ div.tooltip {
 	border-radius: 4px;
 
 }
-#lyricalViz, #top40Viz, #bottom40Viz, #cultTop40Viz, #spotifyscatter {
+#lyricalViz, #top40Viz, #bottom40Viz, #cultTop40Viz, #spotifyscatter , #byalbum, #yourgames  {
 	display: block;
 	margin: auto;
 	/* position: relative; */
@@ -756,7 +756,7 @@ div.tooltip {
 	scroll-margin: 20px;
 }
 
-#spotifyscatter{
+#spotifyscatter, #byalbum, #yourgames  {
 	width: 600px;
 	height: 600px;
 }
@@ -883,7 +883,7 @@ div.tooltip {
 }
 /*iphone 6/7/8 Plus -- should be max-width of 420 but making it smaller for browser/player header*/
 @media (max-width:414px){
-	#lyricalViz, #top40Viz, #bottom40Viz, #top40VizAns, #bottom40VizAns, #cultTop40VizAns, #cultTop40Viz, #spotifyscatter, .spotify, .spotifyscatter-wrapper {
+	#lyricalViz, #top40Viz, #bottom40Viz, #top40VizAns, #bottom40VizAns, #cultTop40VizAns, #cultTop40Viz, #spotifyscatter, #byalbum, #yourgames, .spotify, .spotifyscatter-wrapper {
 		width: 400px;
 	}
 	
@@ -906,7 +906,7 @@ div.tooltip {
 		margin-top:10px;
 	}
 
-	#spotifyscatter{
+	#spotifyscatter, #byalbum{
 		height: 480px;
 	}
 
@@ -947,7 +947,7 @@ div.tooltip {
 		max-width: 360px;
 	}
 
-	#lyricalViz, #top40Viz, #bottom40Viz, #top40VizAns, #bottom40VizAns, #cultTop40VizAns, #cultTop40Viz, #spotifyscatter, .spotify, .spotifyscatter-wrapper, .yourgames {
+	#lyricalViz, #top40Viz, #bottom40Viz, #top40VizAns, #bottom40VizAns, #cultTop40VizAns, #cultTop40Viz, #spotifyscatter, #byalbum, .spotify, .spotifyscatter-wrapper, #yourgames {
 		width:370px
 	}
 
@@ -997,7 +997,7 @@ div.tooltip {
 		max-width: 310px;
 	}
 
-	#lyricalViz, #top40Viz, #bottom40Viz, #top40VizAns, #bottom40VizAns, #cultTop40VizAns, #cultTop40Viz, #spotifyscatter, .spotify, .spotifyscatter-wrapper, .yourgames {
+	#lyricalViz, #top40Viz, #bottom40Viz, #top40VizAns, #bottom40VizAns, #cultTop40VizAns, #cultTop40Viz, #spotifyscatter, #byalbum, .spotify, .spotifyscatter-wrapper, #yourgames {
 		width: 316px;
 	}
 

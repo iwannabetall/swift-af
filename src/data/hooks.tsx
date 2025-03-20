@@ -120,7 +120,7 @@ export function useGetUserStats(sess_id: string, brushRange: BrushRange, brushRa
 		select: (data) => {
 
 			// if have more than 5 guessed correctly for a song, go with that song 
-			console.log('data', data)
+			// console.log('data', data)
 			const songStatsDict: { [k: string]: SongStats } = {}
 			
 			for (let i = 0; i < data.length; i++) {
@@ -154,7 +154,7 @@ export function useGetUserStats(sess_id: string, brushRange: BrushRange, brushRa
 			
 			const songStats: SongStats[] = Object.values(songStatsDict).sort((a: any,b: any) => (b.accuracy - a.accuracy || a.avg_time - b.avg_time))
 
-			console.log('songstats', songStats)
+			// console.log('songstats', songStats)
 			// get top songs by album 
 
 			let albumStats = d3.rollups(data, v=> {
@@ -165,7 +165,8 @@ export function useGetUserStats(sess_id: string, brushRange: BrushRange, brushRa
 					accuracy: Math.round(100*(d3.sum(v, d=> d.correct)/v.length)),
 					avg_time: d3.mean(v, d=> d.time)?.toFixed(1) ?? '-',
 					correct_time: d3.mean(v.filter(x=> x.correct == 1), d=> d.time) ?? '-',
-					wrong_time: d3.mean(v.filter(x=> x.correct == 0), d=> d.time) ?? '-'
+					wrong_time: d3.mean(v.filter(x=> x.correct == 0), d=> d.time) ?? '-',
+					album_key: v[0].album_key
 
 				}
 
@@ -182,7 +183,8 @@ export function useGetUserStats(sess_id: string, brushRange: BrushRange, brushRa
 					accuracy: Math.round(100*(d3.sum(v, d=> d.correct)/v.length)),
 					avg_time: d3.mean(v, d=> d.time)?.toFixed(1) ?? '-',
 					correct_time: v.filter(x=> x.correct == 1).length > 0 ? d3.mean(v.filter(x=> x.correct == 1), d=> d.time) : '-',
-					wrong_time: v.filter(x=> x.correct == 0).length > 0 ? d3.mean(v.filter(x=> x.correct == 0), d=> d.time) : '-'
+					wrong_time: v.filter(x=> x.correct == 0).length > 0 ? d3.mean(v.filter(x=> x.correct == 0), d=> d.time) : '-',
+					album_key: v[0].album_key
 
 				}
 

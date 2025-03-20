@@ -11,6 +11,23 @@ import SortableTable from './components/SortableTable.tsx';
 import moment from 'moment';
 import { AlbumStatsTable } from './components/AlbumStatsTable.tsx'
 
+
+// FORMAT INTO ORGINAL
+var pr = new Intl.PluralRules('en-US', { type: 'ordinal' });
+
+const suffixes = new Map([
+  ['one',   'st'],
+  ['two',   'nd'],
+  ['few',   'rd'],
+  ['other', 'th'],
+]);
+
+const formatOrdinals = (n) => {
+  const rule = pr.select(n);
+  const suffix = suffixes.get(rule);
+  return `${n}${suffix}`;
+};
+
 function MyStats() {
 
 	const URL = TS.config.url
@@ -28,6 +45,7 @@ function MyStats() {
 	const [compareCorrect, setCompareCorrect] = useState<boolean>(true) // compare correct vs incorrect
 
 	const [displayTable, setDisplayTable] = useState<string>('album')
+	const [gameType, setGameType] = useState<string>('eras')
 	const navigate = useNavigate()
 	const screenSize = useScreenSize()
 
@@ -39,8 +57,8 @@ function MyStats() {
 	const marginLeft = TS.marginLeft
 	const marginRight = TS.marginRight
 
-	const h = screenSize.width > 420 ? 600 : 460
-	const w = screenSize.width > 420 ? 600 : 420
+	const h = screenSize.width > 420 ? 600 : screenSize.width > 375 ? 460 : 360
+	const w = screenSize.width > 420 ? 600 : screenSize.width > 375 ? 420 : 360
 	const fontSize = screenSize.width > 420 ? '20px' : '18px'
 
 	
@@ -82,18 +100,8 @@ function MyStats() {
 		{
 			Header: 'Accuracy',
 			id:'accuracy',
-			accessor: d=> `${d.accuracy}%`,			 
-		},
-		{
-			Header: 'Correct',
-			id:'correct',
-			accessor: d=> `${d.correct}`,			 
-		},
-		{
-			Header: 'Total Plays',
-			id:'total',
-			accessor: d=> `${d.total}`,			 
-		},
+			accessor: d=> `${d.accuracy}% (${d.correct}/${d.total})`,			 
+		},		
 		{
 			Header: 'Speed (s)',
 			id: 'speed',
@@ -154,6 +162,7 @@ function MyStats() {
 				// let selectedData = statsByGame?.filter(x=> (new Date(x.date as string)).getTime() >= xInvScale(x0) && (new Date(x.date as string)).getTime() <= xInvScale(x1) && x.accuracy <= yInvScale(y0) && x.accuracy >= yInvScale(y1))
 
 				let selectedData = statsByGame?.filter(x=> parseFloat(x.avg_time) >= xInvScale(x0) && parseFloat(x.avg_time) <= xInvScale(x1) && x.accuracy <= yInvScale(y0) && x.accuracy >= yInvScale(y1))
+				console.log('burhs', selectedData)
 
 				if (selectedData.length > 0) {
 
@@ -184,6 +193,64 @@ function MyStats() {
 				// return `translate(${xScale(new Date(d.date as string))}, ${yScale(d.accuracy)})`
 					return `translate(${xScale(parseFloat(d.avg_time) )}, ${yScale(d.accuracy)})`
 			})
+			.on('mouseover', function(event, d) {
+
+				// console.log(d.album)
+				const startY = -40
+				const xPos = screenSize.width < 420 ? 10 : 60		
+				
+				if (screenSize.width < 600) {
+					// if mobile, tool tip goes off page
+					d3.select('.yourgames').append('text')
+					.attr('class', 'hoverlabel')
+					.attr('x', xPos)
+					.attr('y', startY + 20)
+					.attr('font-size', fontSize)
+					.html(`${d.accuracy}% (${d.correct}/${d.total}) | Avg Time: ${parseFloat(d.avg_time)}s`)
+	
+					d3.select('.yourgames').append('text')
+					.attr('class', 'hoverlabel')
+					.attr('x', xPos)
+					.attr('y', startY + 40)
+					.attr('font-size', fontSize)
+					.text(`${d.game_mode}`)
+						
+				} else {
+
+					d3.selectAll('.tooltip').remove()
+					
+					var	tooltip = d3
+						.select('body')
+						.append('g')
+							.attr('class', 'tooltip')
+						.append('div')
+						.style('width', '320px')
+						.attr('class', 'd3-tooltip')
+						.style('position', 'absolute')
+						.style('z-index', '10')
+						// .style('visibility', 'hidden')
+						.style('padding', '10px')
+						.style('background', 'rgba(0,0,0,0.6)')
+						.style('border-radius', '4px')
+						.style('color', '#fff')
+
+				tooltip
+					.style('top', `${event.pageY + 10}px`)
+					.style('left', `${event.pageX + 10}px`)
+					.html(
+						`<div>${d.accuracy}% (${d.correct}/${d.total}) | Avg Time: ${parseFloat(d.avg_time)}s</div>
+						<div>${d.game_mode}</div>`
+					)
+					// .style('visibility', 'visible');
+ 
+				}			
+							
+			})
+			.on('mouseout', function(){
+				d3.selectAll('.hoverlabel').remove()
+				d3.selectAll('.tooltip').remove()
+				// setScatterHighlight('')
+			})		
 
 		// TODO REMOVED FROM DATA FUNCTION - DOES IT MATTER? 
 		// , function(d: AggGameStats) {
@@ -208,14 +275,14 @@ function MyStats() {
 					d3.select('.yourgames').append('text')
 					.attr('class', 'hoverlabel')
 					.attr('x', xPos)
-					.attr('y', startY)
+					.attr('y', startY + 20)
 					.attr('font-size', fontSize)
 					.html(`${d.accuracy}% (${d.correct}/${d.total}) | Avg Time: ${parseFloat(d.avg_time)}s`)
 	
 					d3.select('.yourgames').append('text')
 					.attr('class', 'hoverlabel')
 					.attr('x', xPos)
-					.attr('y', startY + 25)
+					.attr('y', startY + 40)
 					.attr('font-size', fontSize)
 					.text(`${d.album_mode}`)
 						
@@ -294,7 +361,7 @@ function MyStats() {
 				.text('Accuracy')			
 			)
 
-	}, [statsByGame])
+	}, [statsByGame, gameType])
 
 	
 	useEffect(()=> {
@@ -376,14 +443,14 @@ function MyStats() {
 					d3.select('.byalbum').append('text')
 					.attr('class', 'hoverlabel')
 					.attr('x', xPos)
-					.attr('y', startY)
+					.attr('y', startY + 20)
 					.attr('font-size', fontSize)
 					.html(`${d.accuracy}% (${d.correct}/${d.total}) | Avg Time: ${d.avg_time}s`)
 	
 					d3.select('.byalbum').append('text')
 					.attr('class', 'hoverlabel')
 					.attr('x', xPos)
-					.attr('y', startY + 25)
+					.attr('y', startY + 40)
 					.attr('font-size', fontSize)
 					.text(`${d.album}`)
 						
@@ -485,7 +552,7 @@ function MyStats() {
 			Header: 'Pctl',
 			id: 'pctl', 
 		className: 'data',
-		accessor: d=> getPercentile(d.time),
+		accessor: d=> formatOrdinals(getPercentile(d.time)),
 		}]}]
 
 		const songHeaders = [
@@ -504,13 +571,13 @@ function MyStats() {
 				Header: 'Accuracy',
 				id: 'accuracy', 
 			className: 'data',
-			accessor: d=> `${(100*d.accuracy).toFixed(0)}% (${d.correct}/${d.total}s`,
+			accessor: d=> `${(100*d.accuracy).toFixed(0)}% (${d.correct}/${d.total})`,
 			},
 			{
 				Header: 'Avg (Pctl)',
 				id: 'pctl', 
 			className: 'data',
-			accessor: d=> `${d.avg_time.toFixed(2)}s ${getPercentile(d.avg_time)}`,
+			accessor: d=> `${d.avg_time.toFixed(2)}s (${formatOrdinals(getPercentile(d.avg_time))})`,
 			}]}]
  
 	return (
@@ -520,11 +587,11 @@ function MyStats() {
 				<h2>Your Swiftest...</h2>
 				<div className='flex flex-col container bold text-center justify-center items-center'>
 					<div className='flex flex-row container bold text-center justify-center'>
-						<div className={`${displayTable == 'album' ? 'era-reputation' : 'faded'} inline p-2 min-w-[120px] inline-flex justify-center text-l font-bold shadow cursor-pointer border w-full leading-tight focus:outline-none focus:shadow-outline text-center`}
+						<div className={`${displayTable == 'album' ? 'era-reputation' : 'faded'} inline p-2 w-[120px] inline-flex justify-center text-l font-bold shadow cursor-pointer border w-full leading-tight focus:outline-none focus:shadow-outline text-center`}
 							onClick={() => setDisplayTable('album')}>Album</div>
-						<div className={`${displayTable == 'song' ? 'era-reputation' : 'faded'} inline p-2 min-w-[120px] inline-flex justify-center text-l font-bold shadow cursor-pointer border w-full leading-tight focus:outline-none focus:shadow-outline text-center`}
+						<div className={`${displayTable == 'song' ? 'era-reputation' : 'faded'} inline p-2 w-[120px] inline-flex justify-center text-l font-bold shadow cursor-pointer border w-full leading-tight focus:outline-none focus:shadow-outline text-center`}
 							onClick={() => setDisplayTable('song')}>Song</div>
-							<div className={`${displayTable == 'lyric' ? 'era-reputation' : 'faded'} inline p-2 min-w-[120px] inline-flex justify-center text-l font-bold shadow cursor-pointer border w-full leading-tight focus:outline-none focus:shadow-outline text-center`}
+							<div className={`${displayTable == 'lyric' ? 'era-reputation' : 'faded'} inline p-2 w-[120px] inline-flex justify-center text-l font-bold shadow cursor-pointer border w-full leading-tight focus:outline-none focus:shadow-outline text-center`}
 							onClick={() => setDisplayTable('lyric')}>Lyric</div>
 					</div>
 					{displayTable === 'album' && <AlbumStatsTable data={statsByAlbum}/>}
@@ -542,37 +609,35 @@ function MyStats() {
 			</div>}
  
 
-			<div className='wrapper'>
+			<div className='spotifyscatter-wrapper'>
 				<h2>Accuracy vs. Speed</h2>
 				<div id='byalbum'></div>
 				<h2 className='m-6'>View Your Games</h2>
+
+				<div className='flex flex-col container bold text-center justify-center items-center'>
+					<div className='flex flex-row container bold text-center justify-center'>
+						<div className={`${gameType == 'eras' ? 'era-reputation' : 'faded'} inline p-2 w-[120px] inline-flex justify-center text-l font-bold shadow cursor-pointer border w-full leading-tight focus:outline-none focus:shadow-outline text-center`}
+							onClick={() => setGameType('eras')}>Eras</div>
+						<div className={`${gameType == 'album' ? 'era-reputation' : 'faded'} inline p-2 w-[120px] inline-flex justify-center text-l font-bold shadow cursor-pointer border w-full leading-tight focus:outline-none focus:shadow-outline text-center`}
+							onClick={() => setGameType('album')}>Album Mode</div>
+						 
+					</div>
+					<div className="tableContainer mt-4 max-h-96 overflow-auto">
+						<SortableTable 
+							data={gameType === 'eras' ? statsByGame.filter(x=> x.game_mode !== 'album') : statsByGame.filter(x=> x.game_mode === 'album')}
+							columns={gameHeaders}
+						/>
+					</div>
+					
+					
+				</div>			
 				<h3 className='text-lg'>Select a game to view individual game results</h3>
-				<div className="tableContainer mt-4 max-h-96 overflow-auto">
-					<SortableTable 
-					data={statsByGame}
-					columns={gameHeaders}
-					/>
-				</div>
+				
 				<div id='yourgames'></div>
 				
 			</div>
 
-			{/* <div className='wrapper'>
-				<div className=''>
-					<div>Sort By...</div>
-					<div onClick={() => setSortBy('accuracy')}>Accuracy</div>
-					<div onClick={() => setSortBy('median')}>Median</div>
-					<div onClick={() => setSortBy('q1')}>1st Quartile</div>
-					<div onClick={() => setSortBy('q3')}>3rd Quartile</div>
-					<div onClick={() => setSortBy('min')}>Min</div>
-					<div onClick={() => setSortBy('max')}>Max</div>
-
-					<div onClick={() => setSortDir(!sortDir)}>Best to Worst</div>
-
-				</div>
-				
-				<div id='boxplot'></div>
-			</div> */}
+			 
 
 
 		</Layout>
@@ -584,6 +649,7 @@ function MyStats() {
 
 
 function getPercentile(time) {
+	// percentiles are on lyric level (not averaged or by game)
 	// gets percentile for a given time 
 	
 	// 99th percentile: 1.122

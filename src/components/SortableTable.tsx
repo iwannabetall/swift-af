@@ -4,7 +4,7 @@ import cx from 'classnames'
 import * as TS from '../Constants.tsx'
 
 function SortableTable(props) {	
-	// console.log(props)
+	console.log(props)
 	const albumColorKey = TS.albumColorKey
 	let data = props.data
 	let columns = props.columns
@@ -89,7 +89,6 @@ function SortableTable(props) {
       </thead>
       <tbody {...getTableBodyProps()}>
         {rows.map((row, i) => {  	
-					console.log(row)
           prepareRow(row)
           return (
             <tr {...row.getRowProps()} 

@@ -21,7 +21,7 @@ export function AlbumStatsTable({data}) {
 				>
 					<td className="border p-1">{x.album}</td>
 					<td className="border p-1">{x.accuracy}% ({x.correct}/{x.total})</td>
-					<td className="border p-1">{x.correct_time != '-' ? parseFloat(x.correct_time as string).toFixed(1) : '-'} 
+					<td className="border p-1">{x.correct_time != '-' ? parseFloat(x.correct_time as string).toFixed(2) : '-'} 
 						{/* ({x.correct_time != '-' ? getPercentile(parseFloat(x.correct_time as string)) : '-'}) */}
 						</td>
 				 
@@ -30,7 +30,7 @@ export function AlbumStatsTable({data}) {
 				>
 					<td className="border p-1">{x.topSong}</td>
 					<td className="border p-1">{x.topSongStats} </td>
-					<td className="border p-1">{ typeof x.topSongSpeed == 'number' ? x.topSongSpeed.toFixed(1) : ''}s</td>
+					<td className="border p-1">{ typeof x.topSongSpeed == 'number' ? x.topSongSpeed.toFixed(2) : ''}s</td>
 				 
 				</tr>}
 				</>
